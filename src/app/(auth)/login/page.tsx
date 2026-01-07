@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -18,7 +18,7 @@ import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import { Loader2 } from "lucide-react"
 
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [loading, setLoading] = useState(false)
@@ -141,5 +141,24 @@ export default function LoginPage() {
                 </div>
             </CardFooter>
         </Card>
+    )
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <Card className="w-full shadow-lg border-none sm:border-border sm:shadow-sm">
+                <CardHeader className="space-y-1">
+                    <CardTitle className="text-2xl font-bold tracking-tight">
+                        Login to your account
+                    </CardTitle>
+                    <CardDescription>
+                        Loading...
+                    </CardDescription>
+                </CardHeader>
+            </Card>
+        }>
+            <LoginForm />
+        </Suspense>
     )
 }
