@@ -85,7 +85,7 @@ export function MobilePreview() {
                                         <div className="text-xs text-blue-600">Service</div>
                                     )}
                                     <div className="text-sm font-bold" style={{ color: data.themeColor }}>
-                                        ${product.price.toFixed(2)}
+                                        ${product.offers.price.toFixed(2)}
                                     </div>
                                 </div>
                             ))}

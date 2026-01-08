@@ -22,8 +22,14 @@ export interface WizardData {
         id?: string
         name: string
         description: string
-        price: number
         image?: string
+        sku?: string
+        url?: string
+        offers: {
+            price: number
+            priceCurrency: string
+            availability: string
+        }
         category?: string
         type?: 'product' | 'service'
     }>

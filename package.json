@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "rm -rf .next/dev/lock && (lsof -ti:3000 | xargs kill -9 || true) && next dev",
+    "dev": "npx -y kill-port 3000 && next dev -p 3000",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

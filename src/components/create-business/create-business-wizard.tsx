@@ -112,9 +112,13 @@ function WizardContent() {
     }
 
     const canProceed = () => {
-        // Only Step 1 is required
+        // Step 1: Name & Link required
         if (currentStep === 1) {
             return data.name && data.slug && data.phone.code && data.phone.number
+        }
+        // Step 4: Products required (at least one)
+        if (currentStep === 4) {
+            return data.products && data.products.length > 0
         }
         // All other steps are optional
         return true
@@ -169,8 +173,8 @@ function WizardContent() {
                                 </Button>
                             )}
 
-                            {/* Skip button for steps 2-8 */}
-                            {currentStep > 1 && currentStep < 8 && (
+                            {/* Skip button for steps 2-8, except step 4 (Products) which is required */}
+                            {currentStep > 1 && currentStep < 8 && currentStep !== 4 && (
                                 <Button
                                     type="button"
                                     variant="ghost"

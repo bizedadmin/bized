@@ -28,7 +28,16 @@ export function Step4Products() {
 
         updateData({
             products: [...(data.products || []), {
-                ...newProduct,
+                name: newProduct.name,
+                description: newProduct.description,
+                image: newProduct.image,
+                category: newProduct.category,
+                type: newProduct.type,
+                offers: {
+                    price: newProduct.price,
+                    priceCurrency: "USD",
+                    availability: "https://schema.org/InStock"
+                },
                 id: Date.now().toString()
             }]
         })
@@ -67,7 +76,7 @@ export function Step4Products() {
         <div className="space-y-6">
             <div>
                 <Label className="text-lg">Add your products or services</Label>
-                <p className="text-sm text-gray-500 mt-1">You can skip this and add them later</p>
+                <p className="text-sm text-gray-500 mt-1">Add at least one product or service to continue</p>
             </div>
 
             {/* Product List */}
@@ -97,7 +106,7 @@ export function Step4Products() {
                                 {product.category && (
                                     <div className="text-xs text-gray-400 mt-1">{product.category}</div>
                                 )}
-                                <div className="text-sm font-medium text-blue-600 mt-1">${product.price}</div>
+                                <div className="text-sm font-medium text-blue-600 mt-1">${product.offers.price}</div>
                             </div>
                             <button
                                 type="button"
