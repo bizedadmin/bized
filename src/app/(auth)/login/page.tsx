@@ -59,10 +59,10 @@ function LoginForm() {
             if (res?.error) {
                 setError("Invalid email or password")
             } else {
-                router.push("/admin/dashboard") // Redirect to dashboard on success
+                router.push("/businesses/select") // Redirect to business selector
                 router.refresh()
             }
-        } catch (err: any) {
+        } catch {
             setError("An error occurred. Please try again.")
         } finally {
             setLoading(false)

@@ -25,7 +25,7 @@ export function Step5Delivery() {
             })
         } else {
             updateData({
-                deliveryMethods: [...currentMethods, { type: methodId as any, fee: 0 }]
+                deliveryMethods: [...currentMethods, { type: methodId as 'delivery' | 'pickup' | 'dineIn', fee: 0 }]
             })
         }
     }

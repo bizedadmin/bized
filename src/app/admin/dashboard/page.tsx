@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { AdminNavbar } from "@/components/admin/AdminNavbar"
 import { BusinessCard } from "@/components/admin/BusinessCard"
 import { Button } from "@/components/ui/button"
-import { Add } from "iconsax-react"
+import { Add } from "iconsax-reactjs"
 import { Loader2, Zap } from "lucide-react"
 
 import { useRouter } from "next/navigation"

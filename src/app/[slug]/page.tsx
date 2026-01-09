@@ -3,7 +3,7 @@ import dbConnect from '@/lib/db'
 import Business from '@/models/Business'
 import Product from '@/models/Product'
 import { BusinessStorefront } from '@/components/business/business-storefront'
-import { ShoppingBag, Phone, MapPin, Clock } from 'lucide-react'
+
 
 interface PageProps {
     params: Promise<{ slug: string }>
@@ -21,7 +21,7 @@ export default async function BusinessPage({ params }: PageProps) {
 
     // Fetch products
     const products = await Product.find({ business: business._id }).lean()
-    // @ts-ignore
+
     business.products = products
 
     // Serialize data for client component using JSON stringify/parse to handle all nested ObjectIds and Dates

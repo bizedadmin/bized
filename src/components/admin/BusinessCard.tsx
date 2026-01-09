@@ -3,7 +3,7 @@
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Shop } from "iconsax-react"
+import { Shop } from "iconsax-reactjs"
 import { MoreVertical } from "lucide-react"
 import Link from "next/link"
 

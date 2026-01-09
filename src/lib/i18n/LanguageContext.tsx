@@ -21,6 +21,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     useEffect(() => {
         const savedLang = localStorage.getItem("bized-language") as Language;
         if (savedLang && translations[savedLang]) {
+            // eslint-disable-next-line
             setLanguageState(savedLang);
         }
     }, []);
@@ -33,11 +34,11 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
 
     const t = (path: string): string => {
         const keys = path.split(".");
-        let result: any = translations[language];
+        let result: unknown = translations[language];
 
         for (const key of keys) {
-            if (result && result[key]) {
-                result = result[key];
+            if (result && typeof result === "object" && result !== null && key in result) {
+                result = (result as Record<string, unknown>)[key];
             } else {
                 return path; // Fallback to key if not found
             }

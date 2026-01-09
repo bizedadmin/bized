@@ -4,11 +4,23 @@
 import React from "react";
 import Image from "next/image";
 import { Building2, Github, Twitter, Linkedin, Facebook } from "lucide-react";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+
 const Footer = () => {
     const { t } = useLanguage();
+    const { theme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
 
     return (
         <footer className="bg-white dark:bg-black pt-24 pb-12 border-t border-zinc-200 dark:border-zinc-800">
@@ -17,12 +29,18 @@ const Footer = () => {
                     <div className="col-span-1 lg:col-span-1">
                         <Link href="/" className="flex items-center gap-2 mb-6">
                             <Image
-                                src="/logo.png"
+                                src={theme === "dark" ? "/logo-dark-mode.png" : "/logo-light-mode.png"}
                                 alt="Bized Logo"
                                 width={40}
                                 height={40}
-                                className="h-10 w-auto"
+                                className={cn(
+                                    "h-10 w-auto rounded-sm",
+                                    theme === "dark" ? "mix-blend-screen" : "mix-blend-multiply"
+                                )}
                             />
+                            <span className="font-bold text-xl tracking-tight text-zinc-900 dark:text-white">
+                                BizedApp
+                            </span>
                         </Link>
                         <p className="text-zinc-600 dark:text-zinc-400 mb-6 leading-relaxed">
                             {t("footer.desc")}

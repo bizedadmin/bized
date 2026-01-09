@@ -4,6 +4,7 @@ import { useWizard } from "./wizard-context"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ColorPicker } from "@/components/ui/color-picker"
+import { BusinessCategoryModal } from "./business-category-modal"
 import { Loader2, Wand2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
@@ -23,6 +24,7 @@ export function Step1NameLink() {
     const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null)
     const [isCheckingSlug, setIsCheckingSlug] = useState(false)
     const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false)
+    const [categoryModalOpen, setCategoryModalOpen] = useState(false)
 
     useEffect(() => {
         // Detect user location and set phone code
@@ -188,6 +190,26 @@ export function Step1NameLink() {
                 </div>
             </div>
 
+            {/* Industry / Business Category */}
+            <div className="space-y-2">
+                <Label htmlFor="industry">Industry <span className="text-red-500">*</span></Label>
+                <div
+                    onClick={() => setCategoryModalOpen(true)}
+                    className="border rounded-md px-3 py-2 bg-white dark:bg-zinc-900 cursor-pointer hover:border-gray-400 transition-colors min-h-[40px] flex items-center"
+                >
+                    {data.businessCategories && data.businessCategories.length > 0 ? (
+                        <span className="text-sm">{data.businessCategories[0]}</span>
+                    ) : (
+                        <span className="text-sm text-gray-400">Select business category</span>
+                    )}
+                </div>
+                {data.businessCategories && data.businessCategories.length > 1 && (
+                    <p className="text-xs text-gray-500">
+                        +{data.businessCategories.length - 1} additional {data.businessCategories.length === 2 ? 'category' : 'categories'}
+                    </p>
+                )}
+            </div>
+
             {/* Color Picker */}
             <div className="space-y-3 pt-2">
                 <Label>Brand Color</Label>
@@ -218,6 +240,26 @@ export function Step1NameLink() {
                     className="w-full bg-white dark:bg-zinc-900"
                 />
             </div>
+
+            {/* Button Color Picker */}
+            <div className="space-y-3">
+                <Label>Button Color</Label>
+                <p className="text-xs text-gray-500">Color for action buttons</p>
+                <ColorPicker
+                    value={data.buttonColor || data.themeColor}
+                    onChange={(color) => updateData({ buttonColor: color })}
+                    presets={THEME_COLORS}
+                    className="w-full bg-white dark:bg-zinc-900"
+                />
+            </div>
+
+            {/* Business Category Modal */}
+            <BusinessCategoryModal
+                open={categoryModalOpen}
+                onOpenChange={setCategoryModalOpen}
+                selectedCategories={data.businessCategories || []}
+                onCategoriesChange={(categories) => updateData({ businessCategories: categories })}
+            />
         </div>
     )
 }

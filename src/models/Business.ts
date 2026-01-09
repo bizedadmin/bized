@@ -141,6 +141,25 @@ const BusinessSchema = new mongoose.Schema({
         type: String,
         default: '#f3f4f6',
     },
+    buttonColor: {
+        type: String,
+        default: '#1f2937',
+    },
+    businessCategories: [{
+        type: String,
+    }],
+    showBookNow: {
+        type: Boolean,
+        default: true,
+    },
+    showShopNow: {
+        type: Boolean,
+        default: true,
+    },
+    showQuoteRequest: {
+        type: Boolean,
+        default: true,
+    },
     whatsappNumber: String,
     whatsappConnected: {
         type: Boolean,
@@ -174,6 +193,13 @@ const BusinessSchema = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
+    pages: [{
+        title: String,
+        slug: String,
+        enabled: { type: Boolean, default: true },
+        type: { type: String, enum: ['storefront', 'bookings', 'shop', 'quote'] },
+        settings: { type: mongoose.Schema.Types.Mixed, default: {} }
+    }],
     setupStep: {
         type: Number,
         default: 1,
@@ -181,5 +207,10 @@ const BusinessSchema = new mongoose.Schema({
         max: 8,
     },
 }, { timestamps: true });
+
+// Force recompile model in dev to pick up schema changes
+if (process.env.NODE_ENV === 'development' && mongoose.models && mongoose.models.Business) {
+    delete mongoose.models.Business;
+}
 
 export default mongoose.models.Business || mongoose.model('Business', BusinessSchema);

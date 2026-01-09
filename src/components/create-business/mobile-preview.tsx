@@ -1,10 +1,16 @@
 "use client"
 
-import { useWizard } from "./wizard-context"
-import { Home, Search, ShoppingBag, Menu } from "lucide-react"
+import { useWizard, WizardData } from "./wizard-context"
+import { Search, ShoppingBag, Menu } from "lucide-react"
 
-export function MobilePreview() {
-    const { data } = useWizard()
+interface MobilePreviewProps {
+    data?: Partial<WizardData>
+}
+
+export function MobilePreview({ data: propData }: MobilePreviewProps = {}) {
+    // Use prop data if provided, otherwise try wizard context
+    const wizardContext = useWizard()
+    const data = (propData || wizardContext.data) as WizardData
 
     return (
         <div className="w-[375px] h-[750px] bg-white dark:bg-zinc-950 rounded-[40px] shadow-2xl border-[8px] border-white dark:border-zinc-800 overflow-hidden flex flex-col relative">
@@ -47,19 +53,39 @@ export function MobilePreview() {
                     </div>
                 </div>
 
-                {/* Tab Bar */}
-                <div className="flex border-b border-gray-100 dark:border-zinc-800 sticky top-0 bg-white dark:bg-zinc-950 z-10">
-                    <div className="flex-1 py-3 text-center text-sm font-medium border-b-2" style={{ borderColor: data.themeColor, color: data.themeColor }}>
-                        <div className="flex items-center justify-center gap-2">
-                            <Home className="w-4 h-4" />
-                            Home
-                        </div>
-                    </div>
-                    <div className="flex-1 py-3 text-center text-sm font-medium text-gray-500">
-                        <div className="flex items-center justify-center gap-2">
-                            <Search className="w-4 h-4" />
-                            Search
-                        </div>
+                {/* Welcome Section with Action Buttons */}
+                <div className="px-5 py-6 space-y-4">
+                    <p className="text-center text-gray-900 dark:text-white leading-relaxed">
+                        Welcome to my website! Here you can request a quote from me. I look forward to hearing from you!
+                    </p>
+
+                    <div className="space-y-3">
+                        {(data.showBookNow !== false) && (
+                            <button
+                                className="w-full py-4 rounded-full text-white font-medium shadow-lg transition-transform hover:scale-[1.02]"
+                                style={{ backgroundColor: data.buttonColor || data.themeColor }}
+                            >
+                                Book now
+                            </button>
+                        )}
+
+                        {(data.showShopNow !== false) && (
+                            <button
+                                className="w-full py-4 rounded-full text-white font-medium shadow-lg transition-transform hover:scale-[1.02]"
+                                style={{ backgroundColor: data.buttonColor || data.themeColor }}
+                            >
+                                Shop now
+                            </button>
+                        )}
+
+                        {(data.showQuoteRequest !== false) && (
+                            <button
+                                className="w-full py-4 rounded-full text-white font-medium shadow-lg transition-transform hover:scale-[1.02]"
+                                style={{ backgroundColor: data.buttonColor || data.themeColor }}
+                            >
+                                Quote request
+                            </button>
+                        )}
                     </div>
                 </div>
 

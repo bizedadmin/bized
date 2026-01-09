@@ -5,8 +5,8 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Building2, Menu, X, ArrowRight } from "lucide-react";
-import { Setting2, Moon, Sun, Translate, TickCircle } from "iconsax-react";
+import { Building2, Menu, X, ArrowRight, ChevronDown } from "lucide-react";
+import { Setting2, Moon, Sun, Translate, TickCircle } from "iconsax-reactjs";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 
@@ -23,6 +23,7 @@ const Navbar = () => {
     const settingsRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        // eslint-disable-next-line
         setMounted(true);
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 20);
@@ -58,31 +59,90 @@ const Navbar = () => {
         >
             <div className="max-w-7xl mx-auto flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2 group">
-                    <Image
-                        src="/logo.png"
-                        alt="Bized Logo"
-                        width={40}
-                        height={40}
-                        className="h-10 w-auto group-hover:scale-105 transition-transform"
-                        priority
-                    />
+                    <div className="flex items-center gap-2">
+                        {/* 
+                           Alternative Solution: Blend Modes
+                           Instead of relying on imperfect transparency, we use high-contrast solid versions.
+                           - Light Theme: Black Icon on White BG -> mix-blend-multiply (White becomes transparent)
+                           - Dark Theme: White Icon on Black BG -> mix-blend-screen (Black becomes transparent)
+                        */}
+                        <Image
+                            src={theme === "dark" || isScrolled ? "/logo-dark-mode.png" : "/logo-light-mode.png"}
+                            alt="Bized Logo"
+                            width={40}
+                            height={40}
+                            className={cn(
+                                "h-10 w-auto group-hover:scale-105 transition-transform rounded-sm",
+                                (theme === "dark" || isScrolled) ? "mix-blend-screen" : "mix-blend-multiply"
+                            )}
+                            priority
+                        />
+                        <span className={cn(
+                            "font-bold text-xl tracking-tight",
+                            (theme === "dark" || isScrolled) ? "text-white" : "text-zinc-900"
+                        )}>
+                            BizedApp
+                        </span>
+                    </div>
                 </Link>
 
                 {/* Desktop Menu */}
                 <div className="hidden md:flex items-center gap-8">
                     {[
-                        { key: "features", label: t("navbar.features") },
-                        { key: "solutions", label: t("navbar.solutions") },
+                        {
+                            key: "features",
+                            label: t("navbar.features"),
+                            dropdown: [
+                                { label: "Online Store", href: "#" },
+                                { label: "Invoicing & Payments", href: "#" },
+                                { label: "CRM & Leads", href: "#" },
+                                { label: "Booking & Appointments", href: "#" }
+                            ]
+                        },
+                        {
+                            key: "solutions",
+                            label: t("navbar.solutions"),
+                            dropdown: [
+                                { label: "Retail & Shops", href: "#" },
+                                { label: "Service Business", href: "#" },
+                                { label: "Restaurants & Food", href: "#" },
+                                { label: "Digital Creators", href: "#" }
+                            ]
+                        },
                         { key: "pricing", label: t("navbar.pricing") },
                         { key: "about", label: t("navbar.about") }
                     ].map((item) => (
-                        <Link
-                            key={item.key}
-                            href={`#${item.key}`}
-                            className="text-sm font-medium text-zinc-600 hover:text-indigo-600 transition-colors dark:text-zinc-400 dark:hover:text-indigo-400"
-                        >
-                            {item.label}
-                        </Link>
+                        item.dropdown ? (
+                            <div key={item.key} className="relative group">
+                                <button
+                                    className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-primary transition-colors py-2"
+                                >
+                                    {item.label}
+                                    <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-300" />
+                                </button>
+                                <div className="absolute top-full left-0 pt-2 w-56 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-300 z-50">
+                                    <div className="bg-popover border border-border rounded-xl shadow-xl p-2 flex flex-col gap-1">
+                                        {item.dropdown.map((subItem, idx) => (
+                                            <Link
+                                                key={idx}
+                                                href={subItem.href}
+                                                className="px-4 py-2.5 text-sm md:text-xs lg:text-sm text-foreground hover:bg-muted rounded-lg transition-colors font-medium"
+                                            >
+                                                {subItem.label}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <Link
+                                key={item.key}
+                                href={`#${item.key}`}
+                                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                            >
+                                {item.label}
+                            </Link>
+                        )
                     ))}
                 </div>
 
@@ -91,7 +151,7 @@ const Navbar = () => {
                         {t("navbar.signin")}
                     </Link>
                     <Link href="/register">
-                        <button className="bg-indigo-600 text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25 flex items-center gap-2 group">
+                        <button className="bg-primary text-primary-foreground px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 flex items-center gap-2 group">
                             {t("navbar.getstarted")}
                             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                         </button>
@@ -105,12 +165,12 @@ const Navbar = () => {
                                 className={cn(
                                     "p-2.5 rounded-xl transition-all duration-300 flex items-center justify-center border-2 border-transparent",
                                     isSettingsOpen
-                                        ? "bg-indigo-600 border-indigo-500 shadow-lg shadow-indigo-500/30 rotate-90"
-                                        : "bg-zinc-200/50 text-zinc-900 border-zinc-200 dark:bg-zinc-800 dark:text-white dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                                        ? "bg-primary border-primary shadow-lg shadow-primary/30 rotate-90 text-primary-foreground"
+                                        : "bg-muted/50 text-foreground border-border hover:bg-muted"
                                 )}
                                 aria-label="Settings"
                             >
-                                <Setting2 size={24} variant="Outline" color={isSettingsOpen ? "#FFFFFF" : "currentColor"} />
+                                <Setting2 size={24} variant="Outline" color="currentColor" />
                             </button>
                         )}
 
@@ -120,11 +180,11 @@ const Navbar = () => {
                                     initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                                    className="absolute right-0 mt-3 w-72 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-6 z-50 overflow-hidden"
+                                    className="absolute right-0 mt-3 w-72 bg-popover border border-border rounded-3xl shadow-xl p-6 z-50 overflow-hidden"
                                 >
                                     <div className="space-y-6 text-left">
                                         <div>
-                                            <h4 className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] mb-4 px-1">{t("settings.appearance")}</h4>
+                                            <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4 px-1">{t("settings.appearance")}</h4>
                                             <div className="grid grid-cols-2 gap-3">
                                                 <button
                                                     onClick={() => {
@@ -134,11 +194,11 @@ const Navbar = () => {
                                                     className={cn(
                                                         "flex flex-col items-center justify-center gap-2 p-4 rounded-2xl text-xs font-bold transition-all border-2",
                                                         theme === "light"
-                                                            ? "bg-indigo-50 border-indigo-600 text-indigo-600 dark:bg-indigo-500/10"
-                                                            : "bg-zinc-50 border-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:border-zinc-800 dark:text-zinc-400 hover:border-zinc-200 dark:hover:border-zinc-700"
+                                                            ? "bg-primary/10 border-primary text-primary"
+                                                            : "bg-muted/50 border-transparent text-muted-foreground hover:border-border"
                                                     )}
                                                 >
-                                                    <Sun size={24} variant={theme === "light" ? "Bold" : "Outline"} color={theme === "light" ? "#4f46e5" : "currentColor"} />
+                                                    <Sun size={24} variant={theme === "light" ? "Bold" : "Outline"} color="currentColor" />
                                                     {t("settings.light")}
                                                 </button>
                                                 <button
@@ -149,18 +209,18 @@ const Navbar = () => {
                                                     className={cn(
                                                         "flex flex-col items-center justify-center gap-2 p-4 rounded-2xl text-xs font-bold transition-all border-2",
                                                         theme === "dark"
-                                                            ? "bg-indigo-50 border-indigo-600 text-indigo-600 dark:bg-indigo-500/10"
-                                                            : "bg-zinc-50 border-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:border-zinc-800 dark:text-zinc-400 hover:border-zinc-200 dark:hover:border-zinc-700"
+                                                            ? "bg-primary/10 border-primary text-primary"
+                                                            : "bg-muted/50 border-transparent text-muted-foreground hover:border-border"
                                                     )}
                                                 >
-                                                    <Moon size={24} variant={theme === "dark" ? "Bold" : "Outline"} color={theme === "dark" ? "#4f46e5" : "currentColor"} />
+                                                    <Moon size={24} variant={theme === "dark" ? "Bold" : "Outline"} color="currentColor" />
                                                     {t("settings.dark")}
                                                 </button>
                                             </div>
                                         </div>
 
-                                        <div className="border-t border-zinc-100 dark:border-zinc-800 pt-6">
-                                            <h4 className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] mb-4 px-1">{t("settings.language")}</h4>
+                                        <div className="border-t border-border pt-6">
+                                            <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4 px-1">{t("settings.language")}</h4>
                                             <div className="space-y-2">
                                                 {languages.map((lang) => (
                                                     <button
@@ -172,15 +232,15 @@ const Navbar = () => {
                                                         className={cn(
                                                             "w-full flex items-center justify-between p-3.5 rounded-2xl text-sm font-bold transition-all",
                                                             language === lang.code
-                                                                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/25"
-                                                                : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                                                                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+                                                                : "text-muted-foreground hover:bg-muted"
                                                         )}
                                                     >
                                                         <div className="flex items-center gap-3">
-                                                            <Translate size={20} variant="Outline" color={language === lang.code ? "#FFFFFF" : "currentColor"} />
+                                                            <Translate size={20} variant="Outline" color="currentColor" />
                                                             {lang.name}
                                                         </div>
-                                                        {language === lang.code && <TickCircle size={20} variant="Bold" color="#FFFFFF" />}
+                                                        {language === lang.code && <TickCircle size={20} variant="Bold" color="currentColor" />}
                                                     </button>
                                                 ))}
                                             </div>
@@ -224,7 +284,7 @@ const Navbar = () => {
                                 {item.label}
                             </Link>
                         ))}
-                        <button className="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold mt-2">{t("navbar.getstarted")}</button>
+                        <button className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-semibold mt-2">{t("navbar.getstarted")}</button>
                     </motion.div>
                 )}
             </AnimatePresence>

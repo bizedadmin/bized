@@ -55,16 +55,25 @@ export async function POST(req: Request) {
         const business = await Business.create({
             ...body,
             owner: session.user.id,
+            pages: [
+                { title: 'Storefront', slug: 'storefront', type: 'storefront', enabled: true },
+                { title: 'Bookings', slug: 'bookings', type: 'bookings', enabled: true },
+                { title: 'Shop', slug: 'shop', type: 'shop', enabled: true },
+                { title: 'Quote', slug: 'quote', type: 'quote', enabled: true },
+            ]
         });
 
         console.log('Business created successfully:', business._id);
         return NextResponse.json(business, { status: 201 });
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error creating business:', error);
-        console.error('Error details:', error.message, error.stack);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorStack = error instanceof Error ? error.stack : undefined;
+
+        console.error('Error details:', errorMessage, errorStack);
         return NextResponse.json({
-            message: error.message || 'Internal Server Error',
-            details: error.toString()
+            message: errorMessage || 'Internal Server Error',
+            details: error instanceof Error ? error.toString() : String(error)
         }, { status: 500 });
     }
 }

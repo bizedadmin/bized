@@ -35,8 +35,61 @@ function WizardContent() {
     const isLastStep = currentStep === 8
 
     const handleNext = async () => {
-        if (isLastStep) {
-            // Submit the form
+        // Create business after Step 1
+        if (currentStep === 1) {
+            setCreating(true)
+            try {
+                console.log('Creating business with data:', data)
+
+                const res = await fetch("/api/businesses", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        name: data.name,
+                        slug: data.slug,
+                        phone: data.phone,
+                        themeColor: data.themeColor,
+                        secondaryColor: data.secondaryColor,
+                        buttonColor: data.buttonColor,
+                        businessCategories: data.businessCategories,
+                        industry: data.businessCategories?.[0] || 'LocalBusiness',
+                        schemaOrgType: data.businessCategories?.[0] || 'LocalBusiness',
+                        setupCompleted: false, // Not fully completed yet
+                        isDraft: false,
+                        setupStep: 1,
+                    })
+                })
+
+                if (res.ok) {
+                    const business = await res.json()
+                    console.log('Business created:', business)
+
+                    // Redirect to page builder
+                    console.log('Redirecting to page builder')
+                    router.push(`/business/page-builder?businessId=${business._id}`)
+                } else {
+                    console.error('Business creation failed with status:', res.status)
+                    const errorText = await res.text()
+                    console.error('Error response:', errorText)
+
+                    let error
+                    try {
+                        error = JSON.parse(errorText)
+                    } catch {
+                        error = { message: errorText || 'Failed to create business' }
+                    }
+
+                    console.error('Business creation error:', error)
+                    alert(error.message || "Failed to create business")
+                }
+            } catch (error) {
+                console.error("Error creating business:", error)
+                alert("An error occurred while creating your business")
+            } finally {
+                setCreating(false)
+            }
+        } else if (isLastStep) {
+            // Submit the form (for remaining steps if we keep them)
             setCreating(true)
             try {
                 console.log('Creating business with data:', data)
@@ -82,9 +135,9 @@ function WizardContent() {
                         )
                     }
 
-                    // Redirect to public business page
-                    console.log('Redirecting to:', `/${business.slug}`)
-                    router.push(`/${business.slug}`)
+                    // Redirect to business dashboard
+                    console.log('Redirecting to business dashboard')
+                    router.push('/business/dashboard')
                 } else {
                     console.error('Business creation failed with status:', res.status)
                     const errorText = await res.text()
@@ -112,9 +165,10 @@ function WizardContent() {
     }
 
     const canProceed = () => {
-        // Step 1: Name & Link required
+        // Step 1: Name & Link required + Business Category
         if (currentStep === 1) {
-            return data.name && data.slug && data.phone.code && data.phone.number
+            return data.name && data.slug && data.phone.code && data.phone.number &&
+                data.businessCategories && data.businessCategories.length > 0
         }
         // Step 4: Products required (at least one)
         if (currentStep === 4) {
@@ -196,6 +250,8 @@ function WizardContent() {
                                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                                         Creating...
                                     </>
+                                ) : currentStep === 1 ? (
+                                    "Create Business"
                                 ) : isLastStep ? (
                                     "Complete Setup"
                                 ) : (

@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 import { Providers } from "@/components/providers";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function RootLayout({
   children,
@@ -41,6 +42,7 @@ export default function RootLayout({
             <LanguageProvider>
               {children}
             </LanguageProvider>
+            <Toaster />
           </Providers>
         </ThemeProvider>
       </body>

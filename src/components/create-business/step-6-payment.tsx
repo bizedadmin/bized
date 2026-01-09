@@ -26,12 +26,12 @@ export function Step6Payment() {
             })
         } else {
             updateData({
-                paymentMethods: [...currentMethods, { type: methodId as any, details: {} }]
+                paymentMethods: [...currentMethods, { type: methodId as 'cash' | 'mpesa' | 'bank' | 'card', details: {} }]
             })
         }
     }
 
-    const updateDetails = (methodId: string, details: any) => {
+    const updateDetails = (methodId: string, details: Record<string, unknown>) => {
         const currentMethods = data.paymentMethods || []
         updateData({
             paymentMethods: currentMethods.map(m =>
@@ -93,7 +93,7 @@ export function Step6Payment() {
                                     <Label htmlFor={`details-${option.id}`} className="text-sm">{option.detailLabel}</Label>
                                     <Input
                                         id={`details-${option.id}`}
-                                        value={method?.details?.accountNumber || ""}
+                                        value={(method?.details?.accountNumber as string | undefined) || ""}
                                         onChange={(e) => updateDetails(option.id, { accountNumber: e.target.value })}
                                         placeholder={`Enter ${option.detailLabel?.toLowerCase()}`}
                                         className="bg-white dark:bg-zinc-900"

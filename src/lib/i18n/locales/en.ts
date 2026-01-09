@@ -1,7 +1,7 @@
 export const en = {
     navbar: {
         features: "Features",
-        solutions: "Solutions",
+        solutions: "Industries",
         pricing: "Pricing",
         about: "About",
         signin: "Sign In",

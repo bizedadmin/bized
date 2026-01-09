@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react"
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react"
 
 export interface WizardData {
     // Step 1
@@ -9,6 +9,8 @@ export interface WizardData {
     phone: { code: string; number: string }
     themeColor: string
     secondaryColor: string
+    buttonColor?: string
+    businessCategories?: string[]
 
     // Step 2
     industry: string
@@ -43,7 +45,7 @@ export interface WizardData {
     // Step 6
     paymentMethods: Array<{
         type: 'cash' | 'mpesa' | 'bank' | 'card'
-        details?: any
+        details?: Record<string, unknown>
     }>
 
     // Step 7
@@ -57,6 +59,11 @@ export interface WizardData {
         openTime: string
         closeTime: string
     }>
+
+    // Display Settings
+    showBookNow?: boolean
+    showShopNow?: boolean
+    showQuoteRequest?: boolean
 }
 
 interface WizardContextType {
@@ -81,6 +88,8 @@ export function WizardProvider({ children }: { children: ReactNode }) {
         phone: { code: "", number: "" },
         themeColor: "#1f2937",
         secondaryColor: "#f3f4f6",
+        buttonColor: "#1f2937",
+        businessCategories: [],
         industry: "",
         schemaOrgType: "LocalBusiness",
         goals: [],
@@ -106,6 +115,8 @@ export function WizardProvider({ children }: { children: ReactNode }) {
                         phone: draft.phone || { code: "", number: "" },
                         themeColor: draft.themeColor || "#1f2937",
                         secondaryColor: draft.secondaryColor || "#f3f4f6",
+                        buttonColor: draft.buttonColor || draft.themeColor || "#1f2937",
+                        businessCategories: draft.businessCategories || [],
                         industry: draft.industry || "",
                         schemaOrgType: draft.schemaOrgType || "LocalBusiness",
                         goals: draft.goals || [],
@@ -125,7 +136,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
         loadDraft()
     }, [])
 
-    const saveDraft = async () => {
+    const saveDraft = useCallback(async () => {
         // Only save if we have at least a name
         if (!data.name) return
 
@@ -148,13 +159,13 @@ export function WizardProvider({ children }: { children: ReactNode }) {
         } catch (error) {
             console.error('Failed to save draft:', error)
         }
-    }
+    }, [data, currentStep, draftId])
 
     // Auto-save draft every 30 seconds
     useEffect(() => {
         const interval = setInterval(saveDraft, 30000) // 30 seconds
         return () => clearInterval(interval)
-    }, [data, currentStep, draftId])
+    }, [saveDraft])
 
     const updateData = (updates: Partial<WizardData>) => {
         setData(prev => ({ ...prev, ...updates }))
@@ -177,8 +188,8 @@ export function WizardProvider({ children }: { children: ReactNode }) {
 
 export function useWizard() {
     const context = useContext(WizardContext)
-    if (!context) {
-        throw new Error("useWizard must be used within WizardProvider")
+    if (context === undefined) {
+        throw new Error("useWizard must be used within a WizardProvider")
     }
     return context
 }

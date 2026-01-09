@@ -1,12 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Phone, MapPin, Clock, ShoppingBag, Search, Filter, Menu, X, Share2, Globe, Heart, Home, ChevronDown, Download, Monitor } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import { cn } from "@/lib/utils"
+import { Search, ShoppingBag, Menu, MapPin, Phone, Clock, Share2, ArrowLeft, MessageSquare, ExternalLink } from "lucide-react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils"
 
 interface Product {
     _id: string
@@ -29,36 +28,115 @@ interface Business {
     industry?: string
     themeColor?: string
     secondaryColor?: string
+    buttonColor?: string
     whatsappNumber?: string
     whatsappConnected?: boolean
+    showBookNow?: boolean
+    showShopNow?: boolean
+    showQuoteRequest?: boolean
     phone?: {
         code: string
         number: string
     }
     businessHours?: Array<{
-        day: string
-        isOpen: boolean
-        openTime: string
-        closeTime: string
+        day: string;
+        isOpen: boolean;
+        openTime: string;
+        closeTime: string;
+    }>
+    pages?: Array<{
+        title: string
+        slug: string
+        enabled: boolean
+        type: 'storefront' | 'bookings' | 'shop' | 'quote'
+        settings: any
     }>
 }
 
 interface BusinessStorefrontProps {
     business: Business
     products: Product[]
+    pageType?: 'storefront' | 'bookings' | 'shop' | 'quote'
 }
 
-export function BusinessStorefront({ business, products }: BusinessStorefrontProps) {
-    const [selectedCategory, setSelectedCategory] = useState<string>("All")
+export function BusinessStorefront({ business, products, pageType = 'storefront' }: BusinessStorefrontProps) {
     const [searchQuery, setSearchQuery] = useState("")
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-    const [isCategoriesOpen, setIsCategoriesOpen] = useState(true)
+    const [cart, setCart] = useState<any[]>([])
+    const [isCartOpen, setIsCartOpen] = useState(false)
 
-    // Close sidebar when selecting a category on mobile
-    const handleCategorySelect = (cat: string) => {
-        setSelectedCategory(cat)
-        if (window.innerWidth < 768) {
-            setIsSidebarOpen(false)
+    // Filter logic based on page type
+    const displayedProducts = products.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase())
+        if (pageType === 'shop') return matchesSearch && product.type !== 'service'
+        if (pageType === 'bookings') return matchesSearch && product.type === 'service'
+        return matchesSearch
+    })
+
+    const addToCart = (product: any) => {
+        setCart(prev => [...prev, product])
+        if (pageType === 'shop') setIsCartOpen(true)
+    }
+
+    const cartTotal = cart.reduce((sum, item) => sum + item.offers.price, 0)
+
+    // Current page specific settings
+    const pageData = business.pages?.find((p: any) => p.type === pageType)
+    const settings = pageData?.settings || {}
+    const blocks = settings.blocks || []
+
+    const renderBlock = (block: any) => {
+        switch (block.type) {
+            case 'text':
+                return (
+                    <div key={block.id} className="space-y-2">
+                        {block.title && <h2 className="text-xl font-bold">{block.title}</h2>}
+                        {block.content && <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{block.content}</p>}
+                    </div>
+                )
+            case 'page_link':
+                const getIcon = () => {
+                    switch (block.pageType) {
+                        case 'shop': return <ShoppingBag className="w-6 h-6" />
+                        case 'bookings': return <Clock className="w-6 h-6" />
+                        case 'quote': return <MessageSquare className="w-6 h-6" />
+                        default: return <ArrowLeft className="w-6 h-6 rotate-180" />
+                    }
+                }
+                return (
+                    <button
+                        key={block.id}
+                        onClick={() => window.location.href = `/${business.slug}/${block.pageType}`}
+                        className="w-full p-6 rounded-3xl flex items-center justify-between group transition-all"
+                        style={{ backgroundColor: business.buttonColor || business.themeColor || "#1f2937" }}
+                    >
+                        <div className="text-left">
+                            <div className="font-bold text-lg text-white">{block.label || `Go to ${block.pageType}`}</div>
+                            {block.subtitle && <div className="text-sm text-white/60">{block.subtitle}</div>}
+                        </div>
+                        <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform text-white">
+                            {getIcon()}
+                        </div>
+                    </button>
+                )
+            case 'url':
+                return (
+                    <button
+                        key={block.id}
+                        onClick={() => window.open(block.url, '_blank')}
+                        className="w-full py-5 px-6 rounded-2xl flex items-center justify-between group transition-all"
+                        style={{ backgroundColor: business.secondaryColor || "#f3f4f6" }}
+                    >
+                        <div className="text-left">
+                            <span className="font-bold text-gray-900 dark:text-white">{block.label || 'Link'}</span>
+                            {block.subtitle && <div className="text-xs text-gray-500">{block.subtitle}</div>}
+                        </div>
+                        <div className="w-10 h-10 rounded-xl bg-white/50 dark:bg-zinc-800/50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <ExternalLink className="w-4 h-4 text-gray-600" />
+                        </div>
+                    </button>
+                )
+            default:
+                return null
         }
     }
 
@@ -74,395 +152,297 @@ export function BusinessStorefront({ business, products }: BusinessStorefrontPro
                 console.log('Error sharing:', error)
             }
         } else {
-            // Fallback
-            alert("Sharing is not supported on this browser")
+            navigator.clipboard.writeText(window.location.href)
+            alert("Link copied to clipboard!")
         }
     }
 
-    // Extract unique categories
-    const categories = ["All", ...Array.from(new Set(products.map(p => p.category).filter(Boolean))) as string[]]
-
-    // Filter products
-    const filteredProducts = products.filter(product => {
-        const matchesCategory = selectedCategory === "All" || product.category === selectedCategory
-        const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            product.description?.toLowerCase().includes(searchQuery.toLowerCase())
-        return matchesCategory && matchesSearch
-    })
-
-    const formatBusinessHours = (hours: any[]) => {
-        if (!hours || hours.length === 0) return null
-        const today = new Date().toLocaleDateString('en-US', { weekday: 'long' })
-        const todaySchedule = hours.find(h => h.day === today)
-
-        if (!todaySchedule) return null
-
-        return todaySchedule.isOpen
-            ? `Open today: ${todaySchedule.openTime} - ${todaySchedule.closeTime}`
-            : "Closed today"
-    }
-
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 font-sans">
-            {/* Sidebar & Backdrop */}
-            <AnimatePresence>
-                {isSidebarOpen && (
-                    <>
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setIsSidebarOpen(false)}
-                            className="fixed inset-0 bg-black/40 z-[60]"
-                        />
-                        <motion.div
-                            initial={{ x: "-100%" }}
-                            animate={{ x: 0 }}
-                            exit={{ x: "-100%" }}
-                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="fixed top-0 left-0 bottom-0 w-[280px] bg-white dark:bg-zinc-950 z-[70] shadow-2xl flex flex-col overflow-hidden"
-                        >
-                            {/* Sidebar Header */}
-                            <div className="p-4 flex items-center justify-between border-b border-gray-100 dark:border-zinc-800">
-                                <div className="font-bold text-lg">Menu</div>
-                                <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(false)}>
-                                    <X className="w-5 h-5" />
-                                </Button>
-                            </div>
-
-                            {/* Sidebar Content */}
-                            <div className="flex-1 overflow-y-auto py-4">
-                                <div className="px-4 mb-6">
-                                    <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                        <Input
-                                            placeholder="Search items..."
-                                            className="pl-9 bg-gray-50 dark:bg-zinc-900 border-none"
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <button
-                                        onClick={() => handleCategorySelect("All")}
-                                        className={cn(
-                                            "w-full flex items-center px-6 py-3 text-sm font-medium transition-colors",
-                                            selectedCategory === "All"
-                                                ? "text-blue-600 bg-blue-50 dark:bg-blue-900/10"
-                                                : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-900"
-                                        )}
-                                    >
-                                        <Home className="w-4 h-4 mr-3" />
-                                        Home
-                                    </button>
-
-                                    {/* Categories Accordion */}
-                                    <div>
-                                        <button
-                                            onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
-                                            className="w-full flex items-center justify-between px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-900"
-                                        >
-                                            <span className="flex items-center">
-                                                <Filter className="w-4 h-4 mr-3" />
-                                                Categories
-                                            </span>
-                                            <ChevronDown className={cn("w-4 h-4 transition-transform", isCategoriesOpen ? "rotate-180" : "")} />
-                                        </button>
-                                        <AnimatePresence>
-                                            {isCategoriesOpen && (
-                                                <motion.div
-                                                    initial={{ height: 0, opacity: 0 }}
-                                                    animate={{ height: "auto", opacity: 1 }}
-                                                    exit={{ height: 0, opacity: 0 }}
-                                                    className="overflow-hidden"
-                                                >
-                                                    {categories.filter(c => c !== "All").map(cat => (
-                                                        <button
-                                                            key={cat}
-                                                            onClick={() => handleCategorySelect(cat)}
-                                                            className={cn(
-                                                                "w-full flex items-center px-12 py-2.5 text-sm transition-colors",
-                                                                selectedCategory === cat
-                                                                    ? "text-blue-600 font-medium"
-                                                                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900"
-                                                            )}
-                                                        >
-                                                            {cat}
-                                                        </button>
-                                                    ))}
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </div>
-                                </div>
-
-                                <div className="border-t border-gray-100 dark:border-zinc-800 my-4 mx-4" />
-
-                                <div className="space-y-1">
-                                    <button className="w-full flex items-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-900">
-                                        <Download className="w-4 h-4 mr-3" />
-                                        Add to Home Screen
-                                    </button>
-                                    <button className="w-full flex items-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-900">
-                                        <Heart className="w-4 h-4 mr-3" />
-                                        Follow
-                                    </button>
-                                    <button
-                                        onClick={handleShare}
-                                        className="w-full flex items-center px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-900"
-                                    >
-                                        <Share2 className="w-4 h-4 mr-3" />
-                                        Share
-                                    </button>
-                                    <button className="w-full flex items-center justify-between px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-900">
-                                        <span className="flex items-center">
-                                            <Globe className="w-4 h-4 mr-3" />
-                                            Language
-                                        </span>
-                                        <span className="text-xs text-gray-500">English</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Sidebar Footer */}
-                            <div className="p-4 border-t border-gray-100 dark:border-zinc-800">
-                                <Button
-                                    variant="outline"
-                                    className="w-full rounded-full gap-2 border-gray-200"
-                                    onClick={() => window.open('https://bized.com', '_blank')}
-                                >
-                                    <Monitor className="w-4 h-4" />
-                                    Create your Bized App
-                                </Button>
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
-
-            {/* Hero Section */}
-            <div
-                className="relative h-[180px] md:h-[250px] w-full overflow-hidden"
-                style={{ backgroundColor: business.secondaryColor || '#f3f4f6' }}
-            >
-                {/* Menu Toggle Button */}
-                <div className="absolute top-4 left-4 z-40">
-                    <Button
-                        size="icon"
-                        variant="secondary"
-                        className="rounded-full shadow-lg bg-white/90 backdrop-blur hover:bg-white"
-                        onClick={() => setIsSidebarOpen(true)}
-                    >
-                        <Menu className="w-5 h-5 text-gray-900" />
+        <div className="min-h-screen bg-white dark:bg-zinc-950 font-sans">
+            {/* Header / Navigation */}
+            <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between sticky top-0 z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
+                <Button variant="ghost" size="icon" className="rounded-full">
+                    <Menu className="w-5 h-5" />
+                </Button>
+                <div className="flex gap-2">
+                    <Button variant="ghost" size="icon" className="rounded-full" onClick={handleShare}>
+                        <Share2 className="w-5 h-5" />
                     </Button>
+                    {(pageType === 'shop' || cart.length > 0) && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="rounded-full relative"
+                            onClick={() => setIsCartOpen(true)}
+                        >
+                            <ShoppingBag className="w-5 h-5" />
+                            {cart.length > 0 && (
+                                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                                    {cart.length}
+                                </span>
+                            )}
+                        </Button>
+                    )}
                 </div>
-
-                <div className="absolute inset-0 bg-black/20" /> {/* Overlay for better text contrast/clean look */}
-                <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/60 to-transparent h-24" />
             </div>
 
-            {/* Main Content Container - Overlapping Hero */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative -mt-16 md:-mt-20 pb-20">
-                <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl overflow-hidden border border-gray-100 dark:border-zinc-800 min-h-[600px]">
+            <main className="max-w-2xl mx-auto pb-20 pt-4">
+                {/* Hero / Brand Section */}
+                <div className="relative">
+                    {/* Banner with secondary color */}
+                    <div
+                        className="h-32 w-full sm:rounded-b-[40px] relative overflow-hidden"
+                        style={{ backgroundColor: business.secondaryColor || "#f3f4f6" }}
+                    >
+                        {/* Abstract background decorative elements */}
+                        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+                        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-black/5 rounded-full blur-2xl" />
+                    </div>
 
-                    {/* Header Info */}
-                    <div className="p-6 md:p-8 relative">
-                        {/* View Location Button - Desktop top right */}
-                        <div className="absolute top-6 right-6 hidden md:block">
-                            <Button variant="outline" className="rounded-full border-gray-200 dark:border-zinc-700 text-xs h-8">
-                                <MapPin className="w-3 h-3 mr-2" />
-                                View Location
-                            </Button>
-                        </div>
-
-                        <div className="flex flex-col md:flex-row gap-6 items-start">
-                            {/* Logo */}
+                    <div className="px-6 relative z-10">
+                        {/* Logo Avatar - positioned to overlap banner */}
+                        <div className="-mt-12 mb-4 flex justify-between items-end">
                             <div
-                                className="w-20 h-20 md:w-32 md:h-32 rounded-2xl flex-shrink-0 flex items-center justify-center text-white text-3xl md:text-5xl font-bold shadow-xl border-4 border-white dark:border-zinc-800"
-                                style={{ backgroundColor: business.themeColor || '#1f2937' }}
+                                className="w-20 h-20 rounded-[28px] flex items-center justify-center text-white text-3xl font-black shadow-2xl ring-4 ring-white dark:ring-zinc-950 transform hover:scale-105 transition-transform"
+                                style={{ backgroundColor: business.themeColor || "#1f2937" }}
                             >
                                 {business.name.substring(0, 1).toUpperCase()}
                             </div>
+                        </div>
 
-                            {/* Text Details */}
-                            <div className="flex-1 space-y-3 pt-1">
-                                <div>
-                                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-                                        {business.name}
-                                    </h1>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 font-medium my-1">@{business.slug}</p>
+                        <div className="space-y-1">
+                            <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                                {business.name}
+                            </h1>
+                            <p className="text-gray-500 font-medium">@{business.slug}</p>
+                        </div>
+
+                        {business.description && (
+                            <p className="mt-4 text-gray-600 dark:text-gray-300 leading-relaxed">
+                                {business.description}
+                            </p>
+                        )}
+
+                        {/* Quick Contact Info */}
+                        <div className="flex flex-wrap gap-4 mt-6 text-sm text-gray-500 font-medium">
+                            {business.phone && (
+                                <div className="flex items-center gap-1.5">
+                                    <Phone className="w-4 h-4" />
+                                    {business.phone.code} {business.phone.number}
                                 </div>
-
-                                {business.description && (
-                                    <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed line-clamp-2 max-w-2xl">
-                                        {business.description}
-                                    </p>
-                                )}
-
-                                <div className="flex flex-wrap gap-3 items-center">
-                                    {business.industry && (
-                                        <Badge variant="secondary" className="px-2.5 py-0.5 text-xs bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 font-medium">
-                                            {business.industry}
-                                        </Badge>
-                                    )}
-                                    {business.phone && (
-                                        <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-                                            <Phone className="w-3.5 h-3.5" />
-                                            <span>{business.phone.code} {business.phone.number}</span>
-                                        </div>
-                                    )}
-                                    {business.businessHours && (
-                                        <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-                                            <Clock className="w-3.5 h-3.5" />
-                                            <span>{formatBusinessHours(business.businessHours) || "Check hours"}</span>
-                                        </div>
-                                    )}
-                                </div>
+                            )}
+                            <div className="flex items-center gap-1.5">
+                                <MapPin className="w-4 h-4" />
+                                View Location
                             </div>
                         </div>
-
-                        {/* Mobile WhatsApp/Location Actions */}
-                        <div className="flex gap-3 mt-6 md:hidden">
-                            {business.whatsappConnected && business.whatsappNumber && (
-                                <Button
-                                    className="flex-1 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold h-10 text-sm rounded-lg"
-                                    onClick={() => window.open(`https://wa.me/${business.whatsappNumber?.replace(/[^0-9]/g, '')}`, '_blank')}
-                                >
-                                    WhatsApp
-                                </Button>
-                            )}
-                            <Button variant="outline" className="flex-1 rounded-lg border-gray-200 dark:border-zinc-700 h-10 text-sm">
-                                <MapPin className="w-3.5 h-3.5 mr-2" />
-                                Location
-                            </Button>
-                        </div>
                     </div>
+                </div>
 
-                    {/* Divider */}
-                    {/* <div className="h-px bg-gray-50 dark:bg-zinc-800" /> */}
+                {/* Content Sections based on pageType */}
 
-                    {/* Store Section */}
-                    <div className="p-6 md:p-8 pt-2">
-                        {/* Title and Search Row */}
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Products & Services</h2>
+                {pageType === 'storefront' && (
+                    <div className="px-6 pt-10 space-y-12">
+                        {/* Dynamic Blocks */}
+                        {blocks.length > 0 && (
+                            <div className="space-y-6">
+                                {blocks.map(renderBlock)}
+                            </div>
+                        )}
 
-                            <div className="relative w-full md:w-72">
+                        {/* Featured Items */}
+                        <section className="space-y-6">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-xl font-black italic uppercase tracking-tighter">Featured</h3>
+                                <button className="text-sm font-bold text-blue-600">See All</button>
+                            </div>
+                            <div className="grid grid-cols-1 gap-4">
+                                {products.slice(0, 3).map(product => (
+                                    <div key={product._id} className="flex gap-4 p-4 rounded-3xl border border-gray-100 dark:border-zinc-800 hover:bg-gray-50 transition-colors cursor-pointer">
+                                        <div className="w-24 h-24 bg-gray-100 dark:bg-zinc-900 rounded-2xl overflow-hidden flex-shrink-0">
+                                            {product.image ? <img src={product.image} className="w-full h-full object-cover" /> : <ShoppingBag className="m-auto text-gray-300" />}
+                                        </div>
+                                        <div className="flex-1 flex flex-col justify-center">
+                                            <div className="font-bold">{product.name}</div>
+                                            <div className="text-sm text-gray-500 font-bold mt-1">
+                                                ${product.offers.price.toLocaleString()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    </div>
+                )}
+
+                {pageType === 'shop' && (
+                    <div className="px-6 pt-10">
+                        {blocks.length > 0 && (
+                            <div className="mb-10 space-y-6">
+                                {blocks.map(renderBlock)}
+                            </div>
+                        )}
+                        <div className="flex items-center justify-between mb-8">
+                            <div>
+                                <h2 className="text-2xl font-black">{settings.headline || 'Online Shop'}</h2>
+                                <p className="text-sm text-gray-500">{settings.description || `${displayedProducts.length} items available`}</p>
+                            </div>
+                            <div className="relative w-40">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                 <Input
-                                    placeholder="Search products..."
-                                    className="pl-9 h-10 rounded-xl bg-gray-50 dark:bg-zinc-800 border-none focus:ring-1 focus:ring-gray-200 transition-all text-sm"
+                                    placeholder="Search..."
+                                    className="pl-9 h-10 rounded-full bg-gray-100 border-none text-xs"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
                         </div>
 
-                        {/* Category Pills */}
-                        <div className="flex flex-wrap gap-2 mb-8 overflow-x-auto pb-2 no-scrollbar">
-                            {categories.map((cat) => (
-                                <button
-                                    key={cat}
-                                    onClick={() => setSelectedCategory(cat)}
-                                    className={cn(
-                                        "px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 whitespace-nowrap",
-                                        selectedCategory === cat
-                                            ? "text-white shadow-md"
-                                            : "bg-gray-50 dark:bg-zinc-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-700 border border-gray-100 dark:border-zinc-800"
-                                    )}
-                                    style={selectedCategory === cat ? { backgroundColor: business.themeColor || '#1f2937' } : {}}
-                                >
-                                    {cat}
-                                </button>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-10">
+                            {displayedProducts.map((product) => (
+                                <div key={product._id} className="group">
+                                    <div className="aspect-[3/4] rounded-[40px] bg-gray-100 overflow-hidden relative mb-4 shadow-sm group-hover:shadow-xl transition-all duration-500">
+                                        {product.image ? (
+                                            <img src={product.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                        ) : (
+                                            <ShoppingBag className="m-auto w-12 h-12 text-gray-300" />
+                                        )}
+                                        <button
+                                            onClick={() => addToCart(product)}
+                                            className="absolute bottom-4 right-4 w-12 h-12 bg-white rounded-2xl shadow-lg flex items-center justify-center transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 active:scale-95"
+                                        >
+                                            <ShoppingBag className="w-5 h-5 text-zinc-900" />
+                                        </button>
+                                    </div>
+                                    <div className="px-2">
+                                        <div className="text-sm font-black truncate">{product.name}</div>
+                                        <div className="text-lg font-black mt-1" style={{ color: business.themeColor }}>
+                                            ${product.offers.price.toLocaleString()}
+                                        </div>
+                                    </div>
+                                </div>
                             ))}
                         </div>
+                    </div>
+                )}
 
-                        {/* Product Grid */}
-                        <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            <AnimatePresence>
-                                {filteredProducts.map((product) => (
-                                    <motion.div
-                                        layout
-                                        initial={{ opacity: 0, scale: 0.9 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.9 }}
-                                        key={product._id}
-                                        className="group bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 hover:shadow-xl hover:border-gray-200 dark:hover:border-zinc-700 transition-all duration-300 overflow-hidden flex flex-col"
+                {pageType === 'bookings' && (
+                    <div className="px-6 pt-10 space-y-8">
+                        {blocks.length > 0 && (
+                            <div className="space-y-6">
+                                {blocks.map(renderBlock)}
+                            </div>
+                        )}
+                        <div>
+                            <h2 className="text-2xl font-black">{settings.headline || 'Book a Service'}</h2>
+                            <p className="text-sm text-gray-500">{settings.description || 'Pick a service to schedule your appointment'}</p>
+                        </div>
+
+                        <div className="space-y-4">
+                            {displayedProducts.map(service => (
+                                <div key={service._id} className="p-6 rounded-[32px] border-2 border-zinc-100 dark:border-zinc-800 flex items-center gap-6 hover:border-zinc-900 transition-colors group">
+                                    <div className="w-20 h-20 rounded-3xl bg-zinc-50 dark:bg-zinc-900 flex-shrink-0 overflow-hidden">
+                                        {service.image ? <img src={service.image} className="w-full h-full object-cover" /> : <Clock className="m-auto text-zinc-300" />}
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="font-black text-lg">{service.name}</div>
+                                        <div className="text-sm text-zinc-500 font-bold mt-1">${service.offers.price} • 60 min</div>
+                                    </div>
+                                    <button
+                                        className="h-12 px-6 rounded-2xl font-bold bg-zinc-900 text-white hover:scale-105 active:scale-95 transition-all"
                                     >
-                                        <div className="aspect-[4/3] relative bg-gray-100 dark:bg-zinc-800 overflow-hidden">
-                                            {product.image ? (
-                                                <img
-                                                    src={product.image}
-                                                    alt={product.name}
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                                    <ShoppingBag className="w-12 h-12" />
-                                                </div>
-                                            )}
-                                            {product.type === 'service' && (
-                                                <div className="absolute top-3 left-3">
-                                                    <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-xs font-bold rounded-full text-gray-900 shadow-sm">
-                                                        Service
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="p-5 flex flex-col flex-1">
-                                            <div className="flex-1">
-                                                {product.category && (
-                                                    <p className="text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">{product.category}</p>
-                                                )}
-                                                <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-2 line-clamp-2">{product.name}</h3>
-                                                {product.description && (
-                                                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4">
-                                                        {product.description}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center justify-between mt-4">
-                                                <span
-                                                    className="text-xl font-bold"
-                                                    style={{ color: business.themeColor || '#1f2937' }}
-                                                >
-                                                    {product.offers.priceCurrency === "USD" ? "$" : product.offers.priceCurrency}
-                                                    {product.offers.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                                </span>
-                                                <Button
-                                                    size="sm"
-                                                    className="rounded-xl font-semibold opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-                                                    style={{ backgroundColor: business.themeColor || '#1f2937' }}
-                                                >
-                                                    Add
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </AnimatePresence>
-                        </motion.div>
-
-                        {filteredProducts.length === 0 && (
-                            <div className="text-center py-20">
-                                <div className="w-16 h-16 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <ShoppingBag className="w-8 h-8 text-gray-400" />
+                                        Book
+                                    </button>
                                 </div>
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">No products found</h3>
-                                <p className="text-gray-500">Try changing the category or search for something else.</p>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {pageType === 'quote' && (
+                    <div className="px-6 pt-10 space-y-8">
+                        {blocks.length > 0 && (
+                            <div className="space-y-6">
+                                {blocks.map(renderBlock)}
+                            </div>
+                        )}
+                        <div>
+                            <h2 className="text-2xl font-black">{settings.headline || 'Request a Quote'}</h2>
+                            <p className="text-sm text-gray-500">{settings.description || "Fill out the form below and we'll get back to you with a custom quote."}</p>
+                        </div>
+
+                        <form className="space-y-6 bg-gray-50 dark:bg-zinc-900/50 p-8 rounded-[40px]" onSubmit={(e) => e.preventDefault()}>
+                            <div className="space-y-2">
+                                <Label className="font-bold text-xs uppercase tracking-widest text-zinc-500">Full Name</Label>
+                                <Input className="h-14 rounded-2xl bg-white border-none shadow-sm focus:ring-2 ring-zinc-100" placeholder="John Doe" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="font-bold text-xs uppercase tracking-widest text-zinc-500">Email Address</Label>
+                                <Input className="h-14 rounded-2xl bg-white border-none shadow-sm focus:ring-2 ring-zinc-100" placeholder="john@example.com" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="font-bold text-xs uppercase tracking-widest text-zinc-500">Project Details</Label>
+                                <textarea
+                                    className="w-full min-h-[150px] p-4 rounded-2xl bg-white border-none shadow-sm focus:ring-2 ring-zinc-100 resize-none text-sm"
+                                    placeholder="Tell us about what you need..."
+                                />
+                            </div>
+                            <button className="w-full h-16 rounded-2xl bg-zinc-900 text-white font-black text-xl hover:scale-[1.02] transition-transform active:scale-95 shadow-xl shadow-zinc-900/10">
+                                Send Request
+                            </button>
+                        </form>
+                    </div>
+                )}
+            </main>
+
+            {/* Cart Overlay */}
+            {isCartOpen && (
+                <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex justify-end">
+                    <div className="w-full max-w-md bg-white dark:bg-zinc-950 flex flex-col shadow-2xl animate-in slide-in-from-right duration-300">
+                        <div className="p-6 border-b flex items-center justify-between">
+                            <h2 className="text-xl font-black">Your Cart</h2>
+                            <Button variant="ghost" size="icon" onClick={() => setIsCartOpen(false)}>
+                                <Menu className="w-6 h-6 rotate-45" />
+                            </Button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                            {cart.length === 0 ? (
+                                <div className="text-center py-20 text-gray-400">Your cart is empty</div>
+                            ) : (
+                                cart.map((item, idx) => (
+                                    <div key={idx} className="flex gap-4 items-center">
+                                        <div className="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
+                                            {item.image ? <img src={item.image} className="w-full h-full object-cover" /> : <ShoppingBag className="m-auto text-gray-300" />}
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="font-bold">{item.name}</div>
+                                            <div className="text-sm font-bold text-gray-500">${item.offers.price}</div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                        {cart.length > 0 && (
+                            <div className="p-6 border-t space-y-4">
+                                <div className="flex items-center justify-between font-black text-xl">
+                                    <span>Total</span>
+                                    <span>${cartTotal.toLocaleString()}</span>
+                                </div>
+                                <button className="w-full h-16 rounded-3xl bg-zinc-900 text-white font-black text-lg">
+                                    Checkout
+                                </button>
                             </div>
                         )}
                     </div>
                 </div>
+            )}
 
-                {/* Footer simple */}
-                <div className="text-center mt-12 text-gray-500 text-sm">
-                    <p>Powered by Bized</p>
-                </div>
-            </div>
-        </div>
+            {/* Sticky Powered By */}
+            <footer className="py-10 text-center">
+                <p className="text-gray-400 text-xs font-semibold uppercase tracking-[0.2em]">
+                    Powered by Bized
+                </p>
+            </footer>
+        </div >
     )
 }

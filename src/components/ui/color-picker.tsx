@@ -14,7 +14,11 @@ import { Paintbrush, Pipette } from "lucide-react"
 
 declare global {
     interface Window {
-        EyeDropper: any
+        EyeDropper?: {
+            new(): {
+                open: (options?: { signal?: AbortSignal }) => Promise<{ sRGBHex: string }>
+            }
+        }
     }
 }
 
