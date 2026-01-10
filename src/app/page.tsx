@@ -4,7 +4,7 @@ import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Plus, ExternalLink, HelpCircle, Globe, Calendar, ShoppingBag, CreditCard, Briefcase, CheckCircle2 } from "lucide-react";
+import { Plus, CheckCircle2, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Home() {
@@ -94,231 +94,42 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* TRUSTED BY / SOCIAL PROOF SECTION */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
-          className="mb-24 md:mb-32 pt-10 border-t border-border/40"
-        >
-          <p className="text-center text-xs md:text-sm font-bold text-muted-foreground uppercase tracking-[0.2em] mb-8">
-            Trusted by & Integrated with industry leaders
-          </p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-70 hover:opacity-100 transition-opacity duration-500">
-            {/* Logo 1: Google */}
-            <div className="flex items-center gap-2 grayscale hover:grayscale-0 transition-all duration-300">
-              <span className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-green-500">Google</span>
-            </div>
-            {/* Logo 2: Meta */}
-            <div className="flex items-center gap-2 grayscale hover:grayscale-0 transition-all duration-300">
-              <span className="text-xl md:text-2xl font-bold text-blue-600">Meta</span>
-            </div>
-            {/* Logo 3: WhatsApp */}
-            <div className="flex items-center gap-2 grayscale hover:grayscale-0 transition-all duration-300">
-              <span className="text-xl md:text-2xl font-bold text-[#25D366]">WhatsApp</span>
-            </div>
-            {/* Logo 4: TikTok */}
-            <div className="flex items-center gap-2 grayscale hover:grayscale-0 transition-all duration-300">
-              <span className="text-xl md:text-2xl font-bold text-foreground">TikTok</span>
-            </div>
-            {/* Logo 5: Stripe */}
-            <div className="flex items-center gap-2 grayscale hover:grayscale-0 transition-all duration-300">
-              <span className="text-xl md:text-2xl font-bold text-[#635BFF]">Stripe</span>
-            </div>
-          </div>
-        </motion.div>
 
-        {/* Feature Section 1: Get Discovered (Text Left, Image Right) */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.7 }}
-          className="flex flex-col md:flex-row items-center gap-8 md:gap-20 mb-20 md:mb-32"
-        >
-          <div className="w-full md:w-1/2 order-2 md:order-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs md:text-sm font-semibold mb-4 md:mb-6">
-              <Globe size={14} /> Step 01
-            </div>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-foreground leading-tight">
-              Get discovered online
-            </h2>
-            <p className="text-base md:text-lg text-muted-foreground mb-6 md:mb-8 leading-relaxed">
-              Bized instantly creates a modern business page for you, with templates, branding, custom domains, and SEO settings—no coding needed.
-            </p>
-            <ul className="space-y-3 md:space-y-4">
-              {[
-                "Auto-generated website & public business page",
-                "Get discovered in Google, Facebook, Instagram and WhatsApp",
-                "Shareable links for WhatsApp, social media & ads"
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                  <span className="text-sm md:text-base text-foreground font-medium">{item}</span>
-                </li>
-              ))}
-            </ul>
-            {/* Stats Card Mockup */}
-            <div className="mt-6 md:mt-8 p-4 md:p-6 rounded-2xl bg-card border border-border shadow-lg flex justify-between gap-4 max-w-sm hover:scale-105 transition-transform duration-300">
-              <div>
-                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Clicks</p>
-                <p className="text-xl md:text-2xl font-bold text-blue-600">2,430</p>
-              </div>
-              <div>
-                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider font-semibold">Active Links</p>
-                <p className="text-xl md:text-2xl font-bold text-foreground">12</p>
-              </div>
-              <div>
-                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider font-semibold">Emails</p>
-                <p className="text-xl md:text-2xl font-bold text-foreground">184</p>
-              </div>
-            </div>
-          </div>
-          <div className="w-full md:w-1/2 order-1 md:order-2 relative px-4 md:px-0">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="relative aspect-square rounded-3xl overflow-hidden shadow-xl md:shadow-2xl border border-border/50 bg-muted/50 w-full max-w-[320px] md:max-w-none mx-auto"
-            >
-              <Image src="/feature-discovery.png" alt="Get Discovered Online" fill className="object-cover" />
-            </motion.div>
-          </div>
-        </motion.div>
 
-        {/* Feature Section 2: Scheduling (Image Left, Text Right) */}
+        {/* CTA SECTION */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.7 }}
-          className="flex flex-col md:flex-row items-center gap-8 md:gap-20 mb-20 md:mb-32"
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="relative mt-24 md:mt-32 p-8 md:p-16 rounded-[2.5rem] overflow-hidden bg-primary text-primary-foreground text-center"
         >
-          <div className="w-full md:w-1/2 px-4 md:px-0">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-xl md:shadow-2xl border border-border/50 bg-muted/50 w-full max-w-[280px] md:max-w-[360px] mx-auto"
-            >
-              <Image src="/feature-scheduling.png" alt="Schedule Appointments" fill className="object-cover" />
-            </motion.div>
+          {/* Decorative gradients */}
+          <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-30 pointer-events-none">
+            <div className="absolute -top-[50%] -left-[20%] w-[80%] h-[80%] rounded-full bg-white blur-[100px]" />
+            <div className="absolute top-[30%] -right-[20%] w-[60%] h-[60%] rounded-full bg-blue-400 blur-[80px]" />
           </div>
-          <div className="w-full md:w-1/2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs md:text-sm font-semibold mb-4 md:mb-6">
-              <Calendar size={14} /> Step 02
-            </div>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-foreground leading-tight">
-              Schedule & manage appointments
-            </h2>
-            <p className="text-base md:text-lg text-muted-foreground mb-6 md:mb-8 leading-relaxed">
-              Let clients book you online 24/7. Auto-reminders reduce no-shows, and everything syncs to your calendar.
-            </p>
-            <ul className="space-y-3 md:space-y-4">
-              {[
-                "Share your booking link or embed on your site",
-                "Automatic SMS & Email reminders",
-                "Staff scheduling & improved utilization"
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
-                  <span className="text-sm md:text-base text-foreground font-medium">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </motion.div>
 
-        {/* Feature Section 3: CRM (Text Left, Image Right) */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.7 }}
-          className="flex flex-col md:flex-row items-center gap-8 md:gap-20 mb-20 md:mb-32"
-        >
-          <div className="w-full md:w-1/2 order-2 md:order-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs md:text-sm font-semibold mb-4 md:mb-6">
-              <Briefcase size={14} /> Step 03
-            </div>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-foreground leading-tight">
-              Nurture leads & repeat customers
+          <div className="relative z-10 max-w-3xl mx-auto space-y-8">
+            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight">
+              Ready to take your business to the next level?
             </h2>
-            <p className="text-base md:text-lg text-muted-foreground mb-6 md:mb-8 leading-relaxed">
-              Every click, form fill and interaction becomes a lead in your CRM, so you can track status from new → qualified → converted.
+            <p className="text-lg md:text-xl text-primary-foreground/90 max-w-2xl mx-auto">
+              Join thousands of businesses using Bized to simplify operations, manage orders, and grow revenue.
             </p>
-            <ul className="space-y-3 md:space-y-4">
-              {[
-                "Central lead list with statuses and values",
-                "Pipeline and activities to track follow‑ups",
-                "Client and staff records for better hand‑offs"
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
-                  <span className="text-sm md:text-base text-foreground font-medium">{item}</span>
-                </li>
-              ))}
-            </ul>
-            {/* Pipeline Stats Mockup */}
-            <div className="mt-6 md:mt-8 flex gap-4 max-w-sm hover:scale-105 transition-transform duration-300">
-              <div className="p-3 md:p-4 rounded-xl bg-card border border-border shadow-sm flex-1 text-center">
-                <p className="text-xl md:text-2xl font-bold text-foreground">36</p>
-                <p className="text-[10px] text-muted-foreground uppercase font-bold">New Leads</p>
-              </div>
-              <div className="p-3 md:p-4 rounded-xl bg-card border border-border shadow-sm flex-1 text-center">
-                <p className="text-xl md:text-2xl font-bold text-green-600">9</p>
-                <p className="text-[10px] text-muted-foreground uppercase font-bold">Converted</p>
-              </div>
-            </div>
-          </div>
-          <div className="w-full md:w-1/2 order-1 md:order-2 relative px-4 md:px-0">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="relative aspect-video rounded-3xl overflow-hidden shadow-xl md:shadow-2xl border border-border/50 bg-muted/50 w-full max-w-[320px] md:max-w-none mx-auto"
-            >
-              <Image src="/feature-crm.png" alt="CRM Pipeline" fill className="object-cover" />
-            </motion.div>
-          </div>
-        </motion.div>
 
-        {/* Feature Section 4: Billing (Image Left, Text Right) */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.7 }}
-          className="flex flex-col md:flex-row items-center gap-8 md:gap-20 mb-16 md:mb-24"
-        >
-          <div className="w-full md:w-1/2 px-4 md:px-0">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="relative aspect-[4/5] rounded-3xl overflow-hidden shadow-xl md:shadow-2xl border border-border/50 bg-muted/50 w-full max-w-[280px] md:max-w-[360px] mx-auto"
-            >
-              <Image src="/feature-billing.png" alt="Invoicing and Billing" fill className="object-cover" />
-            </motion.div>
-          </div>
-          <div className="w-full md:w-1/2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs md:text-sm font-semibold mb-4 md:mb-6">
-              <CreditCard size={14} /> Step 04
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+              <Link href="/register">
+                <button className="px-8 py-4 rounded-full bg-background text-foreground font-bold text-lg hover:bg-background/90 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center gap-2 group">
+                  Start for Free
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </Link>
             </div>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 text-foreground leading-tight">
-              Bill, get paid & track every cent
-            </h2>
-            <p className="text-base md:text-lg text-muted-foreground mb-6 md:mb-8 leading-relaxed">
-              Create quotes and invoices in a few clicks, track who has paid, and keep income, expenses and purchases in one cashbook.
+
+            <p className="text-sm text-primary-foreground/70 pt-4">
+              No credit card required. Cancel anytime.
             </p>
-            <ul className="space-y-3 md:space-y-4">
-              {[
-                "Professional invoice & quote templates",
-                "Income, expenses, purchases & vendors in one place",
-                "Import or export data to Excel/CSV"
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-orange-600 dark:text-orange-400 shrink-0 mt-0.5" />
-                  <span className="text-sm md:text-base text-foreground font-medium">{item}</span>
-                </li>
-              ))}
-            </ul>
           </div>
         </motion.div>
       </main>

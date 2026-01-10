@@ -80,7 +80,7 @@ export function AdminNavbar() {
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
-                            <Link href="/profile" className="cursor-pointer flex items-center gap-2">
+                            <Link href="/business/account" className="cursor-pointer flex items-center gap-2">
                                 <ProfileCircle size="16" />
                                 <span>Profile</span>
                             </Link>

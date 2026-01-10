@@ -1,50 +1,59 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import bcrypt from 'bcryptjs';
+import GoogleProvider from 'next-auth/providers/google';
 import dbConnect from './db';
 import User from '../models/User';
 
 export const authOptions: NextAuthOptions = {
     providers: [
-        CredentialsProvider({
-            name: 'Credentials',
-            credentials: {
-                email: { label: 'Email', type: 'email' },
-                password: { label: 'Password', type: 'password' },
-            },
-            async authorize(credentials) {
-                if (!credentials?.email || !credentials?.password) {
-                    throw new Error('Please enter an email and password');
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+            authorization: {
+                params: {
+                    scope: "openid email profile https://www.googleapis.com/auth/business.manage",
+                    prompt: "consent",
+                    access_type: "offline",
+                    response_type: "code"
                 }
-
-                await dbConnect();
-
-                const user = await User.findOne({ email: credentials.email });
-
-                if (!user) {
-                    throw new Error('No user found with this email');
-                }
-
-                const isPasswordMatch = await bcrypt.compare(
-                    credentials.password,
-                    user.password
-                );
-
-                if (!isPasswordMatch) {
-                    throw new Error('Incorrect password');
-                }
-
-                return {
-                    id: user._id.toString(),
-                    name: user.name,
-                    email: user.email,
-                    role: user.role, // We will need to add this type augmentation
-                };
-            },
+            }
         }),
     ],
     callbacks: {
-        async jwt({ token, user }) {
+        async signIn({ user, account }) {
+            if (account?.provider === 'google') {
+                await dbConnect();
+                try {
+                    // Try to find user by their Google ID (which we use as _id)
+                    const existingUser = await User.findById(user.id);
+
+                    if (!existingUser) {
+                        // Create new user with Google ID as the MongoDB _id
+                        const newUser = await User.create({
+                            _id: user.id, // Explicitly set _id to Google ID
+                            name: user.name,
+                            email: user.email,
+                            image: user.image,
+                            role: 'user', // Default role
+                        });
+                        user.id = newUser._id.toString();
+                        user.role = newUser.role;
+                    } else {
+                        user.id = existingUser._id.toString();
+                        user.role = existingUser.role;
+                    }
+                    return true;
+                } catch (error) {
+                    console.error("Error creating user from Google login:", error);
+                    return false;
+                }
+            }
+            return true;
+        },
+        async jwt({ token, user, account }) {
+            if (account) {
+                token.accessToken = account.access_token;
+            }
             if (user) {
                 token.role = user.role;
                 token.id = user.id;
@@ -55,6 +64,8 @@ export const authOptions: NextAuthOptions = {
             if (session?.user) {
                 session.user.role = token.role;
                 session.user.id = token.id;
+                // @ts-ignore
+                session.accessToken = token.accessToken;
             }
             return session;
         },

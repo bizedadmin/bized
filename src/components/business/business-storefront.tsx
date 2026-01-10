@@ -29,6 +29,8 @@ interface Business {
     themeColor?: string
     secondaryColor?: string
     buttonColor?: string
+    image?: string
+    logo?: string
     whatsappNumber?: string
     whatsappConnected?: boolean
     showBookNow?: boolean
@@ -89,7 +91,7 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
             case 'text':
                 return (
                     <div key={block.id} className="space-y-2">
-                        {block.title && <h2 className="text-xl font-bold">{block.title}</h2>}
+                        {block.title && <h2 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">{block.title}</h2>}
                         {block.content && <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{block.content}</p>}
                     </div>
                 )
@@ -158,7 +160,10 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
     }
 
     return (
-        <div className="min-h-screen bg-white dark:bg-zinc-950 font-sans">
+        <div
+            className="min-h-screen bg-white dark:bg-zinc-950 antialiased tracking-tight"
+            style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}
+        >
             {/* Header / Navigation */}
             <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between sticky top-0 z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
                 <Button variant="ghost" size="icon" className="rounded-full">
@@ -191,22 +196,34 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
                 <div className="relative">
                     {/* Banner with secondary color */}
                     <div
-                        className="h-32 w-full sm:rounded-b-[40px] relative overflow-hidden"
-                        style={{ backgroundColor: business.secondaryColor || "#f3f4f6" }}
+                        className="h-32 w-full sm:rounded-b-[40px] relative overflow-hidden bg-cover bg-center"
+                        style={{
+                            backgroundColor: business.secondaryColor || "#f3f4f6",
+                            backgroundImage: business.image ? `url(${business.image})` : undefined
+                        }}
                     >
-                        {/* Abstract background decorative elements */}
-                        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
-                        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-black/5 rounded-full blur-2xl" />
+                        {/* Abstract background decorative elements - only show if no image */}
+                        {!business.image && (
+                            <>
+                                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+                                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-black/5 rounded-full blur-2xl" />
+                            </>
+                        )}
+                        {/* Overlay darker if image exists to ensure text contrast if needed, though text is below */}
+                        {business.image && <div className="absolute inset-0 bg-black/10" />}
                     </div>
 
                     <div className="px-6 relative z-10">
                         {/* Logo Avatar - positioned to overlap banner */}
                         <div className="-mt-12 mb-4 flex justify-between items-end">
                             <div
-                                className="w-20 h-20 rounded-[28px] flex items-center justify-center text-white text-3xl font-black shadow-2xl ring-4 ring-white dark:ring-zinc-950 transform hover:scale-105 transition-transform"
-                                style={{ backgroundColor: business.themeColor || "#1f2937" }}
+                                className="w-20 h-20 rounded-[28px] flex items-center justify-center text-white text-3xl font-black shadow-2xl ring-4 ring-white dark:ring-zinc-950 transform hover:scale-105 transition-transform overflow-hidden bg-cover bg-center"
+                                style={{
+                                    backgroundColor: business.themeColor || "#1f2937",
+                                    backgroundImage: business.logo ? `url(${business.logo})` : undefined
+                                }}
                             >
-                                {business.name.substring(0, 1).toUpperCase()}
+                                {!business.logo && business.name.substring(0, 1).toUpperCase()}
                             </div>
                         </div>
 
@@ -250,79 +267,16 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
                             </div>
                         )}
 
-                        {/* Featured Items */}
-                        <section className="space-y-6">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xl font-black italic uppercase tracking-tighter">Featured</h3>
-                                <button className="text-sm font-bold text-blue-600">See All</button>
-                            </div>
-                            <div className="grid grid-cols-1 gap-4">
-                                {products.slice(0, 3).map(product => (
-                                    <div key={product._id} className="flex gap-4 p-4 rounded-3xl border border-gray-100 dark:border-zinc-800 hover:bg-gray-50 transition-colors cursor-pointer">
-                                        <div className="w-24 h-24 bg-gray-100 dark:bg-zinc-900 rounded-2xl overflow-hidden flex-shrink-0">
-                                            {product.image ? <img src={product.image} className="w-full h-full object-cover" /> : <ShoppingBag className="m-auto text-gray-300" />}
-                                        </div>
-                                        <div className="flex-1 flex flex-col justify-center">
-                                            <div className="font-bold">{product.name}</div>
-                                            <div className="text-sm text-gray-500 font-bold mt-1">
-                                                ${product.offers.price.toLocaleString()}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
                     </div>
                 )}
 
                 {pageType === 'shop' && (
                     <div className="px-6 pt-10">
                         {blocks.length > 0 && (
-                            <div className="mb-10 space-y-6">
+                            <div className="space-y-6">
                                 {blocks.map(renderBlock)}
                             </div>
                         )}
-                        <div className="flex items-center justify-between mb-8">
-                            <div>
-                                <h2 className="text-2xl font-black">{settings.headline || 'Online Shop'}</h2>
-                                <p className="text-sm text-gray-500">{settings.description || `${displayedProducts.length} items available`}</p>
-                            </div>
-                            <div className="relative w-40">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                <Input
-                                    placeholder="Search..."
-                                    className="pl-9 h-10 rounded-full bg-gray-100 border-none text-xs"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-10">
-                            {displayedProducts.map((product) => (
-                                <div key={product._id} className="group">
-                                    <div className="aspect-[3/4] rounded-[40px] bg-gray-100 overflow-hidden relative mb-4 shadow-sm group-hover:shadow-xl transition-all duration-500">
-                                        {product.image ? (
-                                            <img src={product.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                                        ) : (
-                                            <ShoppingBag className="m-auto w-12 h-12 text-gray-300" />
-                                        )}
-                                        <button
-                                            onClick={() => addToCart(product)}
-                                            className="absolute bottom-4 right-4 w-12 h-12 bg-white rounded-2xl shadow-lg flex items-center justify-center transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 active:scale-95"
-                                        >
-                                            <ShoppingBag className="w-5 h-5 text-zinc-900" />
-                                        </button>
-                                    </div>
-                                    <div className="px-2">
-                                        <div className="text-sm font-black truncate">{product.name}</div>
-                                        <div className="text-lg font-black mt-1" style={{ color: business.themeColor }}>
-                                            ${product.offers.price.toLocaleString()}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
                     </div>
                 )}
 
@@ -333,29 +287,6 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
                                 {blocks.map(renderBlock)}
                             </div>
                         )}
-                        <div>
-                            <h2 className="text-2xl font-black">{settings.headline || 'Book a Service'}</h2>
-                            <p className="text-sm text-gray-500">{settings.description || 'Pick a service to schedule your appointment'}</p>
-                        </div>
-
-                        <div className="space-y-4">
-                            {displayedProducts.map(service => (
-                                <div key={service._id} className="p-6 rounded-[32px] border-2 border-zinc-100 dark:border-zinc-800 flex items-center gap-6 hover:border-zinc-900 transition-colors group">
-                                    <div className="w-20 h-20 rounded-3xl bg-zinc-50 dark:bg-zinc-900 flex-shrink-0 overflow-hidden">
-                                        {service.image ? <img src={service.image} className="w-full h-full object-cover" /> : <Clock className="m-auto text-zinc-300" />}
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="font-black text-lg">{service.name}</div>
-                                        <div className="text-sm text-zinc-500 font-bold mt-1">${service.offers.price} • 60 min</div>
-                                    </div>
-                                    <button
-                                        className="h-12 px-6 rounded-2xl font-bold bg-zinc-900 text-white hover:scale-105 active:scale-95 transition-all"
-                                    >
-                                        Book
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
                     </div>
                 )}
 
@@ -366,31 +297,6 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
                                 {blocks.map(renderBlock)}
                             </div>
                         )}
-                        <div>
-                            <h2 className="text-2xl font-black">{settings.headline || 'Request a Quote'}</h2>
-                            <p className="text-sm text-gray-500">{settings.description || "Fill out the form below and we'll get back to you with a custom quote."}</p>
-                        </div>
-
-                        <form className="space-y-6 bg-gray-50 dark:bg-zinc-900/50 p-8 rounded-[40px]" onSubmit={(e) => e.preventDefault()}>
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-zinc-500">Full Name</Label>
-                                <Input className="h-14 rounded-2xl bg-white border-none shadow-sm focus:ring-2 ring-zinc-100" placeholder="John Doe" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-zinc-500">Email Address</Label>
-                                <Input className="h-14 rounded-2xl bg-white border-none shadow-sm focus:ring-2 ring-zinc-100" placeholder="john@example.com" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="font-bold text-xs uppercase tracking-widest text-zinc-500">Project Details</Label>
-                                <textarea
-                                    className="w-full min-h-[150px] p-4 rounded-2xl bg-white border-none shadow-sm focus:ring-2 ring-zinc-100 resize-none text-sm"
-                                    placeholder="Tell us about what you need..."
-                                />
-                            </div>
-                            <button className="w-full h-16 rounded-2xl bg-zinc-900 text-white font-black text-xl hover:scale-[1.02] transition-transform active:scale-95 shadow-xl shadow-zinc-900/10">
-                                Send Request
-                            </button>
-                        </form>
                     </div>
                 )}
             </main>
@@ -437,12 +343,6 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
                 </div>
             )}
 
-            {/* Sticky Powered By */}
-            <footer className="py-10 text-center">
-                <p className="text-gray-400 text-xs font-semibold uppercase tracking-[0.2em]">
-                    Powered by Bized
-                </p>
-            </footer>
         </div >
     )
 }

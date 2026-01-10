@@ -1,7 +1,7 @@
 "use client"
 
-import { useSearchParams, useRouter } from "next/navigation"
-import { useEffect, useState, Suspense } from "react"
+import { useSearchParams, useRouter, useParams } from "next/navigation"
+import { useEffect, useState, Suspense, use } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -58,11 +58,10 @@ const THEME_COLORS = [
     { name: "Purple", value: "#a855f7" },
 ]
 
-function PageBuilderContent() {
+function PageBuilderContent({ pageType }: { pageType: string }) {
     const searchParams = useSearchParams()
     const router = useRouter()
     const businessId = searchParams.get("businessId")
-    const pageType = searchParams.get("type") || "storefront"
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [products, setProducts] = useState<any[]>([])
@@ -154,7 +153,7 @@ function PageBuilderContent() {
     const updatePageSetting = (settingKey: string, value: any) => {
         setFormData((prev: any) => {
             const pages = [...(prev.pages || [])]
-            const pageIndex = pages.findIndex(p => p.type === pageType)
+            const pageIndex = pages.findIndex((p: any) => p.type === pageType)
             if (pageIndex > -1) {
                 pages[pageIndex] = {
                     ...pages[pageIndex],
@@ -163,6 +162,14 @@ function PageBuilderContent() {
                         [settingKey]: value
                     }
                 }
+            } else {
+                // Initialize page if it doesn't exist yet for this type
+                pages.push({
+                    type: pageType,
+                    settings: {
+                        [settingKey]: value
+                    }
+                })
             }
             return { ...prev, pages }
         })
@@ -270,79 +277,10 @@ function PageBuilderContent() {
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                     <Accordion type="single" collapsible defaultValue="design" className="w-full space-y-4">
 
-                        {/* 1. Design & Branding */}
-                        <AccordionItem value="design" className="border rounded-lg px-4 bg-white shadow-sm">
-                            <AccordionTrigger className="hover:no-underline py-4">
-                                <div className="flex items-center gap-3 text-left">
-                                    <div className="p-2 bg-blue-50 text-blue-600 rounded-md">
-                                        <Palette className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <div className="font-semibold">Design & Branding</div>
-                                        <div className="text-xs text-gray-500 font-normal">Colors and visual style</div>
-                                    </div>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="space-y-6 pt-2 pb-4">
-                                <div className="space-y-3">
-                                    <Label>Primary Brand Color</Label>
-                                    <ColorPicker
-                                        value={formData.themeColor}
-                                        onChange={(c) => updateField('themeColor', c)}
-                                        presets={THEME_COLORS}
-                                        className="w-full"
-                                    />
-                                </div>
-                                <div className="space-y-3">
-                                    <Label>Background Color</Label>
-                                    <ColorPicker
-                                        value={formData.secondaryColor}
-                                        onChange={(c) => updateField('secondaryColor', c)}
-                                        presets={[
-                                            { name: "Light Gray", value: "#f3f4f6" },
-                                            { name: "White", value: "#ffffff" },
-                                            { name: "Light Blue", value: "#dbeafe" },
-                                        ]}
-                                        className="w-full"
-                                    />
-                                </div>
-                                <div className="space-y-3">
-                                    <Label>Action Button Color</Label>
-                                    <ColorPicker
-                                        value={formData.buttonColor}
-                                        onChange={(c) => updateField('buttonColor', c)}
-                                        presets={THEME_COLORS}
-                                        className="w-full"
-                                    />
-                                </div>
-                            </AccordionContent>
-                        </AccordionItem>
 
 
-                        {/* 2. Business Information */}
-                        <AccordionItem value="info" className="border rounded-lg px-4 bg-white shadow-sm">
-                            <AccordionTrigger className="hover:no-underline py-4">
-                                <div className="flex items-center gap-3 text-left">
-                                    <div className="p-2 bg-purple-50 text-purple-600 rounded-md">
-                                        <Store className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                        <div className="font-semibold">Business Information</div>
-                                        <div className="text-xs text-gray-500 font-normal">Name, description and details</div>
-                                    </div>
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="space-y-4 pt-2 pb-4">
-                                <div className="space-y-2">
-                                    <Label>Business Name</Label>
-                                    <Input
-                                        value={formData.name}
-                                        onChange={(e) => updateField('name', e.target.value)}
-                                    />
-                                </div>
-                                {/* Description could go here if we had a field for it, currently mapping to nothing or maybe we need to add description to the schema */}
-                            </AccordionContent>
-                        </AccordionItem>
+
+                        {/* 3. Page Layout & Blocks */}
 
                         {/* 3. Page Layout & Blocks */}
                         <AccordionItem value="content" className="border rounded-lg px-4 bg-white shadow-sm">
@@ -651,14 +589,15 @@ function PageBuilderContent() {
 
 }
 
-export default function PageBuilderPage() {
+export default function PageBuilderPage({ params }: { params: Promise<{ pageType: string }> }) {
+    const { pageType } = use(params)
     return (
         <Suspense fallback={
             <div className="flex h-[calc(100vh-2rem)] items-center justify-center bg-gray-50 rounded-2xl border border-zinc-200 shadow-sm">
                 <Loader2 className="w-8 h-8 animate-spin text-zinc-400" />
             </div>
         }>
-            <PageBuilderContent />
+            <PageBuilderContent pageType={pageType} />
         </Suspense>
     )
 

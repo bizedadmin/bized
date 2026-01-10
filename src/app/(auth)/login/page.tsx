@@ -79,59 +79,29 @@ function LoginForm() {
                     Enter your email below to login to your account
                 </CardDescription>
             </CardHeader>
-            <form onSubmit={handleSubmit}>
-                <CardContent className="grid gap-4">
-                    {error && (
-                        <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
-                            {error}
-                        </div>
-                    )}
-                    {success && (
-                        <div className="bg-green-100 text-green-700 text-sm p-3 rounded-md dark:bg-green-900/30 dark:text-green-400">
-                            {success}
-                        </div>
-                    )}
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            placeholder="m@example.com"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                        />
+            <CardContent className="grid gap-4 mt-6">
+                {error && (
+                    <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
+                        {error}
                     </div>
-                    <div className="grid gap-2">
-                        <div className="flex items-center justify-between">
-                            <Label htmlFor="password">Password</Label>
-                            <Link
-                                href="/forgot-password"
-                                className="text-sm text-muted-foreground hover:underline"
-                            >
-                                Forgot your password?
-                            </Link>
-                        </div>
-                        <PasswordInput
-                            id="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                        />
+                )}
+                {success && (
+                    <div className="bg-green-100 text-green-700 text-sm p-3 rounded-md dark:bg-green-900/30 dark:text-green-400">
+                        {success}
                     </div>
-                    <Button
-                        className="w-full bg-black hover:bg-black/90 text-white"
-                        type="submit"
-                        disabled={loading}
-                    >
-                        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        Login
-                    </Button>
-                    <Button variant="outline" type="button" className="w-full">
-                        Login with Google
-                    </Button>
-                </CardContent>
-            </form>
+                )}
+                <Button
+                    variant="outline"
+                    type="button"
+                    className="w-full h-12 text-base font-medium"
+                    onClick={() => signIn("google", { callbackUrl: "/businesses/select" })}
+                >
+                    <svg className="mr-2 h-5 w-5" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                        <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
+                    </svg>
+                    Continue with Google
+                </Button>
+            </CardContent>
             <CardFooter className="flex justify-center">
                 <div className="text-sm text-muted-foreground">
                     Don&apos;t have an account?{" "}

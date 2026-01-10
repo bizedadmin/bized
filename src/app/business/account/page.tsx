@@ -13,8 +13,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useState, useEffect } from "react"
-import Link from "next/link"
+
 import { Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 export default function ProfilePage() {
     const [loading, setLoading] = useState(true)
@@ -67,13 +68,13 @@ export default function ProfilePage() {
                 body: JSON.stringify(user)
             })
             if (res.ok) {
-                alert("Profile updated successfully")
+                toast.success("Profile updated successfully")
             } else {
-                alert("Failed to update profile")
+                toast.error("Failed to update profile")
             }
         } catch (error) {
             console.error(error)
-            alert("An error occurred")
+            toast.error("An unexpected error occurred")
         } finally {
             setSaving(false)
         }
@@ -113,14 +114,10 @@ export default function ProfilePage() {
 
             <div className="mb-8 flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Profile Settings</h1>
-                    <p className="text-muted-foreground">Manage your public profile and account settings.</p>
+                    <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>
+                    <p className="text-muted-foreground">Manage your personal account details.</p>
                 </div>
-                <div className="flex gap-2">
-                    <Link href="/admin/dashboard">
-                        <Button variant="outline">Back to Dashboard</Button>
-                    </Link>
-                </div>
+
             </div>
 
             <Card>

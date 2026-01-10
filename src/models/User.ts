@@ -12,10 +12,10 @@ const UserSchema = new mongoose.Schema({
         maxlength: [60, 'Email cannot be more than 60 characters'],
         unique: true,
     },
-    password: {
-        type: String,
-        required: [true, 'Please provide a password for this user.'],
+    _id: {
+        type: String, // We will manually set this to the Google ID
     },
+    // password field removed as we are using Google Auth only
     role: {
         type: String,
         enum: ['user', 'admin'],
@@ -37,5 +37,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
     }
 }, { timestamps: true });
+
+// Force recompile model in dev to pick up schema changes
+if (process.env.NODE_ENV === 'development' && mongoose.models && mongoose.models.User) {
+    delete mongoose.models.User;
+}
 
 export default mongoose.models.User || mongoose.model('User', UserSchema);

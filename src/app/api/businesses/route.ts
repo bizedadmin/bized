@@ -64,6 +64,17 @@ export async function POST(req: Request) {
         });
 
         console.log('Business created successfully:', business._id);
+
+        // Create Cloudinary folder for the new business
+        try {
+            const { createFolder } = await import('@/lib/cloudinary');
+            await createFolder(business.slug);
+            console.log('Cloudinary folder created for:', business.slug);
+        } catch (error) {
+            console.error('Error creating Cloudinary folder:', error);
+            // Don't fail the response if folder creation fails
+        }
+
         return NextResponse.json(business, { status: 201 });
     } catch (error) {
         console.error('Error creating business:', error);

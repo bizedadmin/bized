@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { BusinessCategoryModal } from "@/components/create-business/business-category-modal"
 import { Loader2, Wand2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 export default function CreateBusinessPage() {
     const router = useRouter()
@@ -134,8 +135,6 @@ export default function CreateBusinessPage() {
 
         setCreating(true)
         try {
-            console.log('Creating business...')
-
             const res = await fetch("/api/businesses", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -154,7 +153,7 @@ export default function CreateBusinessPage() {
 
             if (res.ok) {
                 const business = await res.json()
-                console.log('Business created:', business)
+                toast.success("Business created successfully!")
 
                 // Redirect to page builder with business data
                 router.push(`/business/page-builder?businessId=${business._id}`)
@@ -166,12 +165,11 @@ export default function CreateBusinessPage() {
                 } catch {
                     error = { message: errorText || 'Failed to create business' }
                 }
-                console.error('Business creation error:', error)
-                alert(error.message || "Failed to create business")
+                toast.error(error.message || "Failed to create business. Please try again.")
             }
         } catch (error) {
             console.error("Error creating business:", error)
-            alert("An error occurred while creating your business")
+            toast.error("An unexpected error occurred. Please try again later.")
         } finally {
             setCreating(false)
         }

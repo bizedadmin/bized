@@ -56,7 +56,7 @@ const BusinessSchema = new mongoose.Schema({
 
     // --- System / Platform Specific ---
     owner: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String, // Changed from ObjectId to String to support Google IDs
         ref: 'User',
         required: true,
     },
@@ -73,53 +73,7 @@ const BusinessSchema = new mongoose.Schema({
     industry: {
         type: String,
         required: false,
-        enum: [
-            // Food Establishments
-            'Restaurant', 'Bakery', 'BarOrPub', 'CafeOrCoffeeShop',
-            'FastFoodRestaurant', 'IceCreamShop', 'Winery', 'Brewery',
-
-            // Retail
-            'Store', 'ClothingStore', 'ElectronicsStore', 'FurnitureStore',
-            'HardwareStore', 'JewelryStore', 'LiquorStore', 'PetStore',
-            'ShoeStore', 'SportingGoodsStore', 'ToyStore', 'AutoPartsStore',
-
-            // Health & Beauty
-            'HealthAndBeautyBusiness', 'BeautySalon', 'DaySpa', 'HairSalon',
-            'HealthClub', 'NailSalon', 'TattooParlor', 'Dentist', 'MedicalClinic',
-            'Optician', 'Pharmacy',
-
-            // Professional Services
-            'ProfessionalService', 'AccountingService', 'Attorney', 'Notary',
-            'RealEstateAgent', 'FinancialService',
-
-            // Home Services
-            'HomeAndConstructionBusiness', 'Electrician', 'GeneralContractor',
-            'HVACBusiness', 'Locksmith', 'MovingCompany', 'Plumber',
-            'RoofingContractor', 'HousePainter',
-
-            // Automotive
-            'AutomotiveBusiness', 'AutoBodyShop', 'AutoDealer', 'AutoRental',
-            'AutoRepair', 'AutoWash', 'GasStation', 'MotorcycleDealer',
-
-            // Entertainment
-            'EntertainmentBusiness', 'ArtGallery', 'Casino', 'ComedyClub',
-            'MovieTheater', 'NightClub', 'AmusementPark',
-
-            // Lodging
-            'LodgingBusiness', 'BedAndBreakfast', 'Hostel', 'Hotel', 'Motel', 'Resort',
-
-            // Sports & Recreation
-            'SportsActivityLocation', 'BowlingAlley', 'ExerciseGym', 'GolfCourse',
-            'PublicSwimmingPool', 'SkiResort', 'SportsClub', 'TennisComplex',
-
-            // Education
-            'EducationalOrganization', 'School', 'Preschool', 'ElementarySchool',
-            'MiddleSchool', 'HighSchool', 'CollegeOrUniversity',
-
-            // Other
-            'LocalBusiness', 'AnimalShelter', 'ChildCare', 'DryCleaningOrLaundry',
-            'EmergencyService', 'Library', 'SelfStorage', 'TravelAgency'
-        ],
+        // Enum removed to allow for a broader range of business categories
     },
     schemaOrgType: {
         type: String,
@@ -205,6 +159,9 @@ const BusinessSchema = new mongoose.Schema({
         default: 1,
         min: 1,
         max: 8,
+    },
+    lastGoogleSync: {
+        type: Date,
     },
 }, { timestamps: true });
 
