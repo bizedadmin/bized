@@ -17,7 +17,7 @@ const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    const { theme, setTheme } = useTheme();
+    const { theme, resolvedTheme, setTheme } = useTheme();
     const { language, setLanguage, t } = useLanguage();
     const [mounted, setMounted] = useState(false);
     const settingsRef = useRef<HTMLDivElement>(null);
@@ -53,33 +53,25 @@ const Navbar = () => {
             className={cn(
                 "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4",
                 isScrolled
-                    ? "bg-white/80 backdrop-blur-md border-b border-zinc-200 py-3 dark:bg-zinc-950/80 dark:border-zinc-800"
+                    ? "bg-white border-b border-zinc-200 py-3 dark:bg-zinc-950 dark:border-zinc-800 shadow-sm"
                     : "bg-transparent"
             )}
         >
             <div className="max-w-7xl mx-auto flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2 group">
                     <div className="flex items-center gap-2">
-                        {/* 
-                           Alternative Solution: Blend Modes
-                           Instead of relying on imperfect transparency, we use high-contrast solid versions.
-                           - Light Theme: Black Icon on White BG -> mix-blend-multiply (White becomes transparent)
-                           - Dark Theme: White Icon on Black BG -> mix-blend-screen (Black becomes transparent)
-                        */}
                         <Image
-                            src={theme === "dark" || isScrolled ? "/logo-dark-mode.png" : "/logo-light-mode.png"}
+                            src={mounted && (theme === "dark" || resolvedTheme === "dark") ? "/logo-dark-mode.png" : "/logo-light-mode.png"}
                             alt="Bized Logo"
                             width={40}
                             height={40}
                             className={cn(
-                                "h-10 w-auto group-hover:scale-105 transition-transform rounded-sm",
-                                (theme === "dark" || isScrolled) ? "mix-blend-screen" : "mix-blend-multiply"
+                                "h-10 w-auto group-hover:scale-105 transition-transform rounded-sm"
                             )}
                             priority
                         />
                         <span className={cn(
-                            "font-bold text-xl tracking-tight",
-                            (theme === "dark" || isScrolled) ? "text-white" : "text-zinc-900"
+                            "font-bold text-xl tracking-tight text-foreground"
                         )}>
                             BizedApp
                         </span>

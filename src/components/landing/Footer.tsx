@@ -1,13 +1,10 @@
-
 "use client";
-
 import React from "react";
 import Image from "next/image";
-import { Building2, Github, Twitter, Linkedin, Facebook } from "lucide-react";
+import { Twitter, Github, Linkedin, Facebook } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
@@ -23,85 +20,54 @@ const Footer = () => {
     if (!mounted) return null;
 
     return (
-        <footer className="bg-white dark:bg-black pt-24 pb-12 border-t border-zinc-200 dark:border-zinc-800">
-            <div className="max-w-7xl mx-auto px-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-                    <div className="col-span-1 lg:col-span-1">
-                        <Link href="/" className="flex items-center gap-2 mb-6">
-                            <Image
-                                src={theme === "dark" ? "/logo-dark-mode.png" : "/logo-light-mode.png"}
-                                alt="Bized Logo"
-                                width={40}
-                                height={40}
-                                className={cn(
-                                    "h-10 w-auto rounded-sm",
-                                    theme === "dark" ? "mix-blend-screen" : "mix-blend-multiply"
-                                )}
-                            />
-                            <span className="font-bold text-xl tracking-tight text-zinc-900 dark:text-white">
-                                BizedApp
-                            </span>
-                        </Link>
-                        <p className="text-zinc-600 dark:text-zinc-400 mb-6 leading-relaxed">
-                            {t("footer.desc")}
-                        </p>
-                        <div className="flex gap-4">
-                            {[Twitter, Github, Linkedin, Facebook].map((Icon, idx) => (
-                                <a
-                                    key={idx}
-                                    href="#"
-                                    className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-500 hover:bg-indigo-600 hover:text-white transition-colors"
-                                >
-                                    <Icon size={20} />
-                                </a>
-                            ))}
-                        </div>
-                    </div>
+        <footer className="fixed bottom-0 w-full z-50 bg-black text-white py-4 border-t border-zinc-800">
+            <div className="max-w-7xl mx-auto px-6 h-full flex flex-col md:flex-row items-center justify-between gap-4">
 
-                    {[
-                        {
-                            title: t("footer.product"),
-                            links: [t("navbar.features"), t("navbar.solutions"), "Integrations", t("navbar.pricing")],
-                        },
-                        {
-                            title: t("footer.company"),
-                            links: [t("navbar.about"), "Careers", "Press", "Contact"],
-                        },
-                        {
-                            title: "Resources",
-                            links: ["Documentation", "Help Center", t("footer.privacy"), t("footer.terms")],
-                        },
-                    ].map((column, idx) => (
-                        <div key={idx}>
-                            <h5 className="font-bold text-zinc-900 dark:text-white mb-6 uppercase tracking-wider text-sm">
-                                {column.title}
-                            </h5>
-                            <ul className="flex flex-col gap-4">
-                                {column.links.map((link, lIdx) => (
-                                    <li key={lIdx}>
-                                        <Link
-                                            href="#"
-                                            className="text-zinc-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all font-medium"
-                                        >
-                                            {link}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
+                {/* Left Side: Logo & Copyright */}
+                <div className="flex items-center gap-4">
+                    <Link href="/" className="flex items-center gap-2">
+                        <Image
+                            src="/logo-dark-mode.png"
+                            alt="Bized Logo"
+                            width={32}
+                            height={32}
+                            className="h-8 w-auto mix-blend-screen"
+                        />
+                        <span className="font-bold text-lg tracking-tight">
+                            BizedApp
+                        </span>
+                    </Link>
+                    <div className="flex gap-4 ml-4 pl-4 border-l border-zinc-700">
+                        <Link href="#" className="p-1 hover:text-emerald-400 transition-colors">
+                            <Twitter size={16} />
+                        </Link>
+                        <Link href="#" className="p-1 hover:text-emerald-400 transition-colors">
+                            <Github size={16} />
+                        </Link>
+                        <Link href="#" className="p-1 hover:text-emerald-400 transition-colors">
+                            <Linkedin size={16} />
+                        </Link>
+                        <Link href="#" className="p-1 hover:text-emerald-400 transition-colors">
+                            <Facebook size={16} />
+                        </Link>
+                    </div>
                 </div>
 
-                <div className="border-t border-zinc-200 dark:border-zinc-900 pt-12 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <p className="text-zinc-500 dark:text-zinc-500 text-sm">
-                        {t("footer.copyright")}
-                    </p>
-                    <div className="flex gap-8">
-                        <a href="#" className="text-sm text-zinc-500 hover:text-indigo-600 transition-colors">{t("footer.privacy")}</a>
-                        <a href="#" className="text-sm text-zinc-500 hover:text-indigo-600 transition-colors">{t("footer.terms")}</a>
-                    </div>
+                {/* Right Side: Links */}
+                <div className="flex gap-8 items-center text-sm font-medium">
+                    <Link href="#" className="hover:text-emerald-400 hover:underline transition-all">
+                        {t("footer.terms")}
+                    </Link>
+                    <Link href="#" className="hover:text-emerald-400 hover:underline transition-all">
+                        {t("footer.privacy")}
+                    </Link>
+                    <Link href="#" className="hover:text-emerald-400 hover:underline transition-all">
+                        Sitemap
+                    </Link>
                 </div>
             </div>
+            {/* Copyright Line - Optional if you want it super minimal on one line, but example image shows it bottom or hidden. I'll add a tiny sub-text if needed, but the user asked for "Similar to attached footer" which is a single black bar. */}
+            {/* Based on the second image (black bar), it seems to be just one row. */}
         </footer>
     );
 };

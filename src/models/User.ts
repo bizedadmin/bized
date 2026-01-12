@@ -35,7 +35,23 @@ const UserSchema = new mongoose.Schema({
     },
     image: {
         type: String,
-    }
+    },
+    // Forensic & Status Fields
+    status: {
+        type: String,
+        enum: ['active', 'suspended', 'unverified'],
+        default: 'active',
+    },
+    lastActive: {
+        type: Date,
+        default: Date.now,
+    },
+    lastIp: {
+        type: String,
+    },
+    userAgent: {
+        type: String,
+    },
 }, { timestamps: true });
 
 // Force recompile model in dev to pick up schema changes
