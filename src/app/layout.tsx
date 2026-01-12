@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-// Deploy Trigger: 2026-01-12T18:48
+// Deploy Trigger: 2026-01-12T19:11
 import "./globals.css";
 
 const geistSans = Geist({
