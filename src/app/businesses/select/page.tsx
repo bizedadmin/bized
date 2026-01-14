@@ -2,12 +2,29 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
-import { Plus, ChevronRight, Loader2, Building2, Zap } from "lucide-react"
+import { useSession, signOut } from "next-auth/react"
+import Link from "next/link"
+import Image from "next/image"
+import { useTheme } from "next-themes"
+import { Plus, ChevronRight, Loader2, Building2, Zap, LogOut, User, Settings, Shield, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
+import { cn } from "@/lib/utils"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+} from "@/components/ui/avatar"
 
 interface Business {
     _id: string
@@ -22,10 +39,13 @@ interface Business {
 export default function BusinessSelectorPage() {
     const router = useRouter()
     const { data: session, status } = useSession()
+    const { theme, resolvedTheme } = useTheme()
     const [businesses, setBusinesses] = useState<Business[]>([])
     const [loading, setLoading] = useState(true)
+    const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
+        setMounted(true)
         if (status === "unauthenticated") {
             router.push("/login")
             return
@@ -71,20 +91,80 @@ export default function BusinessSelectorPage() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-zinc-950">
             {/* Header */}
-            <header className="bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800">
+            <header className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200 dark:border-zinc-800">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                                <span className="text-white font-bold text-sm">B</span>
+                        <Link href="/" className="flex items-center gap-2 group">
+                            <div className="flex items-center gap-2">
+                                <Image
+                                    src={mounted && (theme === "dark" || resolvedTheme === "dark") ? "/logo-dark-mode.png" : "/logo-light-mode.png"}
+                                    alt="Bized Logo"
+                                    width={40}
+                                    height={40}
+                                    className={cn(
+                                        "h-10 w-auto group-hover:scale-105 transition-transform rounded-sm"
+                                    )}
+                                    priority
+                                />
+                                <span className={cn(
+                                    "font-bold text-xl tracking-tight text-foreground"
+                                )}>
+                                    BizedApp
+                                </span>
                             </div>
-                            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Bized</h1>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                                {session?.user?.email}
-                            </span>
-                        </div>
+                        </Link>
+
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all duration-200">
+                                    <Avatar className="h-9 w-9 border border-gray-200 dark:border-zinc-700">
+                                        <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || ""} />
+                                        <AvatarFallback className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-700 text-sm font-medium">
+                                            {session?.user?.name?.charAt(0) || session?.user?.email?.charAt(0) || "U"}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-64 p-2 mt-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 shadow-xl rounded-xl" align="end" forceMount>
+                                <DropdownMenuLabel className="font-normal p-2">
+                                    <div className="flex flex-col space-y-1">
+                                        <p className="text-sm font-semibold leading-none text-gray-900 dark:text-white">{session?.user?.name || "User"}</p>
+                                        <p className="text-xs leading-none text-gray-500 dark:text-gray-400 truncate">
+                                            {session?.user?.email}
+                                        </p>
+                                    </div>
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator className="bg-gray-100 dark:bg-zinc-800" />
+                                <DropdownMenuItem
+                                    onClick={() => router.push('/account')}
+                                    className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                                >
+                                    <User className="w-4 h-4 text-gray-500" />
+                                    <span className="text-sm font-medium">My Profile</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
+                                    <Settings className="w-4 h-4 text-gray-500" />
+                                    <span className="text-sm font-medium">Account Settings</span>
+                                </DropdownMenuItem>
+                                {session?.user?.role === 'admin' && (
+                                    <DropdownMenuItem
+                                        onClick={() => router.push('/admin')}
+                                        className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                                    >
+                                        <Shield className="w-4 h-4 text-blue-500" />
+                                        <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Admin Portal</span>
+                                    </DropdownMenuItem>
+                                )}
+                                <DropdownMenuSeparator className="bg-gray-100 dark:bg-zinc-800" />
+                                <DropdownMenuItem
+                                    onClick={() => signOut({ callbackUrl: '/login' })}
+                                    className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/10 text-red-600 dark:text-red-400 transition-colors"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    <span className="text-sm font-medium">Log out</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
             </header>
@@ -96,7 +176,15 @@ export default function BusinessSelectorPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
                 >
-                    <div className="text-center mb-8">
+                    <div className="text-center mb-8 relative">
+                        <Button
+                            variant="ghost"
+                            className="absolute left-0 top-0 pl-0 hover:bg-transparent hover:text-muted-foreground hidden sm:flex"
+                            onClick={() => router.back()}
+                        >
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back
+                        </Button>
                         <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                             Select a business
                         </h2>

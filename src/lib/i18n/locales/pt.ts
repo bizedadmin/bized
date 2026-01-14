@@ -8,11 +8,11 @@ export const pt = {
         getstarted: "Começar"
     },
     hero: {
-        tagline: "Controle Total do Negócio",
-        title_1: "O Sistema Operacional",
-        title_span: "de Negócios Tudo-em-Um",
-        title_2: "para o Crescimento.",
-        description: "O Bized permite construir sua presença online, gerenciar operações e lidar com finanças em uma plataforma unificada. Otimize tudo, desde a criação do site até o cumprimento de pedidos.",
+        tagline: "v2.0 já disponível",
+        title_1: "Toda a sua jornada",
+        title_span: "de cliente, unificada.",
+        title_2: "",
+        description: "Comece pelo WhatsApp e estenda sem esforço o seu alcance para o Facebook, Instagram e SMS. Uma caixa de entrada para dominar cada canal.",
         btn_trial: "Teste Grátis",
         btn_demo: "Ver Demo",
         check_1: "Sem cartão de crédito",

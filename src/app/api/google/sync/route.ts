@@ -45,9 +45,8 @@ export async function GET(req: Request) {
             return NextResponse.json({ message: 'No Google Business Profile account found.' }, { status: 404 });
         }
 
-        // 2. Get Locations for that Account
-        // Note: The account.name looks like "accounts/123456789"
-        const locationsRes = await fetch(`https://mybusinessbusinessinformation.googleapis.com/v1/${account.name}/locations?readMask=name,title,storeCode,phoneNumbers,websiteUri,formattedAddress`, {
+        // 2. Get Locations for that Account and include regularHours in readMask
+        const locationsRes = await fetch(`https://mybusinessbusinessinformation.googleapis.com/v1/${account.name}/locations?readMask=name,title,storeCode,phoneNumbers,websiteUri,formattedAddress,regularHours`, {
             headers: { Authorization: `Bearer ${accessToken}` }
         });
 
@@ -64,25 +63,54 @@ export async function GET(req: Request) {
             return NextResponse.json({ message: 'No locations found in this account.' }, { status: 404 });
         }
 
-        // Return the first location found (for now)
-        // In the future, you might want to let the user select which location to sync
         const location = locations[0];
 
-        // 3. Update the database with the last sync timestamp
+        // 3. Map Business Hours if available
+        let mappedHours = null;
+        if (location.regularHours && location.regularHours.periods) {
+            const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+            mappedHours = DAYS.map(day => {
+                const period = location.regularHours.periods.find((p: any) => p.openDay === day.toUpperCase());
+                if (period) {
+                    return {
+                        day,
+                        isOpen: true,
+                        openTime: period.openTime || "09:00",
+                        closeTime: period.closeTime || "17:00"
+                    };
+                }
+                return { day, isOpen: false, openTime: "09:00", closeTime: "17:00" };
+            });
+        }
+
+        // 4. Update the database with all synced data
         await dbConnect();
+
+        const updateData: any = {
+            lastGoogleSync: new Date(),
+            name: location.title,
+            telephone: location.phoneNumbers?.primaryPhone,
+            url: location.websiteUri,
+            address: { streetAddress: location.formattedAddress || 'Address not available' }
+        };
+
+        if (mappedHours) {
+            updateData.businessHours = mappedHours;
+        }
+
         await Business.findOneAndUpdate(
             { owner: session.user.id },
-            { $set: { lastGoogleSync: new Date() } }
+            { $set: updateData }
         );
 
         return NextResponse.json({
-            googleId: location.name, // "locations/12345..."
+            googleId: location.name,
             name: location.title,
             phone: location.phoneNumbers?.primaryPhone,
             website: location.websiteUri,
-            // Address needs parsing slightly as Google returns a complex object sometimes, 
-            // strictly requesting 'formattedAddress' via mask helps.
-            address: location.formattedAddress || 'Address not available'
+            address: location.formattedAddress || 'Address not available',
+            businessHours: mappedHours,
+            lastGoogleSync: new Date().toISOString()
         });
 
     } catch (error) {

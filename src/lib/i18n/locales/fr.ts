@@ -8,11 +8,11 @@ export const fr = {
         getstarted: "Commencer"
     },
     hero: {
-        tagline: "Contrôle Total de l'Entreprise",
-        title_1: "Le Système d'Exploitation",
-        title_span: "d'Entreprise Tout-en-Un",
-        title_2: "pour la Croissance.",
-        description: "Bized vous permet de construire votre présence en ligne, de gérer les opérations et de traiter les finances sur une plateforme unifiée. Rationalisez tout, de la création de site Web à l'exécution des commandes.",
+        tagline: "v2.0 est en ligne",
+        title_1: "Tout votre parcours",
+        title_span: "client, unifié.",
+        title_2: "",
+        description: "Commencez par WhatsApp et étendez sans effort votre portée à Facebook, Instagram et SMS. Une boîte de réception pour maîtriser chaque canal.",
         btn_trial: "Essai Gratuit",
         btn_demo: "Voir la Démo",
         check_1: "Aucune carte de crédit",

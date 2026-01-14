@@ -14,8 +14,8 @@ import {
     CardFooter,
 } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
-import { auth, googleProvider } from "@/lib/firebase"
-import { signInWithPopup } from "firebase/auth"
+import { auth } from "@/lib/firebase"
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth"
 import { toast } from "sonner"
 
 function LoginForm() {
@@ -26,7 +26,8 @@ function LoginForm() {
         setLoading(true)
         try {
             // 1. Login with Firebase (Client Side popup)
-            const userCredential = await signInWithPopup(auth, googleProvider)
+            const provider = new GoogleAuthProvider();
+            const userCredential = await signInWithPopup(auth, provider)
             const idToken = await userCredential.user.getIdToken()
 
             // 2. Create NextAuth Session (Server Side verification)

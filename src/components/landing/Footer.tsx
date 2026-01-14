@@ -1,73 +1,51 @@
 "use client";
 import React from "react";
-import Image from "next/image";
-import { Twitter, Github, Linkedin, Facebook } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Facebook, Linkedin, Youtube, Instagram } from "lucide-react";
 import Link from "next/link";
-import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 
 const Footer = () => {
-    const { t } = useLanguage();
-    const { theme } = useTheme();
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    if (!mounted) return null;
-
     return (
-        <footer className="fixed bottom-0 w-full z-50 bg-black text-white py-4 border-t border-zinc-800">
-            <div className="max-w-7xl mx-auto px-6 h-full flex flex-col md:flex-row items-center justify-between gap-4">
+        <footer className="fixed bottom-0 left-0 right-0 z-50 w-full bg-[#0A0A0A]/90 backdrop-blur-md text-zinc-400 py-3 border-t border-zinc-800/50">
+            <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
 
-                {/* Left Side: Logo & Copyright */}
-                <div className="flex items-center gap-4">
-                    <Link href="/" className="flex items-center gap-2">
-                        <Image
-                            src="/logo-dark-mode.png"
-                            alt="Bized Logo"
-                            width={32}
-                            height={32}
-                            className="h-8 w-auto mix-blend-screen"
-                        />
-                        <span className="font-bold text-lg tracking-tight">
-                            BizedApp
-                        </span>
+                {/* Social Icons - One Row */}
+                <div className="flex items-center gap-5">
+                    <Link href="#" className="hover:text-white transition-colors">
+                        <Facebook size={18} className="fill-current" />
                     </Link>
-                    <div className="flex gap-4 ml-4 pl-4 border-l border-zinc-700">
-                        <Link href="#" className="p-1 hover:text-emerald-400 transition-colors">
-                            <Twitter size={16} />
-                        </Link>
-                        <Link href="#" className="p-1 hover:text-emerald-400 transition-colors">
-                            <Github size={16} />
-                        </Link>
-                        <Link href="#" className="p-1 hover:text-emerald-400 transition-colors">
-                            <Linkedin size={16} />
-                        </Link>
-                        <Link href="#" className="p-1 hover:text-emerald-400 transition-colors">
-                            <Facebook size={16} />
-                        </Link>
-                    </div>
+                    <Link href="#" className="hover:text-white transition-colors">
+                        {/* Custom X Icon */}
+                        <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4.5 w-4.5 fill-current">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+                        </svg>
+                    </Link>
+                    <Link href="#" className="hover:text-white transition-colors">
+                        <Linkedin size={18} className="fill-current" />
+                    </Link>
+                    <Link href="#" className="hover:text-white transition-colors">
+                        <Youtube size={18} className="fill-current" />
+                    </Link>
+                    <Link href="#" className="hover:text-white transition-colors">
+                        <Instagram size={18} />
+                    </Link>
                 </div>
 
-                {/* Right Side: Links */}
-                <div className="flex gap-8 items-center text-sm font-medium">
-                    <Link href="#" className="hover:text-emerald-400 hover:underline transition-all">
-                        {t("footer.terms")}
+                {/* Footer Links - One Row */}
+                <div className="flex items-center gap-4 text-[13px] font-medium tracking-tight">
+                    <Link href="/terms" className="hover:text-white transition-colors whitespace-nowrap">
+                        Terms & Conditions
                     </Link>
-                    <Link href="#" className="hover:text-emerald-400 hover:underline transition-all">
-                        {t("footer.privacy")}
+                    <span className="text-zinc-800">|</span>
+                    <Link href="/privacy" className="hover:text-white transition-colors whitespace-nowrap">
+                        Privacy Policy
                     </Link>
-                    <Link href="#" className="hover:text-emerald-400 hover:underline transition-all">
-                        Sitemap
+                    <span className="text-zinc-800">|</span>
+                    <Link href="/trust" className="hover:text-white transition-colors whitespace-nowrap">
+                        Trust
                     </Link>
                 </div>
+
             </div>
-            {/* Copyright Line - Optional if you want it super minimal on one line, but example image shows it bottom or hidden. I'll add a tiny sub-text if needed, but the user asked for "Similar to attached footer" which is a single black bar. */}
-            {/* Based on the second image (black bar), it seems to be just one row. */}
         </footer>
     );
 };

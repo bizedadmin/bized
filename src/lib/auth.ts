@@ -15,6 +15,7 @@ export const authOptions: NextAuthOptions = {
             name: 'Firebase Google',
             credentials: {
                 idToken: { label: 'ID Token', type: 'text' },
+                accessToken: { label: 'Access Token', type: 'text' },
             },
             async authorize(credentials) {
                 if (!credentials?.idToken) return null;
@@ -47,6 +48,7 @@ export const authOptions: NextAuthOptions = {
                         email: user.email,
                         image: user.image,
                         role: user.role,
+                        accessToken: credentials.accessToken,
                     };
 
                     // AUDIT LOG: Successful Login
@@ -121,10 +123,14 @@ export const authOptions: NextAuthOptions = {
             if (user) {
                 token.role = user.role;
                 token.id = user.id;
+                if ((user as any).accessToken) {
+                    token.accessToken = (user as any).accessToken;
+                }
             }
             // Dynamic update if session is updated
-            if (trigger === "update" && session?.role) {
-                token.role = session.role;
+            if (trigger === "update") {
+                if (session?.role) token.role = session.role;
+                if (session?.accessToken) token.accessToken = session.accessToken;
             }
             return token;
         },
@@ -133,6 +139,8 @@ export const authOptions: NextAuthOptions = {
                 session.user.role = token.role as string;
                 session.user.id = token.id as string;
             }
+            // @ts-ignore
+            session.accessToken = token.accessToken;
             return session;
         },
     },

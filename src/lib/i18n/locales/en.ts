@@ -8,11 +8,11 @@ export const en = {
         getstarted: "Get Started"
     },
     hero: {
-        tagline: "Total Business Control",
-        title_1: "The All-In-One",
-        title_span: "Business Operating System",
-        title_2: "for Growth.",
-        description: "Bized empowers you to build your online presence, manage operations, and handle finances in one unified platform. Streamline everything from website creation to order fulfillment.",
+        tagline: "v2.0 is live",
+        title_1: "Your Entire",
+        title_span: "Customer Journey, Unified.",
+        title_2: "",
+        description: "Lead with WhatsApp and effortlessly extend your reach to Facebook, Instagram, and SMS. One inbox to rule every channel.",
         btn_trial: "Start Free Trial",
         btn_demo: "Watch Demo",
         check_1: "No Credit Card Required",

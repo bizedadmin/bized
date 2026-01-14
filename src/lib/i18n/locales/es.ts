@@ -8,11 +8,11 @@ export const es = {
         getstarted: "Empezar"
     },
     hero: {
-        tagline: "Control Total del Negocio",
-        title_1: "El Sistema Operativo",
-        title_span: "de Negocios Todo en Uno",
-        title_2: "para el Crecimiento.",
-        description: "Bized le permite construir su presencia en línea, gestionar operaciones y manejar finanzas en una plataforma unificada. Optimice todo, desde la creación del sitio web hasta el cumplimiento de pedidos.",
+        tagline: "v2.0 ya disponible",
+        title_1: "Todo su viaje",
+        title_span: "de cliente, unificado.",
+        title_2: "",
+        description: "Comience con WhatsApp y amplíe su alcance sin esfuerzo a Facebook, Instagram y SMS. Una bandeja de entrada para dominar cada canal.",
         btn_trial: "Prueba Gratuita",
         btn_demo: "Ver Demo",
         check_1: "Sin tarjeta de crédito",

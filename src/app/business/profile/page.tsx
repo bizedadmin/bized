@@ -1,6 +1,8 @@
 "use client"
 import { useState, useEffect } from "react"
-import { useSession, signIn } from "next-auth/react"
+import { useSession } from "next-auth/react"
+import { auth } from "@/lib/firebase"
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
@@ -24,7 +26,7 @@ const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 type ViewMode = "hub" | "edit-info" | "contact" | "hours" | "photos" | "reviews"
 
 export default function ProfileHub() {
-    const { data: session } = useSession()
+    const { data: session, update } = useSession()
     const [loading, setLoading] = useState(false)
     const [view, setView] = useState<ViewMode>("hub")
     const [syncError, setSyncError] = useState<string | null>(null)
@@ -115,11 +117,30 @@ export default function ProfileHub() {
         }
     }
 
-    const handleConnectGoogle = () => {
-        signIn("google", {
-            callbackUrl: "/business/profile",
-            prompt: "consent"
-        })
+    const handleConnectGoogle = async () => {
+        setLoading(true)
+        try {
+            const provider = new GoogleAuthProvider()
+            // Business Profile Scopes
+            provider.addScope('https://www.googleapis.com/auth/business.manage')
+
+            const result = await signInWithPopup(auth, provider)
+            const credential = GoogleAuthProvider.credentialFromResult(result)
+            const accessToken = credential?.accessToken
+
+            if (accessToken) {
+                // Update NextAuth session with the new token
+                await update({ accessToken })
+                toast.success("Google account connected!")
+                // Automatically trigger sync after connection
+                handleSyncFromGoogle()
+            }
+        } catch (error: any) {
+            console.error("Connection error:", error)
+            toast.error(error.message || "Failed to connect Google account")
+        } finally {
+            setLoading(false)
+        }
     }
 
     const handleSyncFromGoogle = async () => {
@@ -138,9 +159,10 @@ export default function ProfileHub() {
                 phone: data.phone || prev.phone,
                 website: data.website || prev.website,
                 address: data.address || prev.address,
-                lastGoogleSync: new Date().toISOString()
+                businessHours: data.businessHours || prev.businessHours,
+                lastGoogleSync: data.lastGoogleSync || new Date().toISOString()
             }))
-            toast.success("Profile details synced from Google!")
+            toast.success("Profile fully synced from Google!")
         } catch (error: any) {
             const msg = error.message || "Failed to sync with Google."
             setSyncError(msg)

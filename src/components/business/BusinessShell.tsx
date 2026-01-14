@@ -188,7 +188,7 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-56" align="end" forceMount>
                             <DropdownMenuItem asChild>
-                                <Link href="/business/account" className="flex items-center cursor-pointer">
+                                <Link href="/account" className="flex items-center cursor-pointer">
                                     <User className="mr-2 h-4 w-4" />
                                     <span>Profile</span>
                                 </Link>

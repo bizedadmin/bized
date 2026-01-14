@@ -163,6 +163,10 @@ const BusinessSchema = new mongoose.Schema({
     lastGoogleSync: {
         type: Date,
     },
+    businessType: {
+        type: String,
+        required: false,
+    },
 }, { timestamps: true });
 
 // Force recompile model in dev to pick up schema changes
