@@ -73,9 +73,9 @@ export function AddCategoryModal({ isOpen, onClose, onSuccess, businessId }: Add
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="max-w-md p-0 overflow-hidden border-none bg-background">
-                <DialogHeader className="px-6 py-4 border-b border-border">
-                    <DialogTitle className="text-lg font-semibold">New Category</DialogTitle>
+            <DialogContent className="max-w-md p-0 overflow-hidden rounded-xl border border-[#CDD0DB] shadow-xl font-noto-sans bg-white">
+                <DialogHeader className="px-6 py-4 border-b border-[#CDD0DB] bg-white">
+                    <DialogTitle className="text-[18px] font-medium leading-[26px] text-[#0A0909] font-rubik">New Category</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -86,34 +86,34 @@ export function AddCategoryModal({ isOpen, onClose, onSuccess, businessId }: Add
                     )}
 
                     <div className="space-y-1">
-                        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Category Name*</Label>
+                        <Label className="text-[10px] font-bold uppercase tracking-widest text-[#3F3E3E] font-noto-sans">Category Name*</Label>
                         <Input
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="h-10 text-sm"
+                            className="h-10 text-sm border-[#CDD0DB] rounded-lg"
                             placeholder="e.g. Summer Collection"
                             required
                         />
                     </div>
 
                     <div className="space-y-1">
-                        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Description (Optional)</Label>
+                        <Label className="text-[10px] font-bold uppercase tracking-widest text-[#3F3E3E] font-noto-sans">Description (Optional)</Label>
                         <Textarea
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className="min-h-[80px] text-sm resize-none"
+                            className="min-h-[80px] text-sm resize-none border-[#CDD0DB] rounded-lg"
                             placeholder="Briefly describe this category..."
                         />
                     </div>
 
-                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-border/50">
-                        <Button type="button" variant="ghost" onClick={handleClose} className="h-10 px-6 text-sm">
+                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#CDD0DB]">
+                        <Button type="button" variant="ghost" onClick={handleClose} className="h-10 px-6 text-[12px] font-medium">
                             Cancel
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading || !name}
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 h-10 text-sm font-semibold shadow-md transition-all active:scale-95"
+                            className="bg-black hover:bg-zinc-800 text-white px-8 h-10 text-[12px] font-medium rounded-lg shadow-sm transition-all active:scale-95"
                         >
                             {loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                             Create Category

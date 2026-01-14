@@ -102,6 +102,11 @@ const BusinessSchema = new mongoose.Schema({
     businessCategories: [{
         type: String,
     }],
+    professionalTitle: String,
+    professionalSubtitle: String,
+    selectedFacilities: [{
+        type: String,
+    }],
     showBookNow: {
         type: Boolean,
         default: true,

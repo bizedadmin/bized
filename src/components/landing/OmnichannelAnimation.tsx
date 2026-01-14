@@ -26,7 +26,7 @@ export default function OmnichannelAnimation() {
                         scale: [1, 1.4, 1],
                         opacity: [0.4, 0.8, 0.4],
                     }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                     className="absolute w-64 h-64 rounded-full bg-emerald-500/50 blur-3xl shadow-[0_0_100px_rgba(16,185,129,0.3)]"
                 />
                 <motion.div
@@ -34,7 +34,7 @@ export default function OmnichannelAnimation() {
                         scale: [1, 1.4, 1],
                         opacity: [0.3, 0.6, 0.3],
                     }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.25 }}
                     className="absolute w-[400px] h-[400px] rounded-full bg-emerald-500/30 blur-[100px]"
                 />
                 <motion.div
@@ -42,7 +42,7 @@ export default function OmnichannelAnimation() {
                         scale: [1, 1.4, 1],
                         opacity: [0.2, 0.4, 0.2],
                     }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
                     className="absolute w-[600px] h-[600px] rounded-full bg-emerald-500/20 blur-[150px]"
                 />
             </div>
@@ -72,7 +72,7 @@ export default function OmnichannelAnimation() {
                 {icons.map((icon, index) => {
                     const angle = (index * 360) / icons.length;
                     const radius = 150 + (index % 2) * 75; // Alternating radius for visual depth
-                    const duration = 20 + index * 2;
+                    const duration = 10 + index;
 
                     return (
                         <motion.div

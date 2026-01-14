@@ -1,11 +1,50 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import { Search, ShoppingBag, Menu, MapPin, Phone, Clock, Share2, ArrowLeft, MessageSquare, ExternalLink } from "lucide-react"
+import {
+    Search,
+    ShoppingBag,
+    Menu,
+    MapPin,
+    Phone,
+    Clock,
+    Share2,
+    ArrowLeft,
+    MessageSquare,
+    ExternalLink,
+    Globe,
+    Mail,
+    Building2,
+    CheckCircle2,
+    Info,
+    Facebook,
+    Instagram,
+    Twitter,
+    Linkedin,
+    Youtube,
+    Github,
+    Zap,
+    Wifi,
+    Car,
+    Coffee,
+    Utensils,
+    Accessibility,
+    Baby,
+    Dog,
+    ChevronDown,
+    Layers
+} from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion"
 
 interface Product {
     _id: string
@@ -40,6 +79,17 @@ interface Business {
         code: string
         number: string
     }
+    email?: string
+    url?: string
+    address?: {
+        streetAddress?: string
+        addressLocality?: string
+        addressRegion?: string
+        postalCode?: string
+        addressCountry?: string
+    }
+    sameAs?: string[]
+    selectedFacilities?: string[]
     businessHours?: Array<{
         day: string;
         isOpen: boolean;
@@ -90,13 +140,13 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
         switch (block.type) {
             case 'text':
                 return (
-                    <div key={block.id} className="space-y-2">
-                        {block.title && <h2 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">{block.title}</h2>}
-                        {block.content && <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{block.content}</p>}
+                    <div key={block.id} className="space-y-1">
+                        {block.title && <h2 className="text-[18px] font-medium leading-[26px] text-[#0A0909] dark:text-white font-rubik">{block.title}</h2>}
+                        {block.content && <p className="text-[10px] font-normal leading-[15.2px] text-[#0A0909] dark:text-gray-300 font-noto-sans whitespace-pre-wrap">{block.content}</p>}
                     </div>
                 )
             case 'page_link':
-                const getIcon = () => {
+                const getPageIcon = () => {
                     switch (block.pageType) {
                         case 'shop': return <ShoppingBag className="w-6 h-6" />
                         case 'bookings': return <Clock className="w-6 h-6" />
@@ -108,15 +158,14 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
                     <button
                         key={block.id}
                         onClick={() => window.location.href = `/${business.slug}/${block.pageType}`}
-                        className="w-full p-6 rounded-3xl flex items-center justify-between group transition-all"
-                        style={{ backgroundColor: business.buttonColor || business.themeColor || "#1f2937" }}
+                        className="w-full h-10 px-6 rounded-lg flex items-center justify-between group transition-all"
+                        style={{ backgroundColor: business.buttonColor || business.themeColor || "#000000" }}
                     >
                         <div className="text-left">
-                            <div className="font-bold text-lg text-white">{block.label || `Go to ${block.pageType}`}</div>
-                            {block.subtitle && <div className="text-sm text-white/60">{block.subtitle}</div>}
+                            <div className="font-normal text-[12px] leading-[20px] text-white font-noto-sans">{block.label || `Go to ${block.pageType}`}</div>
                         </div>
-                        <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform text-white">
-                            {getIcon()}
+                        <div className="text-white group-hover:scale-110 transition-transform">
+                            {getPageIcon()}
                         </div>
                     </button>
                 )
@@ -125,17 +174,204 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
                     <button
                         key={block.id}
                         onClick={() => window.open(block.url, '_blank')}
-                        className="w-full py-5 px-6 rounded-2xl flex items-center justify-between group transition-all"
-                        style={{ backgroundColor: business.secondaryColor || "#f3f4f6" }}
+                        className="w-full h-10 px-6 rounded-lg flex items-center justify-between group transition-all border border-[#CDD0DB]"
+                        style={{ backgroundColor: business.secondaryColor || "#FFFFFF" }}
                     >
                         <div className="text-left">
-                            <span className="font-bold text-gray-900 dark:text-white">{block.label || 'Link'}</span>
-                            {block.subtitle && <div className="text-xs text-gray-500">{block.subtitle}</div>}
+                            <span className="font-normal text-[12px] leading-[20px] text-[#0A0909] font-noto-sans">{block.label || 'Link'}</span>
                         </div>
-                        <div className="w-10 h-10 rounded-xl bg-white/50 dark:bg-zinc-800/50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <ExternalLink className="w-4 h-4 text-gray-600" />
+                        <div className="text-gray-600 group-hover:scale-110 transition-transform">
+                            <ExternalLink className="w-4 h-4" />
                         </div>
                     </button>
+                )
+            case 'opening_hours':
+                return (
+                    <Accordion key={block.id} type="single" collapsible className="w-full">
+                        <AccordionItem value="hours" className="border border-[#CDD0DB]/60 rounded-xl px-3 bg-white dark:bg-zinc-900 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] border-b-[#CDD0DB]/60">
+                            <AccordionTrigger className="hover:no-underline py-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
+                                        <Clock className="w-5 h-5 text-[#0A0909] dark:text-white" />
+                                    </div>
+                                    <div className="text-left text-[14px] font-medium text-[#0A0909] dark:text-white font-noto-sans">Opening Hours</div>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="pb-4">
+                                {block.isOpen247 ? (
+                                    <div className="text-center py-2 text-[10px] font-normal text-[#0A0909] dark:text-white font-noto-sans">Open 24 / 7</div>
+                                ) : (
+                                    <div className="space-y-2 pt-1 font-noto-sans">
+                                        {((business.businessHours?.length ?? 0) > 0 ? business.businessHours : block.days)?.map((day: any, idx: number) => (
+                                            <div key={idx} className="flex justify-between items-center text-[10px]">
+                                                <span className={cn("font-normal", day.isOpen ? "text-[#0A0909] dark:text-white" : "text-[#CDD0DB]")}>{day.day}</span>
+                                                <span className="font-normal text-[#3F3E3E]">
+                                                    {day.isOpen ? `${day.openTime} - ${day.closeTime}` : <span className="text-red-400">Closed</span>}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
+                )
+            case 'contact_info':
+                return (
+                    <Accordion key={block.id} type="single" collapsible className="w-full">
+                        <AccordionItem value="contacts" className="border border-[#CDD0DB]/60 rounded-xl px-3 bg-white dark:bg-zinc-900 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] border-b-[#CDD0DB]/60">
+                            <AccordionTrigger className="hover:no-underline py-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
+                                        <Phone className="w-5 h-5 text-[#0A0909] dark:text-white" />
+                                    </div>
+                                    <div className="text-left text-[14px] font-medium text-[#0A0909] dark:text-white font-noto-sans">Contact Us</div>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="pb-4 space-y-3 font-noto-sans">
+                                {(business.name || block.fullName) && <div className="text-[12px] font-medium text-[#0A0909] dark:text-white mb-2">{business.name || block.fullName}</div>}
+                                <div className="grid gap-2">
+                                    {(business.phone || block.phone) && (
+                                        <a href={`tel:${business.phone ? `${business.phone.code}${business.phone.number}` : block.phone}`} className="flex items-center gap-2 text-[10px] text-[#3F3E3E] hover:text-[#0A0909]">
+                                            <Phone className="w-3 h-3" />
+                                            <span>{business.phone ? `${business.phone.code} ${business.phone.number}` : block.phone}</span>
+                                        </a>
+                                    )}
+                                    {(business.email || block.email) && (
+                                        <a href={`mailto:${business.email || block.email}`} className="flex items-center gap-2 text-[10px] text-[#3F3E3E] hover:text-[#0A0909]">
+                                            <Mail className="w-3 h-3" />
+                                            <span>{business.email || block.email}</span>
+                                        </a>
+                                    )}
+                                    {(business.url || block.website) && (
+                                        <a href={business.url || block.website} target="_blank" className="flex items-center gap-2 text-[10px] text-[#3F3E3E] hover:text-[#0A0909]">
+                                            <Globe className="w-3 h-3" />
+                                            <span>Visit Website</span>
+                                        </a>
+                                    )}
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
+                )
+            case 'location':
+                const locationAddress = [block.street, block.city, block.state, block.postalCode].filter(Boolean).join(', ')
+                return (
+                    <Accordion key={block.id} type="single" collapsible className="w-full">
+                        <AccordionItem value="location" className="border border-[#CDD0DB]/60 rounded-xl px-3 bg-white dark:bg-zinc-900 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] border-b-[#CDD0DB]/60">
+                            <AccordionTrigger className="hover:no-underline py-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
+                                        <MapPin className="w-5 h-5 text-[#0A0909] dark:text-white" />
+                                    </div>
+                                    <div className="text-left text-[14px] font-medium text-[#0A0909] dark:text-white font-noto-sans">Location</div>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="pb-4 space-y-3 font-noto-sans">
+                                {block.locationType === 'manual' || business.address ? (
+                                    <>
+                                        <p className="text-[10px] text-[#3F3E3E] dark:text-gray-400">
+                                            {business.address ? [business.address.streetAddress, business.address.addressLocality, business.address.addressRegion, business.address.postalCode].filter(Boolean).join(', ') : locationAddress}
+                                        </p>
+                                        <Button className="w-full h-10 rounded-lg bg-black hover:bg-zinc-800 text-[12px] font-normal" onClick={() => {
+                                            const addr = business.address ? [business.address.streetAddress, business.address.addressLocality, business.address.addressRegion, business.address.postalCode].filter(Boolean).join(', ') : locationAddress
+                                            window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`, '_blank')
+                                        }}>
+                                            Open in Maps
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <Button className="w-full h-10 rounded-lg bg-black hover:bg-zinc-800 text-[12px] font-normal" onClick={() => window.open(block.url, '_blank')}>
+                                        View on Google Maps
+                                    </Button>
+                                )}
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
+                )
+            case 'facilities':
+                const facilitiesList = [
+                    { id: 'wifi', label: 'Wi-Fi', icon: <Wifi className="w-4 h-4" /> },
+                    { id: 'parking', label: 'Parking', icon: <Car className="w-4 h-4" /> },
+                    { id: 'cafe', label: 'Cafe', icon: <Coffee className="w-4 h-4" /> },
+                    { id: 'restaurant', label: 'Restaurant', icon: <Utensils className="w-4 h-4" /> },
+                    { id: 'accessible', label: 'Accessible', icon: <Accessibility className="w-4 h-4" /> },
+                    { id: 'child', label: 'Child Friendly', icon: <Baby className="w-4 h-4" /> },
+                    { id: 'pet', label: 'Pet Friendly', icon: <Dog className="w-4 h-4" /> },
+                    { id: 'seating', label: 'Seating', icon: <Layers className="w-4 h-4" /> },
+                ]
+                return (
+                    <Accordion key={block.id} type="single" collapsible className="w-full">
+                        <AccordionItem value="facilities" className="border border-[#CDD0DB]/60 rounded-xl px-3 bg-white dark:bg-zinc-900 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] border-b-[#CDD0DB]/60">
+                            <AccordionTrigger className="hover:no-underline py-3">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
+                                        <CheckCircle2 className="w-5 h-5 text-[#0A0909] dark:text-white" />
+                                    </div>
+                                    <div className="text-left text-[14px] font-medium text-[#0A0909] dark:text-white font-noto-sans">Facilities</div>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="pb-4">
+                                <div className="grid grid-cols-2 gap-2 pt-1">
+                                    {facilitiesList.filter(f => (business.selectedFacilities || block.selectedFacilities)?.includes(f.id)).map(f => (
+                                        <div key={f.id} className="flex items-center gap-2 text-[10px] text-[#3F3E3E] font-noto-sans">
+                                            {f.icon}
+                                            <span className="font-normal">{f.label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
+                )
+            case 'about':
+                return (
+                    <div key={block.id} className="p-6 border border-[#CDD0DB] rounded-lg bg-white dark:bg-zinc-900 space-y-3 shadow-sm">
+                        <label className="text-[16px] font-semibold text-[#0A0909] dark:text-white font-noto-sans mb-2 block">Summary</label>
+                        <p className="text-[10px] font-normal leading-[15.2px] text-[#0A0909] dark:text-gray-300 font-noto-sans whitespace-pre-wrap">
+                            {business.description || block.summary}
+                        </p>
+                    </div>
+                )
+            case 'social_networks':
+                const getSocialIcon = (name: string) => {
+                    switch (name) {
+                        case 'facebook': return <Facebook className="w-5 h-5" />
+                        case 'instagram': return <Instagram className="w-5 h-5" />
+                        case 'twitter': return <Twitter className="w-5 h-5" />
+                        case 'linkedin': return <Linkedin className="w-5 h-5" />
+                        case 'youtube': return <Youtube className="w-5 h-5" />
+                        case 'github': return <Github className="w-5 h-5" />
+                        case 'whatsapp': return <Zap className="w-5 h-5" />
+                        case 'website': return <Globe className="w-5 h-5" />
+                        default: return <Share2 className="w-5 h-5" />
+                    }
+                }
+                const platformsToRender = (business.sameAs?.length ?? 0) > 0
+                    ? business.sameAs!.map((url: string) => {
+                        const name = url.includes('facebook') ? 'facebook' :
+                            url.includes('instagram') ? 'instagram' :
+                                url.includes('twitter') ? 'twitter' :
+                                    url.includes('linkedin') ? 'linkedin' :
+                                        url.includes('youtube') ? 'youtube' :
+                                            url.includes('github') ? 'github' :
+                                                url.includes('whatsapp') ? 'whatsapp' : 'website'
+                        return { name, url }
+                    })
+                    : block.platforms
+
+                return (
+                    <div key={block.id} className="flex flex-wrap justify-center gap-4 py-2 mt-4">
+                        {platformsToRender?.map((p: any) => (
+                            <button
+                                key={p.name}
+                                onClick={() => window.open(p.url, '_blank')}
+                                className="w-10 h-10 bg-white border border-[#CDD0DB] dark:bg-zinc-800 rounded-lg flex items-center justify-center shadow-sm hover:scale-110 transition-transform text-[#0A0909]"
+                            >
+                                {getSocialIcon(p.name)}
+                            </button>
+                        ))}
+                    </div>
                 )
             default:
                 return null
@@ -161,8 +397,7 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
 
     return (
         <div
-            className="min-h-screen bg-white dark:bg-zinc-950 antialiased tracking-tight"
-            style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}
+            className="min-h-screen bg-white dark:bg-zinc-950 antialiased tracking-normal font-noto-sans selection:bg-black selection:text-white"
         >
             {/* Header / Navigation */}
             <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between sticky top-0 z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
@@ -227,29 +462,29 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
                             </div>
                         </div>
 
-                        <div className="space-y-1">
-                            <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                        <div className="space-y-1 text-center mt-4">
+                            <h1 className="text-[18px] font-medium leading-[26px] text-[#0A0909] dark:text-white font-rubik">
                                 {business.name}
                             </h1>
-                            <p className="text-gray-500 font-medium">@{business.slug}</p>
+                            <p className="text-[10px] font-normal leading-[18px] text-[#3F3E3E] font-noto-sans">@{business.slug}</p>
                         </div>
 
                         {business.description && (
-                            <p className="mt-4 text-gray-600 dark:text-gray-300 leading-relaxed">
+                            <p className="mt-2 text-[10px] font-normal leading-[15.2px] text-[#0A0909] dark:text-gray-300 font-noto-sans text-center px-4">
                                 {business.description}
                             </p>
                         )}
 
                         {/* Quick Contact Info */}
-                        <div className="flex flex-wrap gap-4 mt-6 text-sm text-gray-500 font-medium">
+                        <div className="flex justify-center gap-4 mt-4 text-[10px] text-[#3F3E3E] font-normal font-noto-sans">
                             {business.phone && (
-                                <div className="flex items-center gap-1.5">
-                                    <Phone className="w-4 h-4" />
+                                <div className="flex items-center gap-1">
+                                    <Phone className="w-3 h-3" />
                                     {business.phone.code} {business.phone.number}
                                 </div>
                             )}
-                            <div className="flex items-center gap-1.5">
-                                <MapPin className="w-4 h-4" />
+                            <div className="flex items-center gap-1">
+                                <MapPin className="w-3 h-3" />
                                 View Location
                             </div>
                         </div>
@@ -259,14 +494,13 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
                 {/* Content Sections based on pageType */}
 
                 {pageType === 'storefront' && (
-                    <div className="px-6 pt-10 space-y-12">
+                    <div className="px-6 pt-6 space-y-2">
                         {/* Dynamic Blocks */}
                         {blocks.length > 0 && (
-                            <div className="space-y-6">
+                            <div className="space-y-2">
                                 {blocks.map(renderBlock)}
                             </div>
                         )}
-
                     </div>
                 )}
 

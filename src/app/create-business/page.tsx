@@ -252,8 +252,12 @@ export default function CreateBusinessPage() {
 
             if (res.ok) {
                 const business = await res.json()
+
+                // Store in localStorage so the dashboard and design pages can load data immediately
+                localStorage.setItem("selectedBusiness", JSON.stringify(business))
+
                 toast.success("Business created successfully!")
-                router.push(`/business/page-builder?businessId=${business._id}`)
+                router.push(`/business/dashboard?businessId=${business._id}`)
             } else {
                 const error = await res.json()
                 toast.error(error.message || "Failed to create business")

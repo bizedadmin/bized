@@ -179,26 +179,26 @@ export function AddProductModal({ isOpen, onClose, onSuccess, businessId }: AddP
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="max-w-2xl p-0 overflow-hidden border-none bg-background">
-                <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <DialogContent className="max-w-2xl p-0 overflow-hidden rounded-xl border border-[#CDD0DB] shadow-xl font-noto-sans">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-[#CDD0DB] bg-white">
                     <div className="flex items-center gap-4">
                         <Button variant="ghost" size="icon" onClick={handleClose} className="h-8 w-8">
                             <ChevronLeft className="w-5 h-5" />
                         </Button>
-                        <DialogTitle className="text-lg font-medium">Add {type.toLowerCase()}</DialogTitle>
+                        <DialogTitle className="text-[18px] font-medium leading-[26px] text-[#0A0909] font-rubik">Add {type.toLowerCase()}</DialogTitle>
                     </div>
                     <div className="flex items-center gap-2">
                         {/* The X button is handled by DialogContent built-in close button */}
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-0 flex flex-col h-full">
+                <form onSubmit={handleSubmit} className="p-0 flex flex-col h-full bg-white">
                     <div className="flex-1 overflow-y-auto">
-                        <div className="flex border-b border-border">
+                        <div className="flex border-b border-[#CDD0DB]">
                             {/* Main Context - LEFT */}
-                            <div className="flex-1 p-6 space-y-6 border-r border-border min-w-0">
+                            <div className="flex-1 p-6 space-y-6 border-r border-[#CDD0DB] min-w-0">
                                 <div className="space-y-4">
-                                    <div className="aspect-[4/3] w-32 rounded-lg border border-dashed border-border flex items-center justify-center bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors relative" onClick={handleImageUploadTrigger}>
+                                    <div className="aspect-[4/3] w-32 rounded-lg border border-dashed border-[#CDD0DB] flex items-center justify-center bg-zinc-50 cursor-pointer hover:bg-zinc-100 transition-colors relative" onClick={handleImageUploadTrigger}>
                                         <input
                                             type="file"
                                             ref={fileInputRef}
@@ -391,14 +391,14 @@ export function AddProductModal({ isOpen, onClose, onSuccess, businessId }: AddP
                     </div>
 
                     {/* Footer - Replaces Save Button */}
-                    <div className="px-6 py-4 flex items-center justify-end gap-3 bg-background border-t border-border shrink-0">
-                        <Button type="button" variant="outline" onClick={handleClose} className="h-10 px-6 font-medium">
+                    <div className="px-6 py-4 flex items-center justify-end gap-3 bg-white border-t border-[#CDD0DB] shrink-0">
+                        <Button type="button" variant="outline" onClick={handleClose} className="h-10 px-6 font-medium text-[12px] border-[#CDD0DB] rounded-lg">
                             Back
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading || !name || !price}
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 h-10 font-bold shadow-sm transition-all active:scale-95"
+                            className="bg-black hover:bg-zinc-800 text-white px-10 h-10 font-medium text-[12px] rounded-lg shadow-sm transition-all active:scale-95"
                         >
                             {loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                             Save
