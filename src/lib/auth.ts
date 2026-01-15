@@ -36,7 +36,7 @@ export const authOptions: NextAuthOptions = {
                             name: name || email?.split('@')[0] || 'User',
                             email,
                             image: picture,
-                            role: 'user',
+                            role: email === 'admin@bized.app' ? 'admin' : 'user',
                             provider: 'firebase',
                         });
                     }

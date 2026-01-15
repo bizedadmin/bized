@@ -279,7 +279,7 @@ export default function CreateBusinessPage() {
             <div className="fixed inset-0 h-full w-full bg-[radial-gradient(circle_800px_at_50%_-30%,#10b98115,transparent)] pointer-events-none -z-10" />
 
             {/* Header */}
-            <header className="h-20 sticky top-0 bg-background/80 backdrop-blur-xl border-b border-border/40 z-50 px-4 md:px-0">
+            <header className="h-16 sticky top-0 bg-background/80 backdrop-blur-xl border-b border-border/40 z-50 px-4 md:px-0">
                 <div className="max-w-3xl mx-auto h-full flex items-center justify-between w-full">
                     <Link href="/" className="flex items-center gap-2 group">
                         {mounted && (
@@ -327,7 +327,7 @@ export default function CreateBusinessPage() {
                 </div>
             </header>
 
-            <main className="flex-1 overflow-y-auto px-4 py-8 md:px-6 md:py-12 md:max-w-3xl md:mx-auto w-full relative z-10 min-h-[450px]">
+            <main className="flex-1 overflow-y-auto px-4 py-6 md:px-6 md:py-8 md:max-w-2xl md:mx-auto w-full relative z-10 min-h-[400px]">
                 <AnimatePresence mode="popLayout">
                     {step === 1 && (
                         <motion.div
@@ -336,7 +336,7 @@ export default function CreateBusinessPage() {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20, position: "absolute" }}
                             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                            className="space-y-10 w-full"
+                            className="space-y-6 w-full"
                         >
                             <div className="text-center space-y-3">
                                 <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-2">
@@ -350,7 +350,7 @@ export default function CreateBusinessPage() {
                                 </motion.p>
                             </div>
 
-                            <div className="space-y-5 bg-card/50 backdrop-blur-sm p-5 md:p-8 rounded-3xl border border-border/60 shadow-xl shadow-black/5">
+                            <div className="space-y-4 bg-card/60 backdrop-blur-md p-5 md:p-7 rounded-3xl border border-border/60 shadow-xl shadow-black/5">
                                 <div className="space-y-3">
                                     <Label htmlFor="name" className="text-sm font-semibold text-foreground/80 ml-1">Business Name</Label>
                                     <div className="relative group">
@@ -362,7 +362,7 @@ export default function CreateBusinessPage() {
                                             value={name}
                                             onChange={handleNameChange}
                                             placeholder="Acme Corporation"
-                                            className="pl-11 h-14 text-lg border-border/60 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all rounded-2xl bg-background/50"
+                                            className="pl-11 h-12 text-base border-input focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all rounded-2xl bg-background"
                                         />
                                     </div>
                                 </div>
@@ -370,9 +370,9 @@ export default function CreateBusinessPage() {
                                 <div className="space-y-3">
                                     <Label htmlFor="slug" className="text-sm font-semibold text-foreground/80 ml-1">Magic Link</Label>
                                     <div className={cn(
-                                        "flex items-center border h-14 rounded-2xl px-4 bg-background/50 focus-within:ring-4 focus-within:ring-primary/10 transition-all",
+                                        "flex items-center border h-12 rounded-2xl px-4 bg-background focus-within:ring-4 focus-within:ring-primary/10 transition-all",
                                         slugAvailable === false ? "border-destructive ring-4 ring-destructive/5" :
-                                            slugAvailable === true ? "border-primary ring-4 ring-primary/5" : "border-border/60 focus-within:border-primary"
+                                            slugAvailable === true ? "border-primary ring-4 ring-primary/5" : "border-input focus-within:border-primary"
                                     )}>
                                         <Globe className="w-5 h-5 text-muted-foreground mr-2" />
                                         <span className="text-muted-foreground font-medium whitespace-nowrap">bized.app/</span>
@@ -380,7 +380,7 @@ export default function CreateBusinessPage() {
                                             id="slug"
                                             value={slug}
                                             onChange={handleSlugChange}
-                                            className="flex-1 border-none bg-transparent h-full px-1 text-lg font-medium focus:outline-none text-foreground"
+                                            className="flex-1 border-none bg-transparent h-full px-1 text-base font-medium focus:outline-none text-foreground placeholder:text-muted-foreground/50"
                                             placeholder="link"
                                         />
                                         <div className="flex items-center gap-2">
@@ -421,7 +421,7 @@ export default function CreateBusinessPage() {
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             placeholder="contact@business.com"
-                                            className="pl-11 h-14 text-lg border-border/60 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all rounded-2xl bg-background/50"
+                                            className="pl-11 h-12 text-base border-input focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all rounded-2xl bg-background"
                                         />
                                     </div>
                                 </div>
@@ -436,7 +436,7 @@ export default function CreateBusinessPage() {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20, position: "absolute" }}
                             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                            className="space-y-10 w-full"
+                            className="space-y-6 w-full"
                         >
                             <div className="text-center space-y-3">
                                 <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-2">
@@ -462,12 +462,12 @@ export default function CreateBusinessPage() {
                                                 "flex flex-col items-center justify-center p-4 rounded-[1.5rem] md:rounded-[2rem] border-2 transition-all duration-300 text-center gap-3 relative overflow-hidden group",
                                                 isSelected
                                                     ? "border-primary bg-primary/[0.03] ring-4 ring-primary/5 shadow-xl shadow-primary/10"
-                                                    : "border-border/40 hover:border-primary/30 hover:bg-muted/30 bg-card/30 backdrop-blur-sm"
+                                                    : "border-border/40 hover:border-primary/30 hover:bg-muted/30 bg-card backdrop-blur-sm"
                                             )}
                                         >
                                             <div className={cn(
                                                 "p-3 rounded-2xl transition-all duration-300 shadow-sm",
-                                                isSelected ? "bg-primary text-primary-foreground scale-105 shadow-md shadow-primary/25" : cn("bg-muted/50 text-muted-foreground group-hover:scale-105 group-hover:text-primary transition-transform")
+                                                isSelected ? "bg-primary text-primary-foreground scale-105 shadow-md shadow-primary/25" : cn("bg-muted text-muted-foreground group-hover:scale-105 group-hover:text-primary transition-transform")
                                             )}>
                                                 <Icon className="w-5 h-5" />
                                             </div>
@@ -500,7 +500,7 @@ export default function CreateBusinessPage() {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20, position: "absolute" }}
                             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                            className="space-y-10 w-full"
+                            className="space-y-6 w-full"
                         >
                             <div className="text-center space-y-3">
                                 <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-2">
@@ -514,7 +514,7 @@ export default function CreateBusinessPage() {
                                 </motion.p>
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                                 {BUSINESS_TYPES.map((type) => {
                                     const Icon = type.icon
                                     const isSelected = selectedBusinessType === type.name
@@ -523,15 +523,15 @@ export default function CreateBusinessPage() {
                                             key={type.id}
                                             onClick={() => setSelectedBusinessType(type.name)}
                                             className={cn(
-                                                "w-full flex items-center p-3 md:p-4 rounded-2xl border-2 transition-all duration-300 text-left gap-3 md:gap-4 relative group",
+                                                "w-full flex items-center p-2.5 md:p-3 rounded-2xl border-2 transition-all duration-300 text-left gap-3 md:gap-4 relative group",
                                                 isSelected
-                                                    ? "border-primary bg-primary/[0.03] ring-4 ring-primary/5 shadow-lg shadow-primary/5"
-                                                    : "border-border/40 hover:border-primary/20 hover:bg-muted/30 bg-card/30 backdrop-blur-sm"
+                                                    ? "border-primary bg-primary/[0.03] ring-4 ring-primary/5 shadow-md shadow-primary/5"
+                                                    : "border-border/40 hover:border-primary/20 hover:bg-muted/30 bg-card backdrop-blur-sm"
                                             )}
                                         >
                                             <div className={cn(
                                                 "p-2.5 md:p-3 rounded-xl md:rounded-2xl transition-all duration-300 flex-shrink-0",
-                                                isSelected ? "bg-primary text-primary-foreground scale-105 shadow-md shadow-primary/25" : "bg-muted/80 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary group-hover:scale-105"
+                                                isSelected ? "bg-primary text-primary-foreground scale-105 shadow-md shadow-primary/25" : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary group-hover:scale-105"
                                             )}>
                                                 <Icon className="w-5 h-5 md:w-6 md:h-6" />
                                             </div>
@@ -566,7 +566,7 @@ export default function CreateBusinessPage() {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20, position: "absolute" }}
                             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                            className="space-y-10 w-full"
+                            className="space-y-6 w-full"
                         >
                             <div className="text-center space-y-3">
                                 <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-2">
@@ -580,7 +580,7 @@ export default function CreateBusinessPage() {
                                 </motion.p>
                             </div>
 
-                            <div className="bg-card/50 backdrop-blur-sm p-6 md:p-10 rounded-[2.5rem] border border-border/60 shadow-2xl shadow-black/5 space-y-8">
+                            <div className="bg-card backdrop-blur-sm p-5 md:p-8 rounded-[2.5rem] border border-border/60 shadow-2xl shadow-black/5 space-y-6">
                                 <div className="space-y-4">
                                     <Label htmlFor="phone" className="text-sm font-bold text-foreground/80 flex items-center gap-2 ml-1">
                                         <Phone className="w-4 h-4 text-primary" />
@@ -592,7 +592,7 @@ export default function CreateBusinessPage() {
                                                 value={phoneCode}
                                                 onChange={(country) => setPhoneCode(country.dialCode)}
                                             />
-                                            <div className="absolute -top-2 left-3 px-2 bg-background/80 backdrop-blur-sm rounded-md border border-border/40 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Country</div>
+                                            <div className="absolute -top-2 left-3 px-2 bg-card rounded-md border border-border/40 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Country</div>
                                         </div>
                                         <div className="flex-1 relative group">
                                             <Input
@@ -601,7 +601,7 @@ export default function CreateBusinessPage() {
                                                 value={phoneNumber}
                                                 onChange={(e) => setPhoneNumber(e.target.value)}
                                                 placeholder="700 000 000"
-                                                className="h-16 pl-6 text-xl tracking-widest font-bold border-border/60 focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all rounded-2xl bg-background/50"
+                                                className="h-12 pl-6 text-base tracking-widest font-bold border-input focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all rounded-2xl bg-background"
                                             />
                                             <div className="absolute -top-2 left-3 px-2 bg-background/80 backdrop-blur-sm rounded-md border border-border/40 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Number</div>
                                         </div>
@@ -617,8 +617,8 @@ export default function CreateBusinessPage() {
             </main>
 
             {/* Footer Navigation */}
-            <footer className="p-5 md:p-8 lg:p-12 bg-background/50 backdrop-blur-xl border-t border-border/40 sticky bottom-0 z-50">
-                <div className="max-w-2xl mx-auto space-y-6 md:space-y-8">
+            <footer className="p-4 md:p-6 bg-background/50 backdrop-blur-xl border-t border-border/40 sticky bottom-0 z-50">
+                <div className="max-w-2xl mx-auto space-y-4 md:space-y-6">
                     <div className="flex items-center gap-4 w-full">
                         <div className="flex-1 h-1.5 bg-muted rounded-full relative">
                             <div className="absolute top-1/2 left-0 -translate-y-1/2 w-full flex justify-between px-0 pointer-events-none">
@@ -660,7 +660,7 @@ export default function CreateBusinessPage() {
                                 size="lg"
                                 onClick={step === 4 ? handleCreateBusiness : nextStep}
                                 disabled={creating}
-                                className="w-full sm:w-auto sm:min-w-[140px] md:min-w-[180px] h-12 md:h-14 rounded-xl md:rounded-2xl text-base md:text-lg font-bold shadow-2xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] bg-primary hover:bg-primary/90 text-primary-foreground px-4 md:px-8"
+                                className="w-full sm:w-auto sm:min-w-[120px] md:min-w-[160px] h-11 md:h-12 rounded-xl md:rounded-2xl text-sm md:text-base font-bold shadow-2xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] bg-primary hover:bg-primary/90 text-primary-foreground px-4 md:px-8"
                             >
                                 {creating ? (
                                     <>

@@ -30,6 +30,8 @@ import {
     Box,
     Truck,
     CheckCircle2,
+    Calendar,
+    Sparkles,
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -42,6 +44,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ImageGeneratorModal } from "@/components/ui/image-generator-modal"
 
 const navigationItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/business/dashboard", badge: null },
@@ -60,6 +63,19 @@ const productsAndStore = {
         { label: "Products", href: "/business/products" },
         { label: "Shipping and returns", href: "/business/shipping-returns" },
         { label: "Store quality", href: "/business/store-quality" },
+    ]
+}
+
+const bookings = {
+    icon: Calendar,
+    label: "Bookings",
+    href: "#",
+    children: [
+        { label: "Booking Page", href: "/business/booking-page" },
+        { label: "Quote Page", href: "/business/quote-page" },
+        { label: "Quote Requests", href: "/business/quote-requests" },
+        { label: "Calendar", href: "/business/calendar" },
+        { label: "Services", href: "/business/services" },
     ]
 }
 
@@ -98,6 +114,8 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [websiteExpanded, setWebsiteExpanded] = useState(true)
     const [storeExpanded, setStoreExpanded] = useState(true)
+    const [bookingsExpanded, setBookingsExpanded] = useState(true)
+    const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false)
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -176,6 +194,14 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                     <Button variant="ghost" size="icon" className="relative h-9 w-9">
                         <Bell className="w-5 h-5" />
                         <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
+                        onClick={() => setIsAiAssistantOpen(true)}
+                    >
+                        <Sparkles className="w-5 h-5" />
                     </Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -258,26 +284,59 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                     <nav className="flex-1 overflow-y-auto p-4">
                         <div className="space-y-1">
                             {navigationItems.map((item) => (
-                                <Link
-                                    key={item.label}
-                                    href={item.href}
-                                    className={cn(
-                                        "flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                                        pathname === item.href
-                                            ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
-                                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
+                                <div key={item.label} className="space-y-1">
+                                    <Link
+                                        href={item.href}
+                                        className={cn(
+                                            "flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                                            pathname === item.href
+                                                ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
+                                                : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
+                                        )}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <item.icon className="w-5 h-5" />
+                                            <span>{item.label}</span>
+                                        </div>
+                                        {item.badge && (
+                                            <Badge variant="destructive" className="h-5 px-1.5 text-xs">
+                                                {item.badge}
+                                            </Badge>
+                                        )}
+                                    </Link>
+                                    {item.label === "Dashboard" && (
+                                        <>
+                                            <button
+                                                onClick={() => setBookingsExpanded(!bookingsExpanded)}
+                                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <bookings.icon className="w-5 h-5" />
+                                                    <span>{bookings.label}</span>
+                                                </div>
+                                                <ChevronDown className={cn("w-4 h-4 transition-transform", bookingsExpanded && "rotate-180")} />
+                                            </button>
+                                            {bookingsExpanded && (
+                                                <div className="ml-9 space-y-1">
+                                                    {bookings.children.map((child) => (
+                                                        <Link
+                                                            key={child.label}
+                                                            href={child.href}
+                                                            className={cn(
+                                                                "block px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                                                                pathname === child.href
+                                                                    ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
+                                                                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
+                                                            )}
+                                                        >
+                                                            {child.label}
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </>
                                     )}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <item.icon className="w-5 h-5" />
-                                        <span>{item.label}</span>
-                                    </div>
-                                    {item.badge && (
-                                        <Badge variant="destructive" className="h-5 px-1.5 text-xs">
-                                            {item.badge}
-                                        </Badge>
-                                    )}
-                                </Link>
+                                </div>
                             ))}
                         </div>
 
@@ -310,7 +369,9 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                                     ))}
                                 </div>
                             )}
+
                         </div>
+
 
                         <div className="mt-8">
                             <h3 className="px-3 mb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -391,6 +452,12 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                     </div>
                 </main>
             </div>
+
+            <ImageGeneratorModal
+                isOpen={isAiAssistantOpen}
+                onClose={() => setIsAiAssistantOpen(false)}
+                onImageSelect={() => { }} // Global assistant doesn't necessarily select images here
+            />
         </div>
     )
 }

@@ -42,6 +42,7 @@ const sidebarItems = [
         icon: ScrollText,
         children: [
             { title: "Audit Logs", href: "/audit" },
+            { title: "API Logs", href: "/logs/errors" },
             { title: "Security Analytics", href: "/analytics" },
         ]
     },

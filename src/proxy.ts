@@ -15,10 +15,9 @@ export default async function proxy(request: NextRequest) {
         // Rewrite all requests to the /admin folder
         // But first, check Auth Protection
 
-        // API Routes -> Rewrite to Main Domain to ensure NextAuth matching
+        // API Routes -> Pass through to allow NextAuth to handle them on the main domain logic
         if (url.pathname.startsWith('/api')) {
-            const target = new URL(url.pathname, process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000');
-            return NextResponse.rewrite(target);
+            return NextResponse.next();
         }
 
         // Public Assets -> Pass through
