@@ -373,20 +373,20 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                                 </div>
                             )}
 
-                            {/* Store Menu (New) */}
+                            {/* Bookings */}
                             <button
-                                onClick={() => setStoreMenuExpanded(!storeMenuExpanded)}
+                                onClick={() => setBookingsExpanded(!bookingsExpanded)}
                                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                             >
                                 <div className="flex items-center gap-3">
-                                    <storeMenu.icon className="w-5 h-5" />
-                                    <span>{storeMenu.label}</span>
+                                    <bookings.icon className="w-5 h-5" />
+                                    <span>{bookings.label}</span>
                                 </div>
-                                <ChevronDown className={cn("w-4 h-4 transition-transform", storeMenuExpanded && "rotate-180")} />
+                                <ChevronDown className={cn("w-4 h-4 transition-transform", bookingsExpanded && "rotate-180")} />
                             </button>
-                            {storeMenuExpanded && (
+                            {bookingsExpanded && (
                                 <div className="ml-9 space-y-1">
-                                    {storeMenu.children.map((child) => (
+                                    {bookings.children.map((child) => (
                                         <Link
                                             key={child.label}
                                             href={child.href}
@@ -493,20 +493,20 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                                 </div>
                             )}
 
-                            {/* Bookings */}
+                            {/* Store Menu (New) */}
                             <button
-                                onClick={() => setBookingsExpanded(!bookingsExpanded)}
+                                onClick={() => setStoreMenuExpanded(!storeMenuExpanded)}
                                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                             >
                                 <div className="flex items-center gap-3">
-                                    <bookings.icon className="w-5 h-5" />
-                                    <span>{bookings.label}</span>
+                                    <storeMenu.icon className="w-5 h-5" />
+                                    <span>{storeMenu.label}</span>
                                 </div>
-                                <ChevronDown className={cn("w-4 h-4 transition-transform", bookingsExpanded && "rotate-180")} />
+                                <ChevronDown className={cn("w-4 h-4 transition-transform", storeMenuExpanded && "rotate-180")} />
                             </button>
-                            {bookingsExpanded && (
+                            {storeMenuExpanded && (
                                 <div className="ml-9 space-y-1">
-                                    {bookings.children.map((child) => (
+                                    {storeMenu.children.map((child) => (
                                         <Link
                                             key={child.label}
                                             href={child.href}
