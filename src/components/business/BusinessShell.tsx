@@ -50,8 +50,8 @@ import { ImageGeneratorModal } from "@/components/ui/image-generator-modal"
 
 const navigationItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/business/dashboard", badge: null },
-    { icon: Users, label: "Customers", href: "/business/customers" },
-    { icon: MessageSquare, label: "Chats", href: "/business/chats" },
+    { icon: Users, label: "Customers", href: "/business/customers", badge: null },
+    { icon: MessageSquare, label: "Chats", href: "/business/chats", badge: null },
 ]
 
 const servicesMenu = {

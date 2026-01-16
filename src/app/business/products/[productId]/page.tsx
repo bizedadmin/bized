@@ -578,8 +578,6 @@ export default function EditProductPage({ params }: { params: { productId: strin
                 onImageSelect={(dataUrl) => {
                     setImages(prev => [...prev, dataUrl])
                 }}
-                aspectRatio="1:1"
-                businessId={businessId || ""}
                 serviceName={name}
                 serviceDescription={description}
             />
@@ -590,7 +588,7 @@ export default function EditProductPage({ params }: { params: { productId: strin
                     setIsEditorOpen(false)
                     setSelectedImageIndex(null)
                 }}
-                image={selectedImageIndex !== null ? images[selectedImageIndex] : ""}
+                imageUrl={selectedImageIndex !== null ? images[selectedImageIndex] : ""}
                 onSave={(dataUrl) => {
                     if (selectedImageIndex !== null) {
                         const newImages = [...images]

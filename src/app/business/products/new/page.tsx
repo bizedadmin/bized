@@ -532,8 +532,6 @@ export default function NewProductPage() {
                 onImageSelect={(dataUrl) => {
                     setImages(prev => [...prev, dataUrl])
                 }}
-                aspectRatio="1:1"
-                businessId={businessId || ""}
                 serviceName={name}
                 serviceDescription={description}
             />
@@ -544,7 +542,7 @@ export default function NewProductPage() {
                     setIsEditorOpen(false)
                     setSelectedImageIndex(null)
                 }}
-                image={selectedImageIndex !== null ? images[selectedImageIndex] : ""}
+                imageUrl={selectedImageIndex !== null ? images[selectedImageIndex] : ""}
                 onSave={(dataUrl) => {
                     if (selectedImageIndex !== null) {
                         const newImages = [...images]

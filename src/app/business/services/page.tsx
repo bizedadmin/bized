@@ -27,6 +27,7 @@ interface Service {
     name: string
     description?: string
     serviceType?: string
+    category?: string
     image?: string[]
     offers?: {
         price: number
