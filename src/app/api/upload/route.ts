@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { uploadToCloudinary } from '@/lib/cloudinary';
+import { uploadToFirebaseAdmin } from '@/lib/firebase-admin-upload';
 import dbConnect from '@/lib/db';
 import Business from '@/models/Business';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(req: Request) {
     try {
@@ -32,13 +33,18 @@ export async function POST(req: Request) {
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
-        const publicUrl = await uploadToCloudinary(buffer, business.slug);
+        const filename = `${uuidv4()}.webp`;
+        const publicUrl = await uploadToFirebaseAdmin(buffer, `${business.slug}/${filename}`);
 
         return NextResponse.json({ url: publicUrl });
     } catch (error) {
         console.error('Upload error:', error);
         return NextResponse.json(
-            { message: 'Internal Server Error', error: error instanceof Error ? error.message : 'Unknown error' },
+            {
+                message: 'Internal Server Error',
+                error: error instanceof Error ? error.message : 'Unknown error',
+                stack: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : undefined) : undefined
+            },
             { status: 500 }
         );
     }

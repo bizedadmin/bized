@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
-import Category from '@/models/Category';
+import AddOn from '@/models/AddOn';
 import Business from '@/models/Business';
 
 export async function GET(req: Request) {
@@ -21,16 +21,10 @@ export async function GET(req: Request) {
 
         await dbConnect();
 
-        // Verify ownership
-        const business = await Business.findOne({ _id: businessId, owner: session.user.id });
-        if (!business) {
-            return NextResponse.json({ message: 'Business not found or unauthorized' }, { status: 404 });
-        }
-
-        const categories = await Category.find({ business: businessId }).sort({ name: 1 });
-        return NextResponse.json(categories);
+        const addons = await AddOn.find({ business: businessId }).sort({ name: 1 });
+        return NextResponse.json(addons);
     } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error('Error fetching addons:', error);
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
@@ -43,11 +37,7 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { business: businessId, name } = body;
-
-        if (!businessId || !name) {
-            return NextResponse.json({ message: 'Business ID and Name are required' }, { status: 400 });
-        }
+        const { business: businessId } = body;
 
         await dbConnect();
 
@@ -57,19 +47,11 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: 'Business not found or unauthorized' }, { status: 404 });
         }
 
-        // Check for duplicates
-        const existing = await Category.findOne({ business: businessId, name: { $regex: new RegExp(`^${name}$`, 'i') } });
-        if (existing) {
-            return NextResponse.json({ message: 'Category already exists' }, { status: 409 });
-        }
-
-        const category = await Category.create(body);
-        return NextResponse.json(category, { status: 201 });
+        const addon = await AddOn.create(body);
+        return NextResponse.json(addon, { status: 201 });
     } catch (error) {
-        console.error('Error creating category:', error);
-        return NextResponse.json({
-            message: error instanceof Error ? error.message : 'Internal Server Error'
-        }, { status: 500 });
+        console.error('Error creating addon:', error);
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
 
@@ -84,10 +66,6 @@ export async function DELETE(req: Request) {
         const id = searchParams.get('id');
         const businessId = searchParams.get('businessId');
 
-        if (!id || !businessId) {
-            return NextResponse.json({ message: 'ID and Business ID are required' }, { status: 400 });
-        }
-
         await dbConnect();
 
         // Verify ownership
@@ -96,10 +74,10 @@ export async function DELETE(req: Request) {
             return NextResponse.json({ message: 'Business not found or unauthorized' }, { status: 404 });
         }
 
-        await Category.deleteOne({ _id: id, business: businessId });
-        return NextResponse.json({ message: 'Category deleted' });
+        await AddOn.deleteOne({ _id: id, business: businessId });
+        return NextResponse.json({ message: 'Add-on deleted' });
     } catch (error) {
-        console.error('Error deleting category:', error);
+        console.error('Error deleting addon:', error);
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }

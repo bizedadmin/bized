@@ -49,7 +49,9 @@ import {
     Dog,
     Zap,
     MessageSquare,
-    LocateFixed
+    LocateFixed,
+    ExternalLink,
+    Copy
 } from "lucide-react"
 import {
     TextalignJustifycenter,
@@ -58,6 +60,7 @@ import {
     Edit2
 } from "iconsax-reactjs"
 import { Switch } from "@/components/ui/switch"
+import { QRCodeCanvas } from "qrcode.react"
 import Link from "next/link"
 import { BusinessStorefront } from "@/components/business/business-storefront"
 import {
@@ -141,6 +144,22 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
             setLoading(false)
         }
     }, [businessId])
+
+    const downloadQR = () => {
+        const canvas = document.getElementById('qr-code-canvas') as HTMLCanvasElement;
+        if (canvas) {
+            const pngUrl = canvas.toDataURL("image/png");
+            const downloadLink = document.createElement("a");
+            downloadLink.href = pngUrl;
+            downloadLink.download = `${formData.slug}-${pageType}-qr.png`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            toast.success("QR Code downloaded!");
+        } else {
+            toast.error("Could not generate QR code image.");
+        }
+    }
 
     const [error, setError] = useState<string | null>(null)
 
@@ -407,6 +426,31 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-900 rounded-lg px-3 md:px-4 h-9 font-medium text-[12px] shadow-sm transition-all active:scale-95"
+                            onClick={() => {
+                                const url = `${window.location.origin}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`
+                                window.open(url, '_blank')
+                            }}
+                        >
+                            <ExternalLink className="w-4 h-4 md:mr-2" />
+                            <span className="hidden md:inline">Visit Page</span>
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-900 rounded-lg px-3 md:px-4 h-9 font-medium text-[12px] shadow-sm transition-all active:scale-95"
+                            onClick={() => {
+                                const url = `${window.location.origin}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`
+                                navigator.clipboard.writeText(url)
+                                toast.success("Link copied to clipboard!")
+                            }}
+                        >
+                            <Copy className="w-4 h-4 md:mr-2" />
+                            <span className="hidden md:inline">Copy Link</span>
+                        </Button>
                         <Button onClick={handleSave} disabled={saving} size="sm" className="bg-black hover:bg-zinc-800 text-white rounded-lg px-3 md:px-4 h-9 font-medium text-[12px] shadow-sm transition-all active:scale-95">
                             {saving ? (
                                 <>
@@ -561,17 +605,138 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                         </TabsContent>
 
                         <TabsContent value="share" className="mt-0 outline-none">
-                            <div className="flex flex-col items-center justify-center py-12 text-center text-zinc-400 space-y-4">
-                                <div className="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center">
-                                    <Share2 className="w-8 h-8 opacity-50" />
+                            <div className="space-y-8">
+                                <div className="space-y-1">
+                                    <h3 className="font-rubik font-medium text-[16px] text-[#0A0909]">Share Page</h3>
+                                    <p className="text-[11px] text-muted-foreground">Promote your page to get more visitors</p>
                                 </div>
-                                <div>
-                                    <h3 className="font-medium text-zinc-900 mb-1">Share your page</h3>
-                                    <p className="text-sm max-w-[200px] mx-auto">Publish your page to start sharing it with customers.</p>
+
+                                {/* Page Link Section */}
+                                <div className="space-y-3">
+                                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Page Link</Label>
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-1">
+                                            <Input
+                                                readOnly
+                                                value={`${window.location.origin}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`}
+                                                className="bg-zinc-50 font-mono text-xs h-10 pr-10 text-zinc-600"
+                                            />
+                                            <div className="absolute right-0 top-0 bottom-0 flex items-center pr-3">
+                                                <div className="h-4 w-4 bg-green-500 rounded-full flex items-center justify-center opacity-0 transition-opacity data-[copied=true]:opacity-100">
+                                                    <Check className="w-2.5 h-2.5 text-white" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            className="h-10 px-4 shrink-0 hover:bg-zinc-50 border-[#CDD0DB]"
+                                            onClick={() => {
+                                                const url = `${window.location.origin}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`
+                                                navigator.clipboard.writeText(url)
+                                                toast.success("Link copied to clipboard!")
+                                            }}
+                                        >
+                                            <span className="text-xs font-medium">Copy</span>
+                                        </Button>
+                                    </div>
+                                    <p className="text-[10px] text-zinc-400">
+                                        This is the public URL for your {pageType} page.
+                                    </p>
                                 </div>
-                                <Button className="bg-black text-white hover:bg-zinc-800 rounded-full px-6">
-                                    Publish Page
-                                </Button>
+
+                                {/* QR Code Section */}
+                                <div className="p-6 border border-[#CDD0DB] rounded-xl bg-white flex flex-col items-center justify-center space-y-4">
+                                    <div className="bg-white p-2 rounded-lg border border-zinc-100 shadow-sm">
+                                        <QRCodeCanvas
+                                            id="qr-code-canvas"
+                                            value={`${typeof window !== 'undefined' ? window.location.origin : ''}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`}
+                                            size={160}
+                                            level={"H"}
+                                            includeMargin={true}
+                                            imageSettings={formData.logo ? {
+                                                src: formData.logo,
+                                                x: undefined,
+                                                y: undefined,
+                                                height: 32,
+                                                width: 32,
+                                                excavate: true,
+                                            } : undefined}
+                                        />
+                                    </div>
+                                    <div className="text-center space-y-1">
+                                        <h4 className="font-medium text-sm text-[#0A0909]">Page QR Code</h4>
+                                        <p className="text-[10px] text-zinc-500 max-w-[200px] mx-auto">
+                                            Customers can scan this code to visit your page instantly.
+                                        </p>
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 text-xs rounded-full border-[#CDD0DB] hover:bg-zinc-50"
+                                        onClick={downloadQR}
+                                    >
+                                        Download PNG
+                                    </Button>
+                                </div>
+
+                                {/* Social Share Section */}
+                                <div className="space-y-3">
+                                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Share on Socials</Label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Button
+                                            variant="outline"
+                                            className="h-12 justify-start px-4 border-[#CDD0DB] hover:bg-zinc-50 hover:text-[#0A0909] gap-3"
+                                            onClick={() => {
+                                                const url = encodeURIComponent(`${window.location.origin}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`)
+                                                window.open(`https://wa.me/?text=${url}`, '_blank')
+                                            }}
+                                        >
+                                            <div className="w-6 h-6 bg-[#25D366] rounded-full flex items-center justify-center shrink-0">
+                                                <Zap className="w-3.5 h-3.5 text-white fill-white" />
+                                            </div>
+                                            <span className="text-xs font-medium">WhatsApp</span>
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className="h-12 justify-start px-4 border-[#CDD0DB] hover:bg-zinc-50 hover:text-[#0A0909] gap-3"
+                                            onClick={() => {
+                                                const url = encodeURIComponent(`${window.location.origin}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`)
+                                                window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank')
+                                            }}
+                                        >
+                                            <div className="w-6 h-6 bg-[#1877F2] rounded-full flex items-center justify-center shrink-0">
+                                                <Facebook className="w-3.5 h-3.5 text-white fill-white" />
+                                            </div>
+                                            <span className="text-xs font-medium">Facebook</span>
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className="h-12 justify-start px-4 border-[#CDD0DB] hover:bg-zinc-50 hover:text-[#0A0909] gap-3"
+                                            onClick={() => {
+                                                const url = encodeURIComponent(`${window.location.origin}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`)
+                                                window.open(`https://twitter.com/intent/tweet?url=${url}`, '_blank')
+                                            }}
+                                        >
+                                            <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center shrink-0">
+                                                <Twitter className="w-3.5 h-3.5 text-white fill-white" />
+                                            </div>
+                                            <span className="text-xs font-medium">X / Twitter</span>
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className="h-12 justify-start px-4 border-[#CDD0DB] hover:bg-zinc-50 hover:text-[#0A0909] gap-3"
+                                            onClick={() => {
+                                                const url = encodeURIComponent(`${window.location.origin}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`)
+                                                window.open(`mailto:?body=${url}`, '_blank')
+                                            }}
+                                        >
+                                            <div className="w-6 h-6 bg-zinc-500 rounded-full flex items-center justify-center shrink-0">
+                                                <Mail className="w-3.5 h-3.5 text-white" />
+                                            </div>
+                                            <span className="text-xs font-medium">Email</span>
+                                        </Button>
+                                    </div>
+                                </div>
                             </div>
                         </TabsContent>
                     </Tabs>

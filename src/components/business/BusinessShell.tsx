@@ -32,6 +32,8 @@ import {
     CheckCircle2,
     Calendar,
     Sparkles,
+    Briefcase,
+    HandPlatter,
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -48,19 +50,41 @@ import { ImageGeneratorModal } from "@/components/ui/image-generator-modal"
 
 const navigationItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/business/dashboard", badge: null },
-    { icon: ShoppingCart, label: "Orders", href: "/business/orders", badge: "1" },
     { icon: Users, label: "Customers", href: "/business/customers" },
     { icon: MessageSquare, label: "Chats", href: "/business/chats" },
-    { icon: BarChart3, label: "Analytics", href: "/business/analytics" },
-    { icon: Settings, label: "Settings", href: "/business/settings" },
 ]
+
+const servicesMenu = {
+    icon: HandPlatter,
+    label: "Services",
+    href: "#",
+    children: [
+        { label: "All Services", href: "/business/services" },
+        { label: "Categories", href: "/business/services/categories" },
+        { label: "Packages & Bundles", href: "/business/services/bundles" },
+        { label: "Add-ons & Extras", href: "/business/services/addons" },
+        { label: "Service Areas", href: "/business/services/areas" },
+        { label: "Pricing & Rules", href: "/business/services/rules" },
+    ]
+}
+
+const businessMenu = {
+    icon: Briefcase,
+    label: "Business",
+    href: "#",
+    children: [
+        { label: "Profile", href: "/business/profile" },
+        { label: "Analytics", href: "/business/analytics" },
+        { label: "Settings", href: "/business/settings" },
+    ]
+}
 
 const productsAndStore = {
     icon: Box,
     label: "Products & store",
     href: "#",
     children: [
-        { label: "Products", href: "/business/products" },
+        { label: "All Products", href: "/business/products" },
         { label: "Shipping and returns", href: "/business/shipping-returns" },
         { label: "Store quality", href: "/business/store-quality" },
     ]
@@ -72,10 +96,27 @@ const bookings = {
     href: "#",
     children: [
         { label: "Booking Page", href: "/business/booking-page" },
+        { label: "Calendar", href: "/business/calendar" },
+    ]
+}
+
+const quotesMenu = {
+    icon: MessageSquare,
+    label: "Quotes",
+    href: "#",
+    children: [
         { label: "Quote Page", href: "/business/quote-page" },
         { label: "Quote Requests", href: "/business/quote-requests" },
-        { label: "Calendar", href: "/business/calendar" },
-        { label: "Services", href: "/business/services" },
+    ]
+}
+
+const storeMenu = {
+    icon: Store,
+    label: "Store",
+    href: "#",
+    children: [
+        { label: "Shop Page", href: "/business/shop-page" },
+        { label: "Orders", href: "/business/orders" },
     ]
 }
 
@@ -87,7 +128,6 @@ const salesChannels = [
         badge: null,
         children: [
             { label: "Design", href: "/business/design" },
-            { label: "Profile", href: "/business/profile" },
         ]
     },
     { icon: MessageCircle, label: "WhatsApp", href: "/business/whatsapp" },
@@ -112,9 +152,13 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
     const [business, setBusiness] = useState<Business | null>(null)
     const [loading, setLoading] = useState(true)
     const [sidebarOpen, setSidebarOpen] = useState(false)
-    const [websiteExpanded, setWebsiteExpanded] = useState(true)
-    const [storeExpanded, setStoreExpanded] = useState(true)
-    const [bookingsExpanded, setBookingsExpanded] = useState(true)
+    const [websiteExpanded, setWebsiteExpanded] = useState(false)
+    const [storeExpanded, setStoreExpanded] = useState(false)
+    const [storeMenuExpanded, setStoreMenuExpanded] = useState(false)
+    const [quotesExpanded, setQuotesExpanded] = useState(false)
+    const [servicesExpanded, setServicesExpanded] = useState(false)
+    const [bookingsExpanded, setBookingsExpanded] = useState(false)
+    const [businessExpanded, setBusinessExpanded] = useState(false)
     const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false)
 
     useEffect(() => {
@@ -283,71 +327,120 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
 
                     <nav className="flex-1 overflow-y-auto p-4">
                         <div className="space-y-1">
-                            {navigationItems.map((item) => (
-                                <div key={item.label} className="space-y-1">
-                                    <Link
-                                        href={item.href}
-                                        className={cn(
-                                            "flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                                            pathname === item.href
-                                                ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
-                                                : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
-                                        )}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <item.icon className="w-5 h-5" />
-                                            <span>{item.label}</span>
-                                        </div>
-                                        {item.badge && (
-                                            <Badge variant="destructive" className="h-5 px-1.5 text-xs">
-                                                {item.badge}
-                                            </Badge>
-                                        )}
-                                    </Link>
-                                    {item.label === "Dashboard" && (
-                                        <>
-                                            <button
-                                                onClick={() => setBookingsExpanded(!bookingsExpanded)}
-                                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <bookings.icon className="w-5 h-5" />
-                                                    <span>{bookings.label}</span>
-                                                </div>
-                                                <ChevronDown className={cn("w-4 h-4 transition-transform", bookingsExpanded && "rotate-180")} />
-                                            </button>
-                                            {bookingsExpanded && (
-                                                <div className="ml-9 space-y-1">
-                                                    {bookings.children.map((child) => (
-                                                        <Link
-                                                            key={child.label}
-                                                            href={child.href}
-                                                            className={cn(
-                                                                "block px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                                                                pathname === child.href
-                                                                    ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
-                                                                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
-                                                            )}
-                                                        >
-                                                            {child.label}
-                                                        </Link>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
+                            {/* Dashboard */}
+                            <Link
+                                href="/business/dashboard"
+                                className={cn(
+                                    "flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                                    pathname === "/business/dashboard"
+                                        ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
+                                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
+                                )}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <LayoutDashboard className="w-5 h-5" />
+                                    <span>Dashboard</span>
                                 </div>
-                            ))}
-                        </div>
+                            </Link>
 
-                        <div className="mt-4 space-y-1">
+                            {/* Business */}
+                            <button
+                                onClick={() => setBusinessExpanded(!businessExpanded)}
+                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <businessMenu.icon className="w-5 h-5" />
+                                    <span>{businessMenu.label}</span>
+                                </div>
+                                <ChevronDown className={cn("w-4 h-4 transition-transform", businessExpanded && "rotate-180")} />
+                            </button>
+                            {businessExpanded && (
+                                <div className="ml-9 space-y-1">
+                                    {businessMenu.children.map((child) => (
+                                        <Link
+                                            key={child.label}
+                                            href={child.href}
+                                            className={cn(
+                                                "block px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                                                pathname === child.href
+                                                    ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
+                                                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
+                                            )}
+                                        >
+                                            {child.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Store Menu (New) */}
+                            <button
+                                onClick={() => setStoreMenuExpanded(!storeMenuExpanded)}
+                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <storeMenu.icon className="w-5 h-5" />
+                                    <span>{storeMenu.label}</span>
+                                </div>
+                                <ChevronDown className={cn("w-4 h-4 transition-transform", storeMenuExpanded && "rotate-180")} />
+                            </button>
+                            {storeMenuExpanded && (
+                                <div className="ml-9 space-y-1">
+                                    {storeMenu.children.map((child) => (
+                                        <Link
+                                            key={child.label}
+                                            href={child.href}
+                                            className={cn(
+                                                "block px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                                                pathname === child.href
+                                                    ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
+                                                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
+                                            )}
+                                        >
+                                            {child.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Services */}
+                            <button
+                                onClick={() => setServicesExpanded(!servicesExpanded)}
+                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <servicesMenu.icon className="w-5 h-5" />
+                                    <span>Services</span>
+                                </div>
+                                <ChevronDown className={cn("w-4 h-4 transition-transform", servicesExpanded && "rotate-180")} />
+                            </button>
+                            {servicesExpanded && (
+                                <div className="ml-9 space-y-1">
+                                    {servicesMenu.children.map((child) => (
+                                        <Link
+                                            key={child.label}
+                                            href={child.href}
+                                            className={cn(
+                                                "block px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                                                pathname === child.href
+                                                    ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
+                                                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
+                                            )}
+                                        >
+                                            {child.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Products */}
                             <button
                                 onClick={() => setStoreExpanded(!storeExpanded)}
                                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                             >
                                 <div className="flex items-center gap-3">
                                     <productsAndStore.icon className="w-5 h-5" />
-                                    <span>{productsAndStore.label}</span>
+                                    <span>Products</span>
                                 </div>
                                 <ChevronDown className={cn("w-4 h-4 transition-transform", storeExpanded && "rotate-180")} />
                             </button>
@@ -370,6 +463,89 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                                 </div>
                             )}
 
+                            {/* Quotes (New) */}
+                            <button
+                                onClick={() => setQuotesExpanded(!quotesExpanded)}
+                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <quotesMenu.icon className="w-5 h-5" />
+                                    <span>{quotesMenu.label}</span>
+                                </div>
+                                <ChevronDown className={cn("w-4 h-4 transition-transform", quotesExpanded && "rotate-180")} />
+                            </button>
+                            {quotesExpanded && (
+                                <div className="ml-9 space-y-1">
+                                    {quotesMenu.children.map((child) => (
+                                        <Link
+                                            key={child.label}
+                                            href={child.href}
+                                            className={cn(
+                                                "block px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                                                pathname === child.href
+                                                    ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
+                                                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
+                                            )}
+                                        >
+                                            {child.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Bookings */}
+                            <button
+                                onClick={() => setBookingsExpanded(!bookingsExpanded)}
+                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <bookings.icon className="w-5 h-5" />
+                                    <span>{bookings.label}</span>
+                                </div>
+                                <ChevronDown className={cn("w-4 h-4 transition-transform", bookingsExpanded && "rotate-180")} />
+                            </button>
+                            {bookingsExpanded && (
+                                <div className="ml-9 space-y-1">
+                                    {bookings.children.map((child) => (
+                                        <Link
+                                            key={child.label}
+                                            href={child.href}
+                                            className={cn(
+                                                "block px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                                                pathname === child.href
+                                                    ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
+                                                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
+                                            )}
+                                        >
+                                            {child.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Other Items */}
+                            {navigationItems.filter(i => !['Dashboard', 'Services'].includes(i.label)).map((item) => (
+                                <Link
+                                    key={item.label}
+                                    href={item.href}
+                                    className={cn(
+                                        "flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                                        pathname === item.href
+                                            ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
+                                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <item.icon className="w-5 h-5" />
+                                        <span>{item.label}</span>
+                                    </div>
+                                    {item.badge && (
+                                        <Badge variant="destructive" className="h-5 px-1.5 text-xs">
+                                            {item.badge}
+                                        </Badge>
+                                    )}
+                                </Link>
+                            ))}
                         </div>
 
 
@@ -458,6 +634,6 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                 onClose={() => setIsAiAssistantOpen(false)}
                 onImageSelect={() => { }} // Global assistant doesn't necessarily select images here
             />
-        </div>
+        </div >
     )
 }

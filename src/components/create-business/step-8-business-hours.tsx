@@ -28,13 +28,10 @@ interface DayHours {
 export function Step8BusinessHours() {
     const { data, updateData } = useWizard()
 
-    console.log('🕐 [Step8BusinessHours] Component rendered')
-    console.log('🕐 [Step8BusinessHours] Current data.businessHours:', JSON.stringify(data.businessHours, null, 2))
 
     // Use useEffect to initialize businessHours only once on mount if it's not already set
     useEffect(() => {
         if (!data.businessHours || data.businessHours.length === 0) {
-            console.log('🕐 [useEffect] Initializing default business hours...')
             // Default: Mon-Fri 9AM-5PM, closed weekends
             const defaultHours = DAYS.map(day => ({
                 day: day.id,
@@ -43,46 +40,35 @@ export function Step8BusinessHours() {
                 closeTime: "17:00"
             }))
             updateData({ businessHours: defaultHours })
-            console.log('🕐 [useEffect] Default hours set:', JSON.stringify(defaultHours, null, 2))
         }
     }, []) // Empty dependency array - only run once on mount
 
     // Always use the hours directly from data, as they are initialized by useEffect or already exist
     const hours = data.businessHours || []
 
-    console.log('🕐 [Step8BusinessHours] Final hours to render:', JSON.stringify(hours, null, 2))
 
     const updateDayHours = (dayId: string, updates: Partial<DayHours>) => {
-        console.log('🕐 [updateDayHours] Updating day:', dayId, 'with updates:', updates)
-        console.log('🕐 [updateDayHours] Current hours before update:', JSON.stringify(hours, null, 2))
 
         const newHours = hours.map(h =>
             h.day === dayId ? { ...h, ...updates } : h
         )
 
-        console.log('🕐 [updateDayHours] New hours after update:', JSON.stringify(newHours, null, 2))
         updateData({ businessHours: newHours })
-        console.log('🕐 [updateDayHours] Called updateData with new hours')
     }
 
     const applyToAll = () => {
-        console.log('🕐 [applyToAll] Applying first day hours to all open days')
         const firstOpenDay = hours.find(h => h.isOpen)
         if (!firstOpenDay) {
-            console.log('🕐 [applyToAll] No open day found, aborting')
             return
         }
 
-        console.log('🕐 [applyToAll] First open day:', firstOpenDay)
         const newHours = hours.map(h => ({
             ...h,
             openTime: firstOpenDay.openTime,
             closeTime: firstOpenDay.closeTime
         }))
 
-        console.log('🕐 [applyToAll] New hours:', JSON.stringify(newHours, null, 2))
         updateData({ businessHours: newHours })
-        console.log('🕐 [applyToAll] Called updateData with new hours')
     }
 
     return (

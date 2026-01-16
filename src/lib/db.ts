@@ -8,11 +8,7 @@ if (!MONGODB_URI) {
     );
 }
 
-// Global debug log to catch where the connection is heading
-const maskedUri = MONGODB_URI.replace(/:([^@]+)@/, ':****@');
-console.log('--- DATABASE CONNECTION DEBUG ---');
-console.log('URI:', maskedUri);
-console.log('---------------------------------');
+
 
 /**
  * Global is used here to maintain a cached connection across hot reloads

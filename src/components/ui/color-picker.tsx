@@ -81,7 +81,7 @@ export function ColorPicker({ value, onChange, className, presets }: ColorPicker
                                         const result = await eyeDropper.open();
                                         onChange(result.sRGBHex);
                                     } catch (e) {
-                                        console.log(e);
+                                        // console.log(e);
                                     }
                                 }}
                                 title="Pick color from screen"

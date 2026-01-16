@@ -130,7 +130,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
                     setCurrentStep(draft.setupStep || 1)
                 }
             } catch (error) {
-                console.log('No draft found or error loading draft')
+                // No draft found or error loading draft
             }
         }
         loadDraft()

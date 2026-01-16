@@ -186,8 +186,30 @@ export function ImageGeneratorModal({
             // Only sync if the context is actually different from what we last synced
             // AND the prompt is either empty or matches the last synced context
             if (context !== lastSyncedContext && (prompt === "" || prompt === lastSyncedContext)) {
-                setPrompt(context)
                 setLastSyncedContext(context)
+
+                // Set initial context as prompt first
+                setPrompt(context)
+
+                // Auto-refine the prompt
+                setIsRefining(true)
+                fetch('/api/refine-prompt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: context }),
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.refinedPrompt) {
+                            setPrompt(data.refinedPrompt)
+                            toast.success("Prompt auto-optimized for image generation!")
+                        }
+                    })
+                    .catch((err) => {
+                        console.error("Auto-refine failed:", err)
+                        // Fallback to original context is already set
+                    })
+                    .finally(() => setIsRefining(false))
             }
         }
     }, [isOpen, serviceName, serviceDescription, lastSyncedContext, prompt])
@@ -276,9 +298,30 @@ export function ImageGeneratorModal({
 
             setMessages(prev => [...prev, assistantMsg])
             toast.success("Visuals created successfully!")
-        } catch (error) {
-            console.error(error)
-            toast.error("Generation failed")
+        } catch (error: any) {
+            console.error("Generation error:", error)
+
+            let errorMessage = "Generation failed. Please try again."
+
+            // Handle specific error messages if they exist in the error object or string
+            if (error.message) {
+                if (error.message.includes("429") || error.message.includes("throttled") || error.message.includes("rate limit")) {
+                    errorMessage = "System is busy (Rate Limit). Please wait a moment before trying again."
+                } else {
+                    errorMessage = error.message
+                }
+            }
+
+            toast.error(errorMessage)
+
+            // Add a system message to the chat for visibility
+            const errorMsg: Message = {
+                id: Math.random().toString(36).substring(7),
+                type: 'assistant',
+                text: `⚠️ ${errorMessage}`,
+                timestamp: Date.now()
+            }
+            setMessages(prev => [...prev, errorMsg])
         } finally {
             setIsGenerating(false)
         }

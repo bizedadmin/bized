@@ -9,8 +9,12 @@ import {
     Filter,
     ArrowUpDown,
     Package,
-    AlertCircle
+    AlertCircle,
+    Trash2,
+    Edit3
 } from "lucide-react"
+
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -54,6 +58,7 @@ export default function ProductsPage() {
     const [loading, setLoading] = useState(true)
     const [businessId, setBusinessId] = useState<string | null>(null)
 
+
     useEffect(() => {
         const storedBusiness = localStorage.getItem("selectedBusiness")
         if (storedBusiness) {
@@ -81,11 +86,34 @@ export default function ProductsPage() {
         if (businessId) fetchProducts(businessId)
     }
 
+    const handleDeleteProduct = async (productId: string) => {
+        if (!confirm("Are you sure you want to delete this product?")) return
+
+        try {
+            const res = await fetch(`/api/products?id=${productId}&businessId=${businessId}`, {
+                method: "DELETE"
+            })
+
+            if (res.ok) {
+                toast.success("Product deleted successfully")
+                if (businessId) fetchProducts(businessId)
+            } else {
+                toast.error("Failed to delete product")
+            }
+        } catch (error) {
+            console.error("Error deleting product:", error)
+            toast.error("An error occurred while deleting")
+        }
+    }
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Products</h1>
-                <Button onClick={() => router.push('/business/products/new')} className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm font-semibold">
+                <Button
+                    onClick={() => router.push('/business/products/new')}
+                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm font-semibold"
+                >
                     <Plus className="w-4 h-4 mr-2" />
                     Add product
                 </Button>
@@ -156,11 +184,15 @@ export default function ProductsPage() {
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-12 h-12 rounded-lg bg-muted flex-shrink-0 relative overflow-hidden">
                                                         {product.image?.[0] ? (
-                                                            <Image
+                                                            <img
                                                                 src={product.image[0]}
                                                                 alt={product.name}
-                                                                fill
-                                                                className="object-cover"
+                                                                className="w-full h-full object-cover"
+                                                                onError={(e) => {
+                                                                    const target = e.target as HTMLImageElement;
+                                                                    target.src = "/placeholder-product.png"; // Fallback if image fails
+                                                                    target.onerror = null; // Prevent infinite loop
+                                                                }}
                                                             />
                                                         ) : (
                                                             <Package className="w-6 h-6 text-muted-foreground absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
@@ -196,8 +228,20 @@ export default function ProductsPage() {
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem className="cursor-pointer">Edit</DropdownMenuItem>
-                                                        <DropdownMenuItem className="cursor-pointer text-destructive">Delete</DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            className="cursor-pointer"
+                                                            onSelect={() => router.push(`/business/products/${product._id}`)}
+                                                        >
+                                                            <Edit3 className="w-4 h-4 mr-2" />
+                                                            Edit
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            className="cursor-pointer text-destructive"
+                                                            onSelect={() => handleDeleteProduct(product._id)}
+                                                        >
+                                                            <Trash2 className="w-4 h-4 mr-2" />
+                                                            Delete
+                                                        </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </TableCell>
@@ -223,6 +267,7 @@ export default function ProductsPage() {
                     </div>
                 </TabsContent>
             </Tabs>
+
 
         </div>
     )

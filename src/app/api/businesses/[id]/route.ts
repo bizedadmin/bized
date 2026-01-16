@@ -40,8 +40,6 @@ export async function PUT(req: Request, props: { params: Promise<{ id: string }>
         const params = await props.params;
         const body = await req.json();
 
-        console.log(`[PUT Business] Updating business ${params.id} for user ${session.user.id}`);
-        console.log(`[PUT Business] Payload:`, body);
 
         // Prevent updating critical fields
         delete body.owner;
@@ -52,7 +50,6 @@ export async function PUT(req: Request, props: { params: Promise<{ id: string }>
 
         await dbConnect();
 
-        console.log('[PUT Business] DB Connected, attempting update...');
 
         const business = await Business.findOneAndUpdate(
             { _id: params.id, owner: session.user.id },
@@ -61,11 +58,9 @@ export async function PUT(req: Request, props: { params: Promise<{ id: string }>
         );
 
         if (!business) {
-            console.log('[PUT Business] Business not found or user not owner');
             return NextResponse.json({ message: 'Business not found' }, { status: 404 });
         }
 
-        console.log('[PUT Business] Update successful');
         return NextResponse.json(business);
     } catch (error) {
         console.error('Error updating business:', error);

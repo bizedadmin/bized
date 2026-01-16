@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
-export default function QuotePageRedirect() {
+export default function ShopPageRedirect() {
     const router = useRouter()
     const [loading, setLoading] = useState(true)
 
@@ -15,7 +15,7 @@ export default function QuotePageRedirect() {
                 try {
                     const business = JSON.parse(storedBusiness)
                     if (business && business._id) {
-                        router.push(`/business/design/page-builder/quote?businessId=${business._id}`)
+                        router.push(`/business/design/page-builder/shop?businessId=${business._id}`)
                         return
                     }
                 } catch (e) {
@@ -34,7 +34,7 @@ export default function QuotePageRedirect() {
         <div className="flex h-[50vh] items-center justify-center">
             <div className="flex flex-col items-center gap-2">
                 <div className="w-8 h-8 border-4 border-zinc-200 border-t-zinc-900 rounded-full animate-spin"></div>
-                <p className="text-sm text-zinc-500">Redirecting to Quote Page Designer...</p>
+                <p className="text-sm text-zinc-500">Redirecting to Shop Page Designer...</p>
             </div>
         </div>
     )

@@ -158,7 +158,7 @@ export default function ServicesPage() {
                                         </div>
                                     </TableCell>
                                     <TableCell className="font-medium text-gray-900">{service.name}</TableCell>
-                                    <TableCell className="hidden md:table-cell text-gray-500">{service.serviceType || "-"}</TableCell>
+                                    <TableCell className="hidden md:table-cell text-gray-500">{service.serviceType || service.category || "-"}</TableCell>
                                     <TableCell className="hidden md:table-cell text-gray-500">{service.duration} mins</TableCell>
                                     <TableCell className="font-medium text-gray-900">
                                         {service.offers?.priceCurrency} {service.offers?.price}

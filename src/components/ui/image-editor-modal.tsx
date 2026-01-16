@@ -99,18 +99,30 @@ export function ImageEditorModal({
     }
 
     const handleSave = async () => {
+        if (!currentImage) return
         setIsSaving(true)
-        const canvas = canvasRef.current
-        if (!canvas) return
 
-        const ctx = canvas.getContext('2d')
-        if (!ctx) return
+        try {
+            const canvas = canvasRef.current
+            if (!canvas) throw new Error("Canvas not found")
 
-        const img = new Image()
-        img.crossOrigin = "anonymous"
-        img.src = currentImage || ""
+            const ctx = canvas.getContext('2d')
+            if (!ctx) throw new Error("Context not found")
 
-        img.onload = () => {
+            // Create a promise to handle image loading
+            const loadImage = () => new Promise<HTMLImageElement>((resolve, reject) => {
+                const img = new Image()
+                img.crossOrigin = "anonymous"
+                img.onload = () => resolve(img)
+                img.onerror = (e) => {
+                    console.error("Image load failed for URL:", currentImage);
+                    reject(new Error("Failed to load image for editing. This can happen if the original image doesn't allow cross-origin editing (CORS)."))
+                }
+                img.src = currentImage
+            })
+
+            const img = await loadImage()
+
             // Setup canvas size based on rotation
             const isRotated = rotation % 180 !== 0
             canvas.width = isRotated ? img.height : img.width
@@ -131,10 +143,17 @@ export function ImageEditorModal({
             // Draw
             ctx.drawImage(img, -img.width / 2, -img.height / 2)
 
+            // Get data URL
             const dataUrl = canvas.toDataURL("image/webp", 0.9)
             onSave(dataUrl)
-            setIsSaving(false)
+            toast.success("Edits applied!")
+
             onClose()
+        } catch (error) {
+            console.error("Save error:", error)
+            toast.error(error instanceof Error ? error.message : "Failed to save edits")
+        } finally {
+            setIsSaving(false)
         }
     }
 
@@ -146,31 +165,26 @@ export function ImageEditorModal({
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
-        if (!file || !businessId) return
+        if (!file) return
 
         setIsUploading(true)
-        const formData = new FormData()
-        formData.append("file", file)
-        formData.append("businessId", businessId)
-
         try {
-            const res = await fetch("/api/upload", {
-                method: "POST",
-                body: formData,
-            })
-
-            if (res.ok) {
-                const data = await res.json()
-                setCurrentImage(data.url)
+            const reader = new FileReader()
+            reader.onload = (event) => {
+                const dataUrl = event.target?.result as string
+                setCurrentImage(dataUrl)
                 resetAdjustments()
-                toast.success("Image uploaded successfully!")
-            } else {
-                toast.error("Upload failed")
+                toast.success("Image loaded for editing!")
+                setIsUploading(false)
             }
+            reader.onerror = () => {
+                toast.error("Failed to read file")
+                setIsUploading(false)
+            }
+            reader.readAsDataURL(file)
         } catch (error) {
-            toast.error("Error uploading file")
+            toast.error("Error reading file")
             console.error(error)
-        } finally {
             setIsUploading(false)
         }
     }
@@ -229,6 +243,7 @@ export function ImageEditorModal({
                                     alt="Editing Preview"
                                     className="max-w-full max-h-[50vh] object-contain select-none"
                                     style={filterStyle}
+                                    crossOrigin="anonymous"
                                 />
                             ) : (
                                 <div
@@ -349,6 +364,7 @@ export function ImageEditorModal({
                                                             src={currentImage}
                                                             className="w-full h-full object-cover"
                                                             style={{ filter: p.filter }}
+                                                            crossOrigin="anonymous"
                                                         />
                                                     )}
                                                     {activePreset === p.name && (

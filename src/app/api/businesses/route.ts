@@ -34,7 +34,6 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { name, slug } = body;
 
-        console.log('Creating business with body:', JSON.stringify(body, null, 2));
 
         if (!name || !slug) {
             return NextResponse.json({ message: 'Name and slug are required' }, { status: 400 });
@@ -45,7 +44,6 @@ export async function POST(req: Request) {
         // Check slug uniqueness (only for non-draft businesses)
         const existing = await Business.findOne({ slug, isDraft: { $ne: true } });
         if (existing) {
-            console.log('Duplicate slug found:', slug);
             return NextResponse.json({ message: 'Business with this slug already exists' }, { status: 400 });
         }
 
@@ -62,18 +60,6 @@ export async function POST(req: Request) {
                 { title: 'Quote', slug: 'quote', type: 'quote', enabled: true },
             ]
         });
-
-        console.log('Business created successfully:', business._id);
-
-        // Create Cloudinary folder for the new business
-        try {
-            const { createFolder } = await import('@/lib/cloudinary');
-            await createFolder(business.slug);
-            console.log('Cloudinary folder created for:', business.slug);
-        } catch (error) {
-            console.error('Error creating Cloudinary folder:', error);
-            // Don't fail the response if folder creation fails
-        }
 
         return NextResponse.json(business, { status: 201 });
     } catch (error) {

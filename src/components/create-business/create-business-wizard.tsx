@@ -39,8 +39,6 @@ function WizardContent() {
         if (currentStep === 1) {
             setCreating(true)
             try {
-                console.log('Creating business with data:', data)
-
                 const res = await fetch("/api/businesses", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -62,10 +60,7 @@ function WizardContent() {
 
                 if (res.ok) {
                     const business = await res.json()
-                    console.log('Business created:', business)
-
                     // Redirect to page builder
-                    console.log('Redirecting to page builder')
                     router.push(`/business/page-builder?businessId=${business._id}`)
                 } else {
                     console.error('Business creation failed with status:', res.status)
@@ -92,8 +87,6 @@ function WizardContent() {
             // Submit the form (for remaining steps if we keep them)
             setCreating(true)
             try {
-                console.log('Creating business with data:', data)
-
                 const res = await fetch("/api/businesses", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -119,11 +112,9 @@ function WizardContent() {
 
                 if (res.ok) {
                     const business = await res.json()
-                    console.log('Business created:', business)
 
                     // Create products if any
                     if (data.products && data.products.length > 0) {
-                        console.log('Creating products:', data.products)
                         await Promise.all(
                             data.products.map(product =>
                                 fetch(`/api/businesses/${business._id}/products`, {
@@ -136,7 +127,6 @@ function WizardContent() {
                     }
 
                     // Redirect to business dashboard
-                    console.log('Redirecting to business dashboard')
                     router.push('/business/dashboard')
                 } else {
                     console.error('Business creation failed with status:', res.status)

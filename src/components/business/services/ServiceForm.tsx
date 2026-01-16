@@ -145,6 +145,36 @@ export function ServiceForm({ initialData, businessId, isEditing = false }: Serv
 
         setLoading(true)
         try {
+            // Process images: upload any data URLs or external CDN URLs to the cloud
+            const processedImages = await Promise.all(images.map(async (img) => {
+                const isDataUrl = img.startsWith('data:');
+                const isExternalCloud = img.includes('replicate.delivery') || img.includes('replicate.com');
+
+                if (isDataUrl || isExternalCloud) {
+                    // Convert to File/Blob for upload
+                    const response = await fetch(img)
+                    const blob = await response.blob()
+                    const file = new File([blob], `service-image-${Date.now()}.webp`, { type: 'image/webp' })
+
+                    const formData = new FormData()
+                    formData.append("file", file)
+                    formData.append("businessId", businessId)
+
+                    const uploadRes = await fetch("/api/upload", {
+                        method: "POST",
+                        body: formData,
+                    })
+
+                    if (uploadRes.ok) {
+                        const data = await uploadRes.json()
+                        return data.url
+                    } else {
+                        throw new Error("Failed to persist image to cloud")
+                    }
+                }
+                return img
+            }))
+
             // Check if the current category exists, if not, create it
             const existingCat = categories.find(c => c.name.toLowerCase() === category.toLowerCase());
             if (!existingCat && category.trim()) {
@@ -171,8 +201,8 @@ export function ServiceForm({ initialData, businessId, isEditing = false }: Serv
                     business: businessId,
                     name,
                     description,
-                    serviceType,
-                    image: images,
+                    serviceType: serviceType || category, // Fallback to category if type is empty
+                    image: processedImages,
                     duration: parseInt(duration),
                     slogan,
                     brand,
@@ -677,6 +707,16 @@ export function ServiceForm({ initialData, businessId, isEditing = false }: Serv
                                         Suggested: {categories.slice(0, 3).map(c => c.name).join(", ")}
                                     </p>
                                 </div>
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-sm font-medium text-foreground">Service Type</Label>
+                                <Input
+                                    value={serviceType}
+                                    onChange={(e) => setServiceType(e.target.value)}
+                                    className="h-10 text-sm"
+                                    placeholder="e.g. Automation, Consulting"
+                                />
+                                <p className="text-[10px] text-muted-foreground mt-1">Specific type of service (shows as 'Type' in list).</p>
                             </div>
                             <div className="space-y-1">
                                 <Label className="text-sm font-medium text-foreground">Brand Association</Label>

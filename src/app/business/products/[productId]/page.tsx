@@ -31,10 +31,11 @@ import {
 } from "@/components/ui/select"
 import { toast } from "sonner"
 
-export default function NewProductPage() {
+export default function EditProductPage({ params }: { params: { productId: string } }) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [generatingDescription, setGeneratingDescription] = useState(false)
+    const [initialLoading, setInitialLoading] = useState(true)
     const [businessId, setBusinessId] = useState<string | null>(null)
 
     // Form state
@@ -70,8 +71,41 @@ export default function NewProductPage() {
             const business = JSON.parse(storedBusiness)
             setBusinessId(business._id)
             fetchCategories(business._id)
+            fetchProduct(business._id)
         }
-    }, [])
+    }, [params.productId])
+
+    const fetchProduct = async (bid: string) => {
+        try {
+            const res = await fetch(`/api/products?id=${params.productId}&businessId=${bid}`)
+            if (res.ok) {
+                const product = await res.json()
+                setName(product.name || "")
+                setType(product.type || "Product")
+                setCategory(product.category || "")
+                setPrice(product.offers?.price?.toString() || "")
+                setCost(product.offers?.cost?.toString() || "")
+                setDiscount(product.offers?.discount?.toString() || "0")
+                setTax(product.offers?.tax?.toString() || "16")
+                setUnit(product.unit || "")
+                setSku(product.sku || "")
+                setMpn(product.mpn || "")
+                setBrand(product.brand || "")
+                setIsOnline(product.status === "active")
+                setDescription(product.description || "")
+                setUrl(product.url || "")
+                setImages(product.image || [])
+            } else {
+                toast.error("Failed to load product")
+                router.push("/business/products")
+            }
+        } catch (error) {
+            console.error("Error fetching product:", error)
+            toast.error("Error loading product")
+        } finally {
+            setInitialLoading(false)
+        }
+    }
 
     const fetchCategories = async (id: string) => {
         try {
@@ -146,9 +180,10 @@ export default function NewProductPage() {
             }))
 
             const res = await fetch("/api/products", {
-                method: "POST",
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    id: params.productId,
                     business: businessId,
                     type,
                     name,
@@ -173,11 +208,13 @@ export default function NewProductPage() {
             })
 
             if (res.ok) {
+                toast.success("Product updated successfully")
                 router.push("/business/products")
                 router.refresh()
             }
         } catch (error) {
-            console.error("Error creating product:", error)
+            console.error("Error updating product:", error)
+            toast.error("Failed to update product")
         } finally {
             setLoading(false)
         }
@@ -203,6 +240,14 @@ export default function NewProductPage() {
         setImages(prev => prev.filter((_, i) => i !== index))
     }
 
+    if (initialLoading) {
+        return (
+            <div className="flex items-center justify-center h-[50vh]">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            </div>
+        )
+    }
+
     return (
         <div className="max-w-5xl mx-auto pb-20">
             {/* Header */}
@@ -217,8 +262,8 @@ export default function NewProductPage() {
                         <ChevronLeft className="w-5 h-5" />
                     </Button>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Add {type.toLowerCase()}</h1>
-                        <p className="text-sm text-muted-foreground">Fill in the details to create a new offering.</p>
+                        <h1 className="text-2xl font-bold text-foreground">Edit {type.toLowerCase()}</h1>
+                        <p className="text-sm text-muted-foreground">Update the details of your offering.</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -229,7 +274,7 @@ export default function NewProductPage() {
                         className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 shadow-sm font-bold"
                     >
                         {loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                        Save {type}
+                        Save Changes
                     </Button>
                 </div>
             </div>
@@ -351,7 +396,8 @@ export default function NewProductPage() {
                                     onChange={handleFileChange}
                                     className="hidden"
                                     accept="image/*"
-                                />
+                                >
+                                </input>
                                 {uploading ? (
                                     <Loader2 className="w-6 h-6 animate-spin text-primary" />
                                 ) : (
