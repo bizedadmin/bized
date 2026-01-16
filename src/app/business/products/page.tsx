@@ -43,7 +43,7 @@ interface Product {
     type: 'Product' | 'Service'
     description: string
     image: string[]
-    status: 'active' | 'draft' | 'archived'
+    status: 'active' | 'draft' | 'archived' | 'online' | 'offline'
     offers: {
         price: number
         priceCurrency: string
@@ -147,9 +147,9 @@ export default function ProductsPage() {
                             <TableHeader>
                                 <TableRow className="bg-gray-50/50 dark:bg-zinc-800/50">
                                     <TableHead className="w-[400px]">Product</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Price</TableHead>
                                     <TableHead>Category</TableHead>
+                                    <TableHead>Price</TableHead>
+                                    <TableHead>Status</TableHead>
                                     <TableHead className="text-right">Action</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -204,21 +204,21 @@ export default function ProductsPage() {
                                                     </div>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
-                                                <Badge
-                                                    variant={product.status === 'active' ? 'secondary' : 'outline'}
-                                                    className={cn(
-                                                        product.status === 'active' ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30" : ""
-                                                    )}
-                                                >
-                                                    {product.status}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="text-sm">
-                                                {product.offers.priceCurrency} {product.offers.price.toLocaleString()}
-                                            </TableCell>
                                             <TableCell className="text-sm text-muted-foreground">
                                                 {product.category || '-'}
+                                            </TableCell>
+                                            <TableCell className="text-sm font-medium">
+                                                {product.offers.priceCurrency} {product.offers.price.toLocaleString()}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge
+                                                    variant={(product.status === 'online' || product.status === 'active') ? 'secondary' : 'outline'}
+                                                    className={cn(
+                                                        (product.status === 'online' || product.status === 'active') ? "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800" : "bg-gray-100 text-gray-600 border-gray-200 dark:bg-zinc-800 dark:text-gray-400 dark:border-zinc-700"
+                                                    )}
+                                                >
+                                                    {product.status === 'active' || product.status === 'online' ? 'Online' : product.status === 'draft' || product.status === 'offline' ? 'Offline' : product.status}
+                                                </Badge>
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <DropdownMenu>

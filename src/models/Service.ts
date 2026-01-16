@@ -93,8 +93,8 @@ const ServiceSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['active', 'draft', 'archived'],
-        default: 'active',
+        enum: ['online', 'offline', 'active', 'inactive', 'draft', 'archived'],
+        default: 'online',
     }
 }, {
     timestamps: true,

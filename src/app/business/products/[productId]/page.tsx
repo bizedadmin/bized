@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, use } from "react"
 import {
     X,
     Upload,
@@ -31,7 +31,8 @@ import {
 } from "@/components/ui/select"
 import { toast } from "sonner"
 
-export default function EditProductPage({ params }: { params: { productId: string } }) {
+export default function EditProductPage({ params }: { params: Promise<{ productId: string }> }) {
+    const { productId } = use(params)
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [generatingDescription, setGeneratingDescription] = useState(false)
@@ -73,11 +74,11 @@ export default function EditProductPage({ params }: { params: { productId: strin
             fetchCategories(business._id)
             fetchProduct(business._id)
         }
-    }, [params.productId])
+    }, [productId])
 
     const fetchProduct = async (bid: string) => {
         try {
-            const res = await fetch(`/api/products?id=${params.productId}&businessId=${bid}`)
+            const res = await fetch(`/api/products?id=${productId}&businessId=${bid}`)
             if (res.ok) {
                 const product = await res.json()
                 setName(product.name || "")
@@ -91,7 +92,7 @@ export default function EditProductPage({ params }: { params: { productId: strin
                 setSku(product.sku || "")
                 setMpn(product.mpn || "")
                 setBrand(product.brand || "")
-                setIsOnline(product.status === "active")
+                setIsOnline(product.status === "online" || product.status === "active")
                 setDescription(product.description || "")
                 setUrl(product.url || "")
                 setImages(product.image || [])
@@ -183,7 +184,7 @@ export default function EditProductPage({ params }: { params: { productId: strin
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    id: params.productId,
+                    id: productId,
                     business: businessId,
                     type,
                     name,
@@ -203,7 +204,7 @@ export default function EditProductPage({ params }: { params: { productId: strin
                         priceCurrency: "KES",
                         availability: isOnline ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
                     },
-                    status: isOnline ? "active" : "draft"
+                    status: isOnline ? "online" : "offline"
                 })
             })
 
@@ -498,11 +499,11 @@ export default function EditProductPage({ params }: { params: { productId: strin
                             </Badge>
                         </div>
                         <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
-                            <Label htmlFor="online" className="text-sm font-medium cursor-pointer">Published</Label>
+                            <Label htmlFor="online" className="text-sm font-medium cursor-pointer">Available Online</Label>
                             <Switch id="online" checked={isOnline} onCheckedChange={setIsOnline} />
                         </div>
                         <p className="text-[11px] text-muted-foreground leading-relaxed">
-                            If published, this {type.toLowerCase()} will be visible on your public storefront and searchable by customers.
+                            If online, this {type.toLowerCase()} will be visible on your public storefront and searchable by customers.
                         </p>
                     </div>
 

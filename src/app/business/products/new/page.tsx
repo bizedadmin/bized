@@ -168,7 +168,7 @@ export default function NewProductPage() {
                         priceCurrency: "KES",
                         availability: isOnline ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
                     },
-                    status: isOnline ? "active" : "draft"
+                    status: isOnline ? "online" : "offline"
                 })
             })
 
@@ -452,11 +452,11 @@ export default function NewProductPage() {
                             </Badge>
                         </div>
                         <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
-                            <Label htmlFor="online" className="text-sm font-medium cursor-pointer">Published</Label>
+                            <Label htmlFor="online" className="text-sm font-medium cursor-pointer">Available Online</Label>
                             <Switch id="online" checked={isOnline} onCheckedChange={setIsOnline} />
                         </div>
                         <p className="text-[11px] text-muted-foreground leading-relaxed">
-                            If published, this {type.toLowerCase()} will be visible on your public storefront and searchable by customers.
+                            If online, this {type.toLowerCase()} will be visible on your public storefront and searchable by customers.
                         </p>
                     </div>
 

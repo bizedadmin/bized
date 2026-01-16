@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import dbConnect from '@/lib/db'
 import Business from '@/models/Business'
 import Product from '@/models/Product'
+import Service from '@/models/Service'
 import { BusinessStorefront } from '@/components/business/business-storefront'
 
 
@@ -21,12 +22,12 @@ export default async function BusinessPage({ params }: PageProps) {
 
     // Fetch products
     const products = await Product.find({ business: business._id }).lean()
+    const services = await Service.find({ business: business._id }).lean()
 
-    business.products = products
-
-    // Serialize data for client component using JSON stringify/parse to handle all nested ObjectIds and Dates
+    // Serialize data
     const plainBusiness = JSON.parse(JSON.stringify(business))
     const plainProducts = JSON.parse(JSON.stringify(products))
+    const plainServices = JSON.parse(JSON.stringify(services))
 
-    return <BusinessStorefront business={plainBusiness} products={plainProducts} />
+    return <BusinessStorefront business={plainBusiness} products={plainProducts} services={plainServices} />
 }

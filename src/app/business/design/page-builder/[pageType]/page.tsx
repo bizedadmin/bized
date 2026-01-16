@@ -51,7 +51,8 @@ import {
     MessageSquare,
     LocateFixed,
     ExternalLink,
-    Copy
+    Copy,
+    ShoppingBag
 } from "lucide-react"
 import {
     TextalignJustifycenter,
@@ -92,6 +93,8 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [products, setProducts] = useState<any[]>([])
+    const [services, setServices] = useState<any[]>([])
+
     const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit')
 
     // Form State
@@ -127,10 +130,17 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                         })
 
                         // Fetch Products
-                        const pRes = await fetch(`/api/products?business=${businessId}`)
+                        const pRes = await fetch(`/api/products?businessId=${businessId}`)
                         if (pRes.ok) {
                             const pData = await pRes.json()
                             setProducts(pData)
+                        }
+
+                        // Fetch Services
+                        const sRes = await fetch(`/api/business/services?businessId=${businessId}`)
+                        if (sRes.ok) {
+                            const sData = await sRes.json()
+                            setServices(sData)
                         }
                     }
                 } catch (err) {
@@ -288,6 +298,12 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                     email: formData.email || ''
                 }
                 break
+            case 'services':
+                newBlock = { ...newBlock, title: 'Our Services', description: 'Select the services you would like to book.' }
+                break
+            case 'products':
+                newBlock = { ...newBlock, title: 'Shop Products', description: 'Explore our curated collection of items.' }
+                break
             case 'location':
                 newBlock = {
                     ...newBlock,
@@ -322,6 +338,13 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                                 url.includes('whatsapp') ? 'whatsapp' : 'website'
                         return { name, url }
                     }) || []
+                }
+                break
+            case 'services':
+                newBlock = {
+                    ...newBlock,
+                    title: 'Our Services',
+                    description: 'Select the services you would like to book.',
                 }
                 break
         }
@@ -741,10 +764,10 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                         </TabsContent>
                     </Tabs>
                 </div>
-            </div >
+            </div>
 
             {/* Right Panel - Preview */}
-            < div className={`flex-1 bg-gray-50 md:flex items-center justify-center p-4 md:p-8 overflow-y-auto relative transition-all duration-300 ${activeTab === 'edit' ? 'hidden md:flex' : 'flex'}`
+            <div className={`flex-1 bg-gray-50 md:flex items-center justify-center p-4 md:p-8 overflow-y-auto relative transition-all duration-300 ${activeTab === 'edit' ? 'hidden md:flex' : 'flex'}`
             }>
                 <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]"></div>
 
@@ -771,6 +794,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                     <BusinessStorefront
                                         business={formData}
                                         products={products}
+                                        services={services}
                                         pageType={pageType as any}
                                     />
                                 </div>
@@ -778,10 +802,10 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                         </div>
                     </div>
                 </div>
-            </div >
+            </div>
 
             {/* Mobile Tab Bar */}
-            < div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t flex items-center px-4 z-[100] gap-2" >
+            <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t flex items-center px-4 z-[100] gap-2" >
                 <button
                     onClick={() => setActiveTab('edit')}
                     className={`flex-1 h-10 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition-all ${activeTab === 'edit' ? 'bg-black text-white shadow-lg' : 'text-zinc-500 hover:bg-zinc-50'}`}
@@ -796,11 +820,11 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                     <Smartphone size={18} />
                     Preview
                 </button>
-            </div >
+            </div>
 
 
             {/* Blocks Management Modal */}
-            < Dialog open={isBlocksModalOpen} onOpenChange={setIsBlocksModalOpen} >
+            <Dialog open={isBlocksModalOpen} onOpenChange={setIsBlocksModalOpen} >
                 <DialogContent className="max-w-md p-0 overflow-hidden rounded-xl border border-[#CDD0DB] shadow-xl font-noto-sans h-[550px] flex flex-col">
                     <DialogHeader className="px-6 pt-6 pb-2 border-b-0 bg-white shrink-0">
                         <DialogTitle className="text-[18px] font-medium leading-[26px] text-[#0A0909] font-rubik">Add Content Block</DialogTitle>
@@ -986,6 +1010,46 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                             <div className="text-[10px] text-[#3F3E3E]">Social networks</div>
                                         </div>
                                     </button>
+
+                                    <button
+                                        className="p-3 rounded-lg border border-[#CDD0DB] hover:border-black hover:bg-zinc-50 transition-all duration-200 text-left group flex flex-row items-center gap-3 relative"
+                                        onClick={() => { addBlock('services'); toast.success('Services block added'); }}
+                                    >
+                                        <div className="relative">
+                                            <div className="w-9 h-9 bg-orange-500 rounded-md flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-all">
+                                                <Zap size={18} />
+                                            </div>
+                                            {blocks.some((b: any) => b.type === 'services') && (
+                                                <div className="absolute -top-1.5 -right-1.5 bg-green-500 rounded-full p-0.5 border-2 border-white shadow-sm">
+                                                    <Check size={10} className="text-white" strokeWidth={4} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <div className="font-medium text-[13px] text-[#0A0909] font-noto-sans">Services</div>
+                                            <div className="text-[10px] text-[#3F3E3E]">Active services list</div>
+                                        </div>
+                                    </button>
+
+                                    <button
+                                        className="p-3 rounded-lg border border-[#CDD0DB] hover:border-black hover:bg-zinc-50 transition-all duration-200 text-left group flex flex-row items-center gap-3 relative"
+                                        onClick={() => { addBlock('products'); toast.success('Products block added'); }}
+                                    >
+                                        <div className="relative">
+                                            <div className="w-9 h-9 bg-blue-500 rounded-md flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-all">
+                                                <ShoppingBag size={18} />
+                                            </div>
+                                            {blocks.some((b: any) => b.type === 'products') && (
+                                                <div className="absolute -top-1.5 -right-1.5 bg-green-500 rounded-full p-0.5 border-2 border-white shadow-sm">
+                                                    <Check size={10} className="text-white" strokeWidth={4} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <div className="font-medium text-[13px] text-[#0A0909] font-noto-sans">Products</div>
+                                            <div className="text-[10px] text-[#3F3E3E]">Beautiful product catalog</div>
+                                        </div>
+                                    </button>
                                 </div>
                             </TabsContent>
                         </div>
@@ -1000,10 +1064,10 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                         </Button>
                     </DialogFooter>
                 </DialogContent>
-            </Dialog >
+            </Dialog>
 
             {/* Block Edit Modal */}
-            < Dialog open={!!editingBlockId} onOpenChange={(open) => !open && setEditingBlockId(null)}>
+            <Dialog open={!!editingBlockId} onOpenChange={(open) => !open && setEditingBlockId(null)}>
                 {editingBlock && (
                     <DialogContent className="max-w-md p-0 overflow-hidden rounded-xl border border-[#CDD0DB] shadow-xl font-noto-sans">
                         <DialogHeader className="px-6 pt-6 pb-4 border-b border-[#CDD0DB] bg-white">
@@ -1018,6 +1082,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                     {editingBlock.type === 'facilities' && <CheckCircle2 size={16} className="text-teal-500" />}
                                     {editingBlock.type === 'about' && <Info size={16} className="text-indigo-500" />}
                                     {editingBlock.type === 'social_networks' && <Share2 size={16} className="text-pink-500" />}
+                                    {editingBlock.type === 'services' && <Zap size={16} className="text-orange-500" />}
                                 </div>
                                 Edit {editingBlock.type.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                             </DialogTitle>
@@ -1425,6 +1490,54 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                     </div>
                                 </div>
                             )}
+
+                            {editingBlock.type === 'services' && (
+                                <div className="space-y-4">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-semibold text-muted-foreground">Title</Label>
+                                        <Input
+                                            value={editingBlock.title}
+                                            onChange={(e) => updateBlock(editingBlock.id, { title: e.target.value })}
+                                            className="h-10 text-sm"
+                                            placeholder="e.g. Select Services"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-semibold text-muted-foreground">Description</Label>
+                                        <Textarea
+                                            value={editingBlock.description}
+                                            onChange={(e) => updateBlock(editingBlock.id, { description: e.target.value })}
+                                            className="min-h-[80px] text-sm resize-none"
+                                            placeholder="e.g. Choose from our available options"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {editingBlock.type === 'products' && (
+                                <div className="space-y-4">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-semibold text-muted-foreground">Title</Label>
+                                        <Input
+                                            value={editingBlock.title}
+                                            onChange={(e) => updateBlock(editingBlock.id, { title: e.target.value })}
+                                            className="h-10 text-sm"
+                                            placeholder="e.g. Featured Products"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-semibold text-muted-foreground">Description</Label>
+                                        <Textarea
+                                            value={editingBlock.description}
+                                            onChange={(e) => updateBlock(editingBlock.id, { description: e.target.value })}
+                                            className="min-h-[80px] text-sm resize-none"
+                                            placeholder="e.g. Explore our best-selling items"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+
                         </div>
 
                         <DialogFooter className="p-6 border-t border-[#CDD0DB] bg-white">
@@ -1434,8 +1547,8 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                         </DialogFooter>
                     </DialogContent>
                 )}
-            </Dialog >
-        </div >
+            </Dialog>
+        </div>
     )
 
 }

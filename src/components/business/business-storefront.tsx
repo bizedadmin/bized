@@ -32,7 +32,10 @@ import {
     Baby,
     Dog,
     ChevronDown,
-    Layers
+    Layers,
+    Plus,
+    Check,
+    PlusCircle
 } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -53,6 +56,7 @@ interface Product {
     image?: string
     category?: string
     type?: string
+    status?: string
     offers: {
         price: number
         priceCurrency: string
@@ -108,19 +112,24 @@ interface Business {
 interface BusinessStorefrontProps {
     business: Business
     products: Product[]
+    services?: any[]
     pageType?: 'storefront' | 'bookings' | 'shop' | 'quote'
 }
 
-export function BusinessStorefront({ business, products, pageType = 'storefront' }: BusinessStorefrontProps) {
+export function BusinessStorefront({ business, products, services = [], pageType = 'storefront' }: BusinessStorefrontProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [cart, setCart] = useState<any[]>([])
     const [isCartOpen, setIsCartOpen] = useState(false)
+    const [selectedServices, setSelectedServices] = useState<string[]>([])
+
 
     // Filter logic based on page type
     const displayedProducts = products.filter(product => {
         const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase())
-        if (pageType === 'shop') return matchesSearch && product.type !== 'service'
-        if (pageType === 'bookings') return matchesSearch && product.type === 'service'
+        const isLive = product.status === 'online' || product.status === 'active'
+        if (!isLive) return false
+        if (pageType === 'shop') return matchesSearch
+        if (pageType === 'bookings') return matchesSearch && product.type?.toLowerCase() === 'service'
         return matchesSearch
     })
 
@@ -148,24 +157,30 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
             case 'page_link':
                 const getPageIcon = () => {
                     switch (block.pageType) {
-                        case 'shop': return <ShoppingBag className="w-6 h-6" />
-                        case 'bookings': return <Clock className="w-6 h-6" />
-                        case 'quote': return <MessageSquare className="w-6 h-6" />
-                        default: return <ArrowLeft className="w-6 h-6 rotate-180" />
+                        case 'shop': return <ShoppingBag className="w-4 h-4" />
+                        case 'bookings': return <Clock className="w-4 h-4" />
+                        case 'quote': return <MessageSquare className="w-4 h-4" />
+                        default: return <ArrowLeft className="w-4 h-4 rotate-180" />
                     }
                 }
                 return (
                     <button
                         key={block.id}
                         onClick={() => window.location.href = `/${business.slug}/${block.pageType}`}
-                        className="w-full h-10 px-6 rounded-lg flex items-center justify-between group transition-all"
-                        style={{ backgroundColor: business.buttonColor || business.themeColor || "#000000" }}
+                        className="w-full h-12 px-6 rounded-2xl flex items-center justify-between group transition-all active:scale-[0.98] shadow-sm hover:shadow-md border border-white/10"
+                        style={{ backgroundColor: business.themeColor || "#000000" }}
                     >
-                        <div className="text-left">
-                            <div className="font-normal text-[12px] leading-[20px] text-white font-noto-sans">{block.label || `Go to ${block.pageType}`}</div>
+                        <div className="flex items-center gap-3 text-left">
+                            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white">
+                                {getPageIcon()}
+                            </div>
+                            <div>
+                                <div className="font-bold text-[13px] leading-none text-white font-rubik">{block.label || `Go to ${block.pageType}`}</div>
+                                {block.subtitle && <div className="text-[10px] text-white/70 mt-1">{block.subtitle}</div>}
+                            </div>
                         </div>
-                        <div className="text-white group-hover:scale-110 transition-transform">
-                            {getPageIcon()}
+                        <div className="text-white/80 group-hover:text-white transition-colors">
+                            <ArrowLeft className="w-4 h-4 rotate-180" />
                         </div>
                     </button>
                 )
@@ -174,15 +189,18 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
                     <button
                         key={block.id}
                         onClick={() => window.open(block.url, '_blank')}
-                        className="w-full h-10 px-6 rounded-lg flex items-center justify-between group transition-all border border-[#CDD0DB]"
-                        style={{ backgroundColor: business.secondaryColor || "#FFFFFF" }}
+                        className="w-full h-12 px-6 rounded-2xl flex items-center justify-between group transition-all bg-white dark:bg-zinc-900 border border-[#CDD0DB]/60 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm active:scale-[0.98]"
                     >
-                        <div className="text-left">
-                            <span className="font-normal text-[12px] leading-[20px] text-[#0A0909] font-noto-sans">{block.label || 'Link'}</span>
+                        <div className="flex items-center gap-3 text-left">
+                            <div className="w-8 h-8 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center text-zinc-400">
+                                <ExternalLink className="w-4 h-4" />
+                            </div>
+                            <div>
+                                <div className="font-bold text-[13px] leading-none text-[#0A0909] dark:text-white font-rubik">{block.label}</div>
+                                {block.subtitle && <div className="text-[10px] text-[#3F3E3E] dark:text-gray-400 mt-1">{block.subtitle}</div>}
+                            </div>
                         </div>
-                        <div className="text-gray-600 group-hover:scale-110 transition-transform">
-                            <ExternalLink className="w-4 h-4" />
-                        </div>
+                        <ArrowLeft className="w-4 h-4 rotate-180 text-zinc-300 group-hover:text-zinc-500 transition-colors" />
                     </button>
                 )
             case 'opening_hours':
@@ -312,17 +330,156 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="pb-4">
-                                <div className="grid grid-cols-2 gap-2 pt-1">
-                                    {facilitiesList.filter(f => (business.selectedFacilities || block.selectedFacilities)?.includes(f.id)).map(f => (
-                                        <div key={f.id} className="flex items-center gap-2 text-[10px] text-[#3F3E3E] font-noto-sans">
-                                            {f.icon}
-                                            <span className="font-normal">{f.label}</span>
+                                <div key={block.id} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    {facilitiesList.filter(f => (business.selectedFacilities || block.selectedFacilities)?.includes(f.id)).map((facility) => (
+                                        <div key={facility.id} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700">
+                                            <div className="text-zinc-600 dark:text-zinc-400">{facility.icon}</div>
+                                            <span className="text-[10px] font-medium text-zinc-900 dark:text-white font-noto-sans text-center">{facility.label}</span>
                                         </div>
                                     ))}
                                 </div>
                             </AccordionContent>
                         </AccordionItem>
                     </Accordion>
+                )
+            case 'services':
+                const onlineServices = services.filter(s => s.status === 'online' || s.status === 'active')
+                const productServices = products.filter(p => p.type?.toLowerCase() === 'service')
+                const servs = [...onlineServices, ...productServices]
+                return (
+                    <div key={block.id} className="space-y-6">
+                        <div className="space-y-1">
+                            {block.title && <h2 className="text-[18px] font-medium leading-[26px] text-[#0A0909] dark:text-white font-rubik">{block.title}</h2>}
+                            {block.description && <p className="text-[10px] font-normal leading-[15.2px] text-[#3F3E3E] dark:text-gray-400 font-noto-sans whitespace-pre-wrap">{block.description}</p>}
+                        </div>
+                        <div className="space-y-4">
+                            {servs.map((service: any) => (
+                                <div
+                                    key={service._id}
+                                    className={cn(
+                                        "p-4 rounded-2xl border transition-all duration-300 flex flex-col gap-4",
+                                        selectedServices.includes(service._id)
+                                            ? "border-orange-500 bg-orange-50/30 ring-1 ring-orange-500"
+                                            : "border-[#CDD0DB] bg-white hover:border-zinc-300 shadow-sm"
+                                    )}
+                                >
+                                    <div className="flex items-start gap-3 sm:gap-4">
+                                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-zinc-100 flex-shrink-0 border border-zinc-100">
+                                            {service.image?.[0] ? (
+                                                <img src={service.image[0]} alt={service.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-zinc-300">
+                                                    <Zap size={20} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0 space-y-1">
+                                            <div className="font-bold text-[15px] sm:text-[16px] text-[#0A0909] font-rubik leading-tight line-clamp-1">
+                                                {service.name}
+                                            </div>
+                                            {service.description && (
+                                                <p className="text-[11px] text-[#3F3E3E] line-clamp-2 font-noto-sans leading-relaxed opacity-80">
+                                                    {service.description}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between border-t border-dashed border-zinc-100 pt-3">
+                                        <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#3F3E3E] bg-zinc-50 px-2 py-1 rounded-lg">
+                                            <Clock className="w-3.5 h-3.5 text-zinc-400" />
+                                            <span>{service.duration || 30}m duration</span>
+                                        </div>
+                                        <div className="text-[15px] font-black text-orange-600">
+                                            {service.offers?.priceCurrency || 'USD'} {service.offers?.price?.toLocaleString() || 0}
+                                        </div>
+                                    </div>
+                                    <Button
+                                        variant={selectedServices.includes(service._id) ? "default" : "outline"}
+                                        className={cn(
+                                            "w-full h-10 rounded-xl text-[13px] font-bold transition-all",
+                                            selectedServices.includes(service._id)
+                                                ? "bg-orange-500 text-white hover:bg-orange-600 border-none shadow-md shadow-orange-200"
+                                                : "text-orange-600 border-orange-200 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-300"
+                                        )}
+                                        onClick={() => {
+                                            if (selectedServices.includes(service._id)) {
+                                                setSelectedServices(prev => prev.filter(id => id !== service._id))
+                                            } else {
+                                                setSelectedServices(prev => [...prev, service._id])
+                                            }
+                                        }}
+                                    >
+                                        {selectedServices.includes(service._id) ? (
+                                            <span className="flex items-center gap-1.5">
+                                                Selected <Check className="w-3.5 h-3.5" strokeWidth={3} />
+                                            </span>
+                                        ) : (
+                                            <span className="flex items-center gap-1.5">
+                                                Select <Plus className="w-3.5 h-3.5" />
+                                            </span>
+                                        )}
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )
+            case 'products':
+                const prodList = (products || []).filter(p => p.status === 'online' || p.status === 'active')
+                return (
+                    <div key={block.id} className="space-y-6">
+                        <div className="space-y-1">
+                            {block.title && <h2 className="text-[18px] font-medium leading-[26px] text-[#0A0909] dark:text-white font-rubik">{block.title}</h2>}
+                            {block.description && <p className="text-[10px] font-normal leading-[15.2px] text-[#3F3E3E] dark:text-gray-400 font-noto-sans whitespace-pre-wrap">{block.description}</p>}
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            {prodList.map((product: any) => (
+                                <div
+                                    key={product._id}
+                                    className="group bg-white dark:bg-zinc-900 border border-[#CDD0DB]/60 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col"
+                                >
+                                    <div className="aspect-square w-full relative overflow-hidden bg-zinc-100">
+                                        {product.image?.[0] ? (
+                                            <img
+                                                src={product.image[0]}
+                                                alt={product.name}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-zinc-300">
+                                                <ShoppingBag size={24} />
+                                            </div>
+                                        )}
+                                        <div className="absolute top-2 right-2">
+                                            <div className="px-2 py-1 rounded-lg bg-white/90 backdrop-blur-sm text-[10px] font-bold text-orange-600 shadow-sm">
+                                                {product.offers?.priceCurrency || 'USD'} {product.offers?.price?.toLocaleString()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="p-3 flex flex-col flex-1 gap-2">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-bold text-[13px] text-[#0A0909] dark:text-white font-rubik line-clamp-1">
+                                                {product.name}
+                                            </div>
+                                            {product.description && (
+                                                <p className="text-[10px] text-[#3F3E3E] dark:text-gray-400 line-clamp-1 font-noto-sans mt-0.5 opacity-70">
+                                                    {product.description}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <Button
+                                            onClick={() => addToCart(product)}
+                                            variant="outline"
+                                            className="w-full h-8 rounded-xl border-zinc-200 text-[11px] font-bold hover:bg-zinc-900 hover:text-white transition-all group-hover:border-zinc-900"
+                                        >
+                                            Add <Plus className="w-3 h-3 ml-1" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 )
             case 'about':
                 return (
@@ -426,7 +583,8 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
                 </div>
             </div>
 
-            <main className="max-w-2xl mx-auto pb-20 pt-4">
+            <main className={cn("max-w-2xl mx-auto pb-20 pt-4", selectedServices.length > 0 && "pb-40")}>
+
                 {/* Hero / Brand Section */}
                 <div className="relative">
                     {/* Banner with secondary color */}
@@ -577,6 +735,31 @@ export function BusinessStorefront({ business, products, pageType = 'storefront'
                 </div>
             )}
 
-        </div >
+            {/* Sticky Continue Button for Services */}
+            {selectedServices.length > 0 && (
+                <div className="sticky bottom-4 left-4 right-4 z-50 flex justify-center mt-auto pb-4 pointer-events-none">
+                    <div className="w-full max-w-sm flex items-center justify-between p-2.5 rounded-2xl bg-white/90 backdrop-blur-xl border border-zinc-200/50 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15)] pointer-events-auto animate-in fade-in zoom-in-95 duration-300">
+                        <div className="px-3 flex flex-col justify-center">
+                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">Total Duration</span>
+                            <div className="flex items-center gap-1.5 mt-1">
+                                <Clock className="w-3.5 h-3.5 text-orange-500" />
+                                <span className="text-[14px] font-bold text-zinc-900">
+                                    {selectedServices.reduce((acc, id) => {
+                                        const s = services.find(serv => serv._id === id) || products.find(p => p._id === id);
+                                        return acc + (s?.duration || 30);
+                                    }, 0)}m
+                                </span>
+                            </div>
+                        </div>
+                        <Button
+                            className="h-11 rounded-xl px-10 bg-orange-500 hover:bg-orange-600 text-white font-black text-[14px] flex items-center gap-2 group shadow-lg shadow-orange-500/25 transition-all active:scale-95"
+                        >
+                            Continue
+                            <ArrowLeft className="w-4 h-4 rotate-180 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                    </div>
+                </div>
+            )}
+        </div>
     )
 }

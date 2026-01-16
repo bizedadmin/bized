@@ -56,7 +56,7 @@ export function ServiceForm({ initialData, businessId, isEditing = false }: Serv
     const [duration, setDuration] = useState(initialData?.duration?.toString() || "60")
     const [description, setDescription] = useState(initialData?.description || "")
     const [images, setImages] = useState<string[]>(initialData?.image || [])
-    const [isActive, setIsActive] = useState(initialData?.status === "active")
+    const [isOnline, setIsOnline] = useState(initialData ? initialData.status === "online" : true)
     const [uploading, setUploading] = useState(false)
     const [isGeneratorOpen, setIsGeneratorOpen] = useState(false)
     const [isEditorOpen, setIsEditorOpen] = useState(false)
@@ -223,7 +223,7 @@ export function ServiceForm({ initialData, businessId, isEditing = false }: Serv
                         availability: availability,
                         url: url
                     },
-                    status: isActive ? "active" : "draft"
+                    status: isOnline ? "online" : "offline"
                 })
             })
 
@@ -736,11 +736,11 @@ export function ServiceForm({ initialData, businessId, isEditing = false }: Serv
                                 <h3 className="text-sm font-semibold text-foreground">Service Availability</h3>
                             </div>
                             <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30">
-                                <Label className="text-sm font-medium">Active</Label>
-                                <Switch checked={isActive} onCheckedChange={setIsActive} />
+                                <Label className="text-sm font-medium">Available Online</Label>
+                                <Switch checked={isOnline} onCheckedChange={setIsOnline} />
                             </div>
                             <p className="text-[11px] text-muted-foreground leading-normal">
-                                Toggle availability for bookings. Inactive services will not be visible to customers.
+                                Toggle visibility for bookings. Offline services will not be visible to customers.
                             </p>
                         </div>
                     </div>

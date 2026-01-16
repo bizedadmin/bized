@@ -79,8 +79,8 @@ const ProductSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['active', 'draft', 'archived'],
-        default: 'active',
+        enum: ['active', 'draft', 'archived', 'online', 'offline'],
+        default: 'online',
     }
 }, {
     timestamps: true,

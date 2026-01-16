@@ -85,6 +85,7 @@ const productsAndStore = {
     href: "#",
     children: [
         { label: "All Products", href: "/business/products" },
+        { label: "Shop Page", href: "/business/shop-page" },
         { label: "Shipping and returns", href: "/business/shipping-returns" },
         { label: "Store quality", href: "/business/store-quality" },
     ]

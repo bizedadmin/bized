@@ -165,7 +165,7 @@ export default function ServicesPage() {
                                         {service.offers?.priceCurrency} {service.offers?.price}
                                     </TableCell>
                                     <TableCell className="hidden sm:table-cell">
-                                        <Badge variant={service.status === 'active' ? 'default' : 'secondary'} className="capitalize font-normal">
+                                        <Badge variant={service.status === 'online' ? 'default' : 'secondary'} className="capitalize font-normal">
                                             {service.status}
                                         </Badge>
                                     </TableCell>
