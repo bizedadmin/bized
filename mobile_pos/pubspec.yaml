@@ -1,0 +1,51 @@
+name: mobile_pos
+description: Bized Mobile POS Application
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  get: ^4.6.6
+  
+  # HTTP & API
+  dio: ^5.4.0
+  
+  # Firebase & Auth
+  firebase_core: ^3.8.1
+  firebase_auth: ^5.3.4
+  google_sign_in: ^6.2.2
+  
+  # Storage
+  flutter_secure_storage: ^9.0.0
+  
+  # Environment
+  flutter_dotenv: ^5.1.0
+  
+  # UI
+  flutter_svg: ^2.0.9
+  cached_network_image: ^3.3.1
+  
+  # Utils
+  intl: ^0.19.0
+  dio_cookie_manager: ^3.3.0
+  cookie_jar: ^4.0.8
+  lottie: ^3.1.0
+  flutter_staggered_grid_view: ^0.7.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - .env
