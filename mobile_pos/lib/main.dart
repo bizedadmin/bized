@@ -24,6 +24,12 @@ import 'app/modules/home/home_page.dart';
 import 'app/modules/home/home_binding.dart';
 import 'app/modules/business_summary/business_summary_page.dart';
 import 'app/modules/business_summary/business_summary_binding.dart';
+import 'app/modules/products/products_page.dart';
+import 'app/modules/products/products_binding.dart';
+import 'app/modules/services/services_page.dart';
+import 'app/modules/services/services_binding.dart';
+import 'app/data/services/product_service.dart';
+import 'app/data/services/service_service.dart';
 
 import 'dart:ui';
 import 'app/core/utils/logger.dart';
@@ -54,6 +60,8 @@ void main() async {
   Get.put(AuthService());
   Get.put(BusinessService());
   Get.put(CurrentBusinessService());
+  Get.put(ProductService());
+  Get.put(ServiceService());
   
   // Initialize Firebase in background (don't await)
   Firebase.initializeApp().then((_) {
@@ -160,6 +168,16 @@ class MyApp extends StatelessWidget {
           name: AppRoutes.businessSummary,
           page: () => const BusinessSummaryPage(),
           binding: BusinessSummaryBinding(),
+        ),
+        GetPage(
+          name: AppRoutes.products,
+          page: () => const ProductsPage(),
+          binding: ProductsBinding(),
+        ),
+        GetPage(
+          name: AppRoutes.services,
+          page: () => const ServicesPage(),
+          binding: ServicesBinding(),
         ),
       ],
     );

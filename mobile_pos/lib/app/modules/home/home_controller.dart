@@ -11,10 +11,18 @@ class HomeController extends GetxController {
   get currentUser => _authService.currentUser.value;
 
   void navigateToSection(String section) {
-    if (section == 'Business') {
-      Get.toNamed(AppRoutes.businessSummary);
-    } else {
-      Get.snackbar('Coming Soon', '$section page is under development');
+    switch (section) {
+      case 'Business':
+        Get.toNamed(AppRoutes.businessSummary);
+        break;
+      case 'Products':
+        Get.toNamed(AppRoutes.products);
+        break;
+      case 'Services':
+        Get.toNamed(AppRoutes.services);
+        break;
+      default:
+        Get.snackbar('Coming Soon', '$section page is under development');
     }
   }
 
