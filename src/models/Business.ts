@@ -99,6 +99,18 @@ const BusinessSchema = new mongoose.Schema({
         type: String,
         default: '#1f2937',
     },
+    fontFamily: {
+        type: String,
+        default: 'system',
+    },
+    glassmorphism: {
+        type: Boolean,
+        default: false,
+    },
+    borderRadius: {
+        type: String,
+        default: 'xl', // rounded-xl by default
+    },
     businessCategories: [{
         type: String,
     }],

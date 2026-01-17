@@ -29,8 +29,8 @@ async function demoteUser() {
     }
 
     try {
-        await mongoose.connect(process.env.MONGODB_URI);
-        console.log("Connected to MongoDB.");
+        await mongoose.connect(process.env.MONGODB_URI, { dbName: 'bized' });
+        console.log("Connected to MongoDB (Database: bized).");
 
         const user = await User.findOne({ email: targetEmail });
 

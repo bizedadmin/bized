@@ -35,12 +35,21 @@ async function dbConnect() {
 
     if (!cached.promise) {
         const opts = {
-            bufferCommands: false,
-            dbName: 'bized', // Explicitly force the database name
+            bufferCommands: true, // Allow buffering to prevent race conditions with models
+            dbName: 'bized',
+            autoIndex: true,
         };
 
-        cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
-            return mongoose;
+        // Ensure URI doesn't have extra quotes if they leaked in
+        const cleanURI = MONGODB_URI?.trim().replace(/^["']|["']$/g, '');
+
+        console.log('--- DATABASE CONNECTION ATTEMPT ---');
+        console.log('Target Database:', opts.dbName);
+
+        cached.promise = mongoose.connect(cleanURI!, opts).then((mongooseInstance) => {
+            console.log('--- DATABASE CONNECTED SUCCESSFULLY ---');
+            console.log('Connected to:', mongooseInstance.connection.name); // Should log 'bized'
+            return mongooseInstance;
         });
     }
 
@@ -48,6 +57,8 @@ async function dbConnect() {
         cached.conn = await cached.promise;
     } catch (e) {
         cached.promise = null;
+        console.error('--- DATABASE CONNECTION ERROR ---');
+        console.error(e);
         throw e;
     }
 

@@ -546,6 +546,11 @@ export default function EditProductPage({ params }: { params: Promise<{ productI
                                         <SelectItem value="Service">Digital Service</SelectItem>
                                     </SelectContent>
                                 </Select>
+                                {type === "Service" && (
+                                    <p className="text-[11px] text-blue-600 font-medium mt-1 animate-in fade-in slide-in-from-top-1">
+                                        Note: This service will be bookable online.
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>

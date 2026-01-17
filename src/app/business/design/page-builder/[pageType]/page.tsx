@@ -96,6 +96,20 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
     const [services, setServices] = useState<any[]>([])
 
     const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit')
+    const [isDirty, setIsDirty] = useState(false)
+    const [showExitDialog, setShowExitDialog] = useState(false)
+
+    // Handle browser back/close
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isDirty) {
+                e.preventDefault()
+                e.returnValue = ''
+            }
+        }
+        window.addEventListener('beforeunload', handleBeforeUnload)
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+    }, [isDirty])
 
     // Form State
     const [formData, setFormData] = useState<any>({
@@ -197,6 +211,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
 
             if (res.ok) {
                 toast.success("Changes saved successfully!")
+                setIsDirty(false)
             } else {
                 const errData = await res.json()
                 console.error("Failed to save", errData)
@@ -211,8 +226,17 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
         }
     }
 
+    const handleBack = () => {
+        if (isDirty) {
+            setShowExitDialog(true)
+        } else {
+            router.push('/business/design')
+        }
+    }
+
     const updateField = (field: string, value: any) => {
         setFormData((prev: any) => ({ ...prev, [field]: value }))
+        setIsDirty(true)
     }
 
     const updatePageSetting = (settingKey: string, value: any) => {
@@ -241,6 +265,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
             }
             return { ...prev, pages }
         })
+        setIsDirty(true)
     }
 
     const currentPageSettings = formData.pages?.find((p: any) => p.type === pageType)?.settings || {}
@@ -436,11 +461,9 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                 {/* Header */}
                 <header className="h-16 border-b flex items-center justify-between px-6 bg-white shrink-0">
                     <div className="flex items-center gap-4">
-                        <Link href="/business/design">
-                            <Button variant="ghost" size="icon">
-                                <ArrowLeft className="w-5 h-5" />
-                            </Button>
-                        </Link>
+                        <Button variant="ghost" size="icon" onClick={handleBack}>
+                            <ArrowLeft className="w-5 h-5" />
+                        </Button>
                         <div>
                             <h1 className="font-semibold text-lg">{formData.name}</h1>
                             <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
@@ -796,6 +819,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                         products={products}
                                         services={services}
                                         pageType={pageType as any}
+                                        isPreview={true}
                                     />
                                 </div>
                             </div>
@@ -1548,7 +1572,34 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                     </DialogContent>
                 )}
             </Dialog>
-        </div>
+
+            {/* Unsaved Changes Confirmation Dialog */}
+            <Dialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+                <DialogContent className="sm:max-w-[425px] rounded-2xl">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-bold">Unsaved Changes</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-4 text-zinc-600">
+                        You have unsaved changes. Are you sure you want to leave? Your changes will be lost.
+                    </div>
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button variant="outline" onClick={() => setShowExitDialog(false)} className="rounded-xl">
+                            Stay and Save
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={() => {
+                                setIsDirty(false)
+                                router.push('/business/design')
+                            }}
+                            className="rounded-xl bg-red-600 hover:bg-red-700"
+                        >
+                            Leave anyway
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div >
     )
 
 }

@@ -70,24 +70,6 @@ const FileUploader = ({ label, onImageSelected, currentImage }: { label: string,
 // Layout options with icons and descriptions
 const DESIGN_OPTIONS = [
     {
-        id: "profile",
-        label: "Profile",
-        description: "Logo, header and business info",
-        icon: User,
-        color: "text-pink-600",
-        bg: "bg-pink-100 dark:bg-pink-900/20",
-        borderHover: "hover:border-pink-500",
-    },
-    {
-        id: "style",
-        label: "Design & Branding",
-        description: "Global colors and visual style",
-        icon: Palette,
-        color: "text-blue-600",
-        bg: "bg-blue-100 dark:bg-blue-900/20",
-        borderHover: "hover:border-blue-500",
-    },
-    {
         id: "storefront",
         label: "Storefront",
         description: "Main landing page for your business",
@@ -164,8 +146,10 @@ const FONT_OPTIONS = [
 ]
 
 export default function DesignPage() {
-    const [selectedType, setSelectedType] = useState<string>("style")
+    const [selectedType, setSelectedType] = useState<string>("storefront")
     const [businessData, setBusinessData] = useState<any>(null)
+    const [products, setProducts] = useState<any[]>([])
+    const [services, setServices] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
 
     // Fetch business data for preview
@@ -173,7 +157,7 @@ export default function DesignPage() {
         const stored = localStorage.getItem("selectedBusiness")
         if (stored) {
             const parsed = JSON.parse(stored)
-            fetchBusinessData(parsed._id)
+            fetchPreviewData(parsed._id)
         }
 
         // Refetch on window focus to get updates from builder
@@ -181,51 +165,41 @@ export default function DesignPage() {
             const stored = localStorage.getItem("selectedBusiness")
             if (stored) {
                 const parsed = JSON.parse(stored)
-                fetchBusinessData(parsed._id)
+                fetchPreviewData(parsed._id)
             }
         }
         window.addEventListener('focus', onFocus)
         return () => window.removeEventListener('focus', onFocus)
     }, [])
 
-    const fetchBusinessData = async (id: string) => {
+    const fetchPreviewData = async (id: string) => {
         try {
-            const res = await fetch(`/api/businesses/${id}`, { cache: 'no-store' })
-            if (res.ok) {
-                const data = await res.json()
-                setBusinessData(data)
+            // Fetch Business
+            const bRes = await fetch(`/api/businesses/${id}`, { cache: 'no-store' })
+            if (bRes.ok) {
+                const business = await bRes.json()
+                setBusinessData(business)
+
+                // Fetch Products
+                const pRes = await fetch(`/api/products?businessId=${id}`)
+                if (pRes.ok) {
+                    const pData = await pRes.json()
+                    setProducts(pData)
+                }
+
+                // Fetch Services
+                const sRes = await fetch(`/api/business/services?businessId=${id}`)
+                if (sRes.ok) {
+                    const sData = await sRes.json()
+                    setServices(sData)
+                }
             }
         } catch (error) {
-            console.error("Failed to fetch business for preview", error)
+            console.error("Failed to fetch data for preview", error)
         } finally {
             setLoading(false)
         }
     }
-
-    const mockProducts = [
-        {
-            _id: "1",
-            name: "Sample Product",
-            offers: {
-                price: 99,
-                priceCurrency: "KES",
-                availability: "https://schema.org/InStock"
-            },
-            image: "",
-            type: "physical"
-        },
-        {
-            _id: "2",
-            name: "Service Item",
-            offers: {
-                price: 149,
-                priceCurrency: "KES",
-                availability: "https://schema.org/InStock"
-            },
-            image: "",
-            type: "service"
-        }
-    ]
 
     const handleStyleUpdate = (field: string, value: string) => {
         setBusinessData((prev: any) => ({
@@ -296,122 +270,10 @@ export default function DesignPage() {
 
                                     </div>
                                 )}
-
-                                {selectedType === 'profile' && option.id === 'profile' && businessData && (
-                                    <div className="w-full animate-in slide-in-from-top-2 duration-200 cursor-default" onClick={(e) => e.stopPropagation()}>
-                                        <Accordion type="single" collapsible className="w-full space-y-4" defaultValue="profile">
-                                            <AccordionItem value="profile" className="border-none">
-                                                <AccordionTrigger className="hover:no-underline py-0">
-                                                    <div className="flex items-center gap-3 text-left">
-                                                        <div className="p-2 bg-pink-50 text-pink-600 rounded-md dark:bg-pink-900/20">
-                                                            <User className="w-5 h-5" />
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-semibold text-zinc-900 dark:text-white">Profile</div>
-                                                            <div className="text-xs text-gray-500 font-normal">Header, Logo and Details</div>
-                                                        </div>
-                                                    </div>
-                                                </AccordionTrigger>
-                                                <AccordionContent className="space-y-6 pt-6 pb-2">
-                                                    <FileUploader
-                                                        label="Header Image"
-                                                        currentImage={businessData.image}
-                                                        onImageSelected={(url) => handleStyleUpdate('image', url)}
-                                                    />
-
-                                                    <FileUploader
-                                                        label="Avatar (Logo)"
-                                                        currentImage={businessData.logo}
-                                                        onImageSelected={(url) => handleStyleUpdate('logo', url)}
-                                                    />
-
-                                                    <div className="space-y-2">
-                                                        <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Name</Label>
-                                                        <Input
-                                                            value={businessData.name || ""}
-                                                            onChange={(e) => handleStyleUpdate('name', e.target.value)}
-                                                            className="h-11 rounded-xl bg-zinc-50 border-zinc-200"
-                                                        />
-                                                    </div>
-                                                    <div className="space-y-2">
-                                                        <Label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Bio</Label>
-                                                        <Textarea
-                                                            value={businessData.description || ""}
-                                                            onChange={(e) => handleStyleUpdate('description', e.target.value)}
-                                                            className="min-h-[100px] rounded-xl bg-zinc-50 border-zinc-200 resize-none"
-                                                            placeholder="Decorate with **bold** --strike-- _italic_"
-                                                        />
-                                                    </div>
-                                                    <Button
-                                                        className="w-full mt-2"
-                                                    >
-                                                        Save Profile
-                                                    </Button>
-                                                </AccordionContent>
-                                            </AccordionItem>
-                                        </Accordion>
-                                    </div>
-                                )}
-
-                                {selectedType === 'style' && option.id === 'style' && businessData && (
-                                    <div className="w-full animate-in slide-in-from-top-2 duration-200 cursor-default" onClick={(e) => e.stopPropagation()}>
-                                        <Accordion type="single" collapsible className="w-full space-y-4" defaultValue="design">
-                                            <AccordionItem value="design" className="border-none">
-                                                <AccordionTrigger className="hover:no-underline py-0">
-                                                    <div className="flex items-center gap-3 text-left">
-                                                        <div className="p-2 bg-blue-50 text-blue-600 rounded-md dark:bg-blue-900/20">
-                                                            <Palette className="w-5 h-5" />
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-semibold text-zinc-900 dark:text-white">Design & Branding</div>
-                                                            <div className="text-xs text-gray-500 font-normal">Colors and visual style</div>
-                                                        </div>
-                                                    </div>
-                                                </AccordionTrigger>
-                                                <AccordionContent className="space-y-6 pt-6 pb-2">
-                                                    <div className="space-y-3">
-                                                        <Label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Primary Brand Color</Label>
-                                                        <ColorPicker
-                                                            value={businessData.themeColor || "#1f2937"}
-                                                            onChange={(c) => handleStyleUpdate('themeColor', c)}
-                                                            presets={THEME_COLORS}
-                                                            className="w-full"
-                                                        />
-                                                    </div>
-                                                    <div className="space-y-3">
-                                                        <Label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Background Color</Label>
-                                                        <ColorPicker
-                                                            value={businessData.secondaryColor || "#f3f4f6"}
-                                                            onChange={(c) => handleStyleUpdate('secondaryColor', c)}
-                                                            presets={[
-                                                                { name: "Light Gray", value: "#f3f4f6" },
-                                                                { name: "White", value: "#ffffff" },
-                                                                { name: "Light Blue", value: "#dbeafe" },
-                                                                { name: "Light Pink", value: "#fce7f3" },
-                                                                { name: "Beige", value: "#f5f5dc" },
-                                                            ]}
-                                                            className="w-full"
-                                                        />
-                                                    </div>
-                                                    <div className="space-y-3">
-                                                        <Label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Action Button Color</Label>
-                                                        <ColorPicker
-                                                            value={businessData.buttonColor || businessData.themeColor || "#1f2937"}
-                                                            onChange={(c) => handleStyleUpdate('buttonColor', c)}
-                                                            presets={THEME_COLORS}
-                                                            className="w-full"
-                                                        />
-                                                    </div>
-                                                </AccordionContent>
-                                            </AccordionItem>
-                                        </Accordion>
-                                    </div>
-                                )}
                             </div>
                         ))}
                     </div>
-                </div >
-
+                </div>
             </div>
 
             {/* Right Side - Preview */}
@@ -420,7 +282,7 @@ export default function DesignPage() {
                 <div className="relative">
                     <div className="absolute -top-12 left-0 right-0 text-center">
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                            <Smartphone className="w-3 h-3" /> Live Preview: {selectedType === 'style' ? 'Global Style' : selectedType}
+                            <Smartphone className="w-3 h-3" /> Live Preview: {selectedType === 'profile' ? 'Business Profile' : selectedType}
                         </div>
                     </div>
 
@@ -439,8 +301,10 @@ export default function DesignPage() {
                             {!loading && businessData && (
                                 <BusinessStorefront
                                     business={businessData}
-                                    products={mockProducts}
-                                    pageType={selectedType === 'style' ? 'storefront' : selectedType as any}
+                                    products={products}
+                                    services={services}
+                                    pageType={selectedType === 'profile' ? 'storefront' : selectedType as any}
+                                    isPreview={true}
                                 />
                             )}
 
@@ -454,8 +318,9 @@ export default function DesignPage() {
                         </div>
                     </div>
                 </div>
-            </div >
-        </div >
+            </div>
+        </div>
     )
 }
+
 

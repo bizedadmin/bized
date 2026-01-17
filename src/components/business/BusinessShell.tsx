@@ -97,7 +97,7 @@ const bookings = {
     href: "#",
     children: [
         { label: "Booking Page", href: "/business/booking-page" },
-        { label: "Calendar", href: "/business/calendar" },
+        { label: "Tickets", href: "/business/tickets" },
     ]
 }
 
@@ -129,6 +129,7 @@ const salesChannels = [
         badge: null,
         children: [
             { label: "Design", href: "/business/design" },
+            { label: "Style", href: "/business/style" },
         ]
     },
     { icon: MessageCircle, label: "WhatsApp", href: "/business/whatsapp" },
