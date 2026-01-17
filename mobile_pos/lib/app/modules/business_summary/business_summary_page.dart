@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../core/theme/app_colors.dart';
 import '../../widgets/custom_card.dart';
 import '../../widgets/user_profile_menu.dart';
@@ -103,7 +104,9 @@ class BusinessSummaryPage extends GetView<BusinessSummaryController> {
                     const SizedBox(height: 16),
                     _buildDetailRow('Name', business.name),
                     const Divider(height: 24),
-                    _buildDetailRow('Slug', business.slug),
+                    _buildMagicLinkRow(business.slug),
+                    const Divider(height: 24),
+                    _buildDetailRow('Business Type', business.type ?? 'Not set'),
                     const Divider(height: 24),
                     _buildDetailRow('Email', business.email ?? 'Not set'),
                     const Divider(height: 24),
@@ -225,6 +228,56 @@ class BusinessSummaryPage extends GetView<BusinessSummaryController> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildMagicLinkRow(String slug) {
+    final String businessUrl = 'https://bized.app/$slug';
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Magic Link',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.mutedForeground,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    businessUrl,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              onPressed: () {
+                Share.share(
+                  'Check out my business: $businessUrl',
+                  subject: 'My Business Link',
+                );
+              },
+              icon: const Icon(Icons.share),
+              color: AppColors.primary,
+              tooltip: 'Share link',
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

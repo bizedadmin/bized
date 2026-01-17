@@ -168,7 +168,19 @@ class AuthService extends GetxService {
   }
 
   Future<bool> isAuthenticated() async {
-    final token = await _storage.read(key: 'session_token');
-    return token != null;
+    try {
+      final token = await _storage.read(key: 'session_token');
+      if (token == null) return false;
+      
+      // Verify the session is still valid with the backend
+      final session = await _getUserSession();
+      return session['user'] != null;
+    } catch (e) {
+      Logger.error('Auth', 'Session validation failed', error: e);
+      // Clear invalid session
+      await _storage.delete(key: 'session_token');
+      await _storage.delete(key: 'user_data');
+      return false;
+    }
   }
 }

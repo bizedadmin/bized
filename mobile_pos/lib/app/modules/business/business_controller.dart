@@ -25,7 +25,15 @@ class BusinessController extends GetxController {
       businesses.value = await _businessService.getBusinesses();
     } catch (e) {
       Logger.error('BusinessController', 'Error fetching businesses', error: e);
-      Get.snackbar('Error', 'Failed to load businesses');
+      
+      // Check if it's an authentication error
+      if (e.toString().contains('401') || e.toString().contains('Unauthorized')) {
+        // User is not authenticated, redirect to login
+        Get.find<AuthService>().signOut();
+        Get.offAllNamed(AppRoutes.login);
+      } else {
+        Get.snackbar('Error', 'Failed to load businesses');
+      }
     } finally {
       isLoading.value = false;
     }
