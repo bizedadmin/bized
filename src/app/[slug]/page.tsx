@@ -1,9 +1,10 @@
+
 import { notFound } from 'next/navigation'
 import dbConnect from '@/lib/db'
 import Business from '@/models/Business'
 import Product from '@/models/Product'
 import Service from '@/models/Service'
-import { BusinessStorefront } from '@/components/business/business-storefront'
+import { BusinessProfile } from '@/components/business/business-profile'
 
 
 interface PageProps {
@@ -29,5 +30,5 @@ export default async function BusinessPage({ params }: PageProps) {
     const plainProducts = JSON.parse(JSON.stringify(products))
     const plainServices = JSON.parse(JSON.stringify(services))
 
-    return <BusinessStorefront business={plainBusiness} products={plainProducts} services={plainServices} />
+    return <BusinessProfile business={plainBusiness} products={plainProducts} services={plainServices} />
 }

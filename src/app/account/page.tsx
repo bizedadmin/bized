@@ -14,12 +14,10 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useState, useEffect } from "react"
 
-import { useRouter } from "next/navigation"
-import { Loader2, ArrowLeft } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 export default function ProfilePage() {
-    const router = useRouter()
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [user, setUser] = useState({
@@ -115,14 +113,6 @@ export default function ProfilePage() {
             />
 
             <div className="mb-8">
-                <Button
-                    variant="ghost"
-                    className="mb-4 pl-0 hover:bg-transparent hover:text-muted-foreground"
-                    onClick={() => router.back()}
-                >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back
-                </Button>
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Store, ShoppingBag, FileText, Smartphone, Edit, ArrowRight, Palette, Type, Check } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { BusinessStorefront } from "@/components/business/business-storefront"
+import { BusinessProfile } from "@/components/business/business-profile"
 import { cn } from "@/lib/utils"
 import { ColorPicker } from "@/components/ui/color-picker"
 import { Label } from "@/components/ui/label"
@@ -70,9 +70,9 @@ const FileUploader = ({ label, onImageSelected, currentImage }: { label: string,
 // Layout options with icons and descriptions
 const DESIGN_OPTIONS = [
     {
-        id: "storefront",
-        label: "Storefront",
-        description: "Main landing page for your business",
+        id: "profile",
+        label: "Profile",
+        description: "Main profile page for your business",
         icon: Store,
         color: "text-orange-600",
         bg: "bg-orange-100 dark:bg-orange-900/20",
@@ -146,7 +146,7 @@ const FONT_OPTIONS = [
 ]
 
 export default function DesignPage() {
-    const [selectedType, setSelectedType] = useState<string>("storefront")
+    const [selectedType, setSelectedType] = useState<string>("profile")
     const [businessData, setBusinessData] = useState<any>(null)
     const [products, setProducts] = useState<any[]>([])
     const [services, setServices] = useState<any[]>([])
@@ -235,7 +235,7 @@ export default function DesignPage() {
                                 )}
                             >
                                 {/* Hide header if selected for style OR profile (they handle their own headers) */}
-                                {(selectedType !== option.id || (option.id !== 'style' && option.id !== 'profile')) && (
+                                {(selectedType !== option.id || (option.id !== 'style')) && (
                                     <div className="flex items-center w-full">
                                         <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center mr-4", option.bg)}>
                                             <option.icon className={cn("w-6 h-6", option.color)} />
@@ -245,8 +245,8 @@ export default function DesignPage() {
                                             <p className="text-sm text-gray-500 dark:text-gray-400">{option.description}</p>
                                         </div>
 
-                                        {/* Edit Button for Pages (not Style or Profile) */}
-                                        {option.id !== 'style' && option.id !== 'profile' && (
+                                        {/* Edit Button for Pages (not Style) */}
+                                        {option.id !== 'style' && (
                                             <Link href={`/business/design/page-builder/${option.id}?businessId=${businessData?._id}`}>
                                                 <Button
                                                     size="sm"
@@ -264,7 +264,7 @@ export default function DesignPage() {
                                         )}
 
                                         {/* Chevron for Profile/Style when not selected */}
-                                        {(option.id === 'style' || option.id === 'profile') && (
+                                        {(option.id === 'style') && (
                                             <ChevronDown className="w-4 h-4 text-zinc-400" />
                                         )}
 
@@ -282,7 +282,7 @@ export default function DesignPage() {
                 <div className="relative">
                     <div className="absolute -top-12 left-0 right-0 text-center">
                         <div className="inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                            <Smartphone className="w-3 h-3" /> Live Preview: {selectedType === 'profile' ? 'Business Profile' : selectedType}
+                            <Smartphone className="w-3 h-3" /> Live Preview: {selectedType === 'profile' ? 'Profile' : selectedType}
                         </div>
                     </div>
 
@@ -299,11 +299,11 @@ export default function DesignPage() {
                             )}
 
                             {!loading && businessData && (
-                                <BusinessStorefront
+                                <BusinessProfile
                                     business={businessData}
                                     products={products}
                                     services={services}
-                                    pageType={selectedType === 'profile' ? 'storefront' : selectedType as any}
+                                    pageType={selectedType === 'profile' ? 'profile' : selectedType as any}
                                     isPreview={true}
                                 />
                             )}

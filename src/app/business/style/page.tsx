@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Palette, Type, Smartphone, Check, Layout, Sparkles, Image as ImageIcon, Wand2 } from "lucide-react"
 import { useState, useEffect } from "react"
-import { BusinessStorefront } from "@/components/business/business-storefront"
+import { BusinessProfile } from "@/components/business/business-profile"
 import { cn } from "@/lib/utils"
 import { ColorPicker } from "@/components/ui/color-picker"
 import { Label } from "@/components/ui/label"
@@ -498,11 +498,11 @@ export default function StylePage() {
 
                         <div className="h-full w-full overflow-y-auto scrollbar-none">
                             {businessData && (
-                                <BusinessStorefront
+                                <BusinessProfile
                                     business={businessData}
                                     products={products}
                                     services={services}
-                                    pageType="storefront"
+                                    pageType="profile"
                                     isPreview={true}
                                 />
                             )}

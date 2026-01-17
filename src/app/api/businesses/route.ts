@@ -54,7 +54,7 @@ export async function POST(req: Request) {
             ...body,
             owner: session.user.id,
             pages: [
-                { title: 'Storefront', slug: 'storefront', type: 'storefront', enabled: true },
+                { title: 'Profile', slug: 'profile', type: 'profile', enabled: true },
                 { title: 'Bookings', slug: 'bookings', type: 'bookings', enabled: true },
                 { title: 'Shop', slug: 'shop', type: 'shop', enabled: true },
                 { title: 'Quote', slug: 'quote', type: 'quote', enabled: true },

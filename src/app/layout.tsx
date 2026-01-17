@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Rubik, Noto_Sans } from "next/font/google";
 // Deploy Trigger: 2026-01-12T19:21
+// Force rebuild check
 import "./globals.css";
 
 const geistSans = Geist({

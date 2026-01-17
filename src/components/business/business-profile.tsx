@@ -49,7 +49,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useSession } from "next-auth/react"
+import { getSession } from "next-auth/react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import {
@@ -115,7 +115,7 @@ interface Business {
         title: string
         slug: string
         enabled: boolean
-        type: 'storefront' | 'bookings' | 'shop' | 'quote'
+        type: 'profile' | 'bookings' | 'shop' | 'quote' | 'storefront'
         settings: any
     }>
     fontFamily?: string
@@ -123,15 +123,15 @@ interface Business {
     borderRadius?: 'none' | 'md' | 'xl' | 'full'
 }
 
-interface BusinessStorefrontProps {
+interface BusinessProfileProps {
     business: Business
     products: Product[]
     services?: any[]
-    pageType?: 'storefront' | 'bookings' | 'shop' | 'quote'
+    pageType?: 'profile' | 'bookings' | 'shop' | 'quote' | 'storefront'
     isPreview?: boolean
 }
 
-export function BusinessStorefront({ business, products, services = [], pageType = 'storefront', isPreview = false }: BusinessStorefrontProps) {
+export function BusinessProfile({ business, products, services = [], pageType = 'profile', isPreview = false }: BusinessProfileProps) {
     const [searchQuery, setSearchQuery] = useState("")
     const [cart, setCart] = useState<any[]>([])
 
@@ -145,7 +145,6 @@ export function BusinessStorefront({ business, products, services = [], pageType
         }
     }
     const [isCartOpen, setIsCartOpen] = useState(false)
-    const { data: session } = useSession()
 
     const [selectedServices, setSelectedServices] = useState<string[]>([])
     const [bookingStep, setBookingStep] = useState<'selection' | 'datetime' | 'details' | 'confirmation'>('selection')
@@ -157,15 +156,19 @@ export function BusinessStorefront({ business, products, services = [], pageType
 
     // Auto-fill form if user is logged in
     useEffect(() => {
-        if (session?.user) {
-            setCustomerInfo(prev => ({
-                ...prev,
-                name: session.user?.name || '',
-                email: session.user?.email || '',
-                phone: '' // Phone is usually not in default session, but we can leave it empty to be filled
-            }))
+        const fetchSession = async () => {
+            const session = await getSession()
+            if (session?.user) {
+                setCustomerInfo(prev => ({
+                    ...prev,
+                    name: session.user?.name || '',
+                    email: session.user?.email || '',
+                    phone: '' // Phone is usually not in default session, but we can leave it empty to be filled
+                }))
+            }
         }
-    }, [session])
+        fetchSession()
+    }, [])
 
     const radiusClasses: Record<string, string> = {
         none: "rounded-none",
@@ -239,6 +242,7 @@ export function BusinessStorefront({ business, products, services = [], pageType
 
     // Current page specific settings
     const pageData = business.pages?.find((p: any) => p.type === pageType)
+        || (pageType === 'profile' ? business.pages?.find((p: any) => p.type === 'storefront') : undefined)
     const settings = pageData?.settings || {}
     let blocks = settings.blocks || []
 
@@ -250,9 +254,9 @@ export function BusinessStorefront({ business, products, services = [], pageType
             blocks = [{ id: 'default-services', type: 'services', title: 'Book an Appointment', description: 'Choose a service to get started' }]
         } else if (pageType === 'quote') {
             blocks = [{ id: 'default-quote', type: 'text', title: 'Request a Quote', content: 'Tell us what you need and we will get back to you with a personalized estimate.' }]
-        } else if (pageType === 'storefront' && isPreview) {
-            // For storefront in preview, if empty, show a welcome
-            blocks = [{ id: 'default-welcome', type: 'text', title: `Welcome to ${business.name}`, content: business.description || 'Welcome to our business storefront. Feel free to browse our services and products.' }]
+        } else if ((pageType === 'profile' || pageType === 'storefront') && isPreview) {
+            // For profile in preview, if empty, show a welcome
+            blocks = [{ id: 'default-welcome', type: 'text', title: `Welcome to ${business.name}`, content: business.description || 'Welcome to our business profile. Feel free to browse our services and products.' }]
         }
     }
 
@@ -1309,6 +1313,19 @@ export function BusinessStorefront({ business, products, services = [], pageType
                         ))}
                     </div>
                 )
+            case 'facilities':
+                return (
+                    <div key={block.id} className="space-y-4">
+                        {block.title && <h2 className="text-[18px] font-medium leading-[26px] text-[#0A0909] dark:text-white font-rubik">{block.title}</h2>}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            {block.selectedFacilities?.map((fac: string, idx: number) => (
+                                <div key={idx} className="flex flex-col items-center justify-center p-3 bg-zinc-50 dark:bg-zinc-800 rounded-xl text-center gap-2 border border-zinc-100 dark:border-zinc-700">
+                                    <span className="text-xs font-medium text-zinc-900 dark:text-white capitalize">{fac.replace('_', ' ')}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )
             default:
                 return null
         }
@@ -1431,7 +1448,7 @@ export function BusinessStorefront({ business, products, services = [], pageType
 
                 {/* Content Sections based on pageType */}
 
-                {pageType === 'storefront' && (
+                {(pageType === 'storefront' || pageType === 'profile') && (
                     <div className="px-6 pt-6 space-y-2">
                         {/* Dynamic Blocks */}
                         {blocks.length > 0 && (

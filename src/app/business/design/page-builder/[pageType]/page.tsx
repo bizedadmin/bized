@@ -63,7 +63,7 @@ import {
 import { Switch } from "@/components/ui/switch"
 import { QRCodeCanvas } from "qrcode.react"
 import Link from "next/link"
-import { BusinessStorefront } from "@/components/business/business-storefront"
+import { BusinessProfile } from "@/components/business/business-profile"
 import {
     Dialog,
     DialogContent,
@@ -133,8 +133,23 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                     const bRes = await fetch(`/api/businesses/${businessId}`, { cache: 'no-store' })
                     if (bRes.ok) {
                         const business = await bRes.json()
+                        // Auto-migrate storefront to profile if profile missing
+                        let pages = business.pages || []
+                        if (pageType === 'profile' && !pages.find((p: any) => p.type === 'profile')) {
+                            const storefront = pages.find((p: any) => p.type === 'storefront')
+                            if (storefront) {
+                                pages = [...pages, {
+                                    ...storefront,
+                                    type: 'profile',
+                                    slug: 'profile',
+                                    title: 'Profile'
+                                }]
+                            }
+                        }
+
                         setFormData({
                             ...business,
+                            pages,
                             themeColor: business.themeColor || "#1f2937",
                             secondaryColor: business.secondaryColor || "#f3f4f6",
                             buttonColor: business.buttonColor || business.themeColor || "#1f2937",
@@ -282,6 +297,13 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
     }
 
     const addBlock = (type: string) => {
+        // Enforce single instance for business info blocks
+        const singleInstanceBlocks = ['opening_hours', 'contact_info', 'location', 'facilities', 'about', 'social_networks', 'services', 'products'];
+        if (singleInstanceBlocks.includes(type) && blocks.some((b: any) => b.type === type)) {
+            toast.error(`${type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} block already exists`);
+            return;
+        }
+
         let newBlock: any = {
             id: Math.random().toString(36).substring(7),
             type,
@@ -477,8 +499,10 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                             size="sm"
                             className="bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-900 rounded-lg px-3 md:px-4 h-9 font-medium text-[12px] shadow-sm transition-all active:scale-95"
                             onClick={() => {
-                                const url = `${window.location.origin}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`
-                                window.open(url, '_blank')
+                                // Explicitly use /profile for main profile page
+                                let suffix = pageType === 'storefront' ? 'profile' : pageType
+                                let path = `/${formData.slug}/${suffix}`
+                                window.open(`${window.location.origin}${path}`, '_blank')
                             }}
                         >
                             <ExternalLink className="w-4 h-4 md:mr-2" />
@@ -489,8 +513,10 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                             size="sm"
                             className="bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-900 rounded-lg px-3 md:px-4 h-9 font-medium text-[12px] shadow-sm transition-all active:scale-95"
                             onClick={() => {
-                                const url = `${window.location.origin}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`
-                                navigator.clipboard.writeText(url)
+                                // Explicitly use /profile for main profile page
+                                let suffix = pageType === 'storefront' ? 'profile' : pageType
+                                let path = `/${formData.slug}/${suffix}`
+                                navigator.clipboard.writeText(`${window.location.origin}${path}`)
                                 toast.success("Link copied to clipboard!")
                             }}
                         >
@@ -664,7 +690,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                         <div className="relative flex-1">
                                             <Input
                                                 readOnly
-                                                value={`${window.location.origin}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`}
+                                                value={`${window.location.origin}/${formData.slug}/${(pageType === 'storefront' ? 'profile' : pageType)}`}
                                                 className="bg-zinc-50 font-mono text-xs h-10 pr-10 text-zinc-600"
                                             />
                                             <div className="absolute right-0 top-0 bottom-0 flex items-center pr-3">
@@ -677,7 +703,8 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                             variant="outline"
                                             className="h-10 px-4 shrink-0 hover:bg-zinc-50 border-[#CDD0DB]"
                                             onClick={() => {
-                                                const url = `${window.location.origin}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`
+                                                const suffix = pageType === 'storefront' ? 'profile' : pageType
+                                                const url = `${window.location.origin}/${formData.slug}/${suffix}`
                                                 navigator.clipboard.writeText(url)
                                                 toast.success("Link copied to clipboard!")
                                             }}
@@ -695,7 +722,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                     <div className="bg-white p-2 rounded-lg border border-zinc-100 shadow-sm">
                                         <QRCodeCanvas
                                             id="qr-code-canvas"
-                                            value={`${typeof window !== 'undefined' ? window.location.origin : ''}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`}
+                                            value={`${typeof window !== 'undefined' ? window.location.origin : ''}/${formData.slug}/${(pageType === 'storefront' ? 'profile' : pageType)}`}
                                             size={160}
                                             level={"H"}
                                             includeMargin={true}
@@ -733,7 +760,8 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                             variant="outline"
                                             className="h-12 justify-start px-4 border-[#CDD0DB] hover:bg-zinc-50 hover:text-[#0A0909] gap-3"
                                             onClick={() => {
-                                                const url = encodeURIComponent(`${window.location.origin}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`)
+                                                const suffix = pageType === 'storefront' ? 'profile' : pageType
+                                                const url = encodeURIComponent(`${window.location.origin}/${formData.slug}/${suffix}`)
                                                 window.open(`https://wa.me/?text=${url}`, '_blank')
                                             }}
                                         >
@@ -746,7 +774,8 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                             variant="outline"
                                             className="h-12 justify-start px-4 border-[#CDD0DB] hover:bg-zinc-50 hover:text-[#0A0909] gap-3"
                                             onClick={() => {
-                                                const url = encodeURIComponent(`${window.location.origin}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`)
+                                                const suffix = pageType === 'storefront' ? 'profile' : pageType
+                                                const url = encodeURIComponent(`${window.location.origin}/${formData.slug}/${suffix}`)
                                                 window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank')
                                             }}
                                         >
@@ -759,7 +788,8 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                             variant="outline"
                                             className="h-12 justify-start px-4 border-[#CDD0DB] hover:bg-zinc-50 hover:text-[#0A0909] gap-3"
                                             onClick={() => {
-                                                const url = encodeURIComponent(`${window.location.origin}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`)
+                                                const suffix = pageType === 'storefront' ? 'profile' : pageType
+                                                const url = encodeURIComponent(`${window.location.origin}/${formData.slug}/${suffix}`)
                                                 window.open(`https://twitter.com/intent/tweet?url=${url}`, '_blank')
                                             }}
                                         >
@@ -772,7 +802,8 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                             variant="outline"
                                             className="h-12 justify-start px-4 border-[#CDD0DB] hover:bg-zinc-50 hover:text-[#0A0909] gap-3"
                                             onClick={() => {
-                                                const url = encodeURIComponent(`${window.location.origin}/${formData.slug}${pageType === 'storefront' ? '' : '/' + pageType}`)
+                                                const suffix = pageType === 'storefront' ? 'profile' : pageType
+                                                const url = encodeURIComponent(`${window.location.origin}/${formData.slug}/${suffix}`)
                                                 window.open(`mailto:?body=${url}`, '_blank')
                                             }}
                                         >
@@ -814,7 +845,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                 <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[80px] h-6 bg-black rounded-full z-50"></div>
 
                                 <div className="h-full w-full overflow-y-auto custom-scrollbar bg-white scroll-smooth">
-                                    <BusinessStorefront
+                                    <BusinessProfile
                                         business={formData}
                                         products={products}
                                         services={services}
@@ -868,7 +899,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                 <div className="grid grid-cols-2 gap-3">
                                     <button
                                         className="p-3 rounded-lg border border-[#CDD0DB] hover:border-black hover:bg-zinc-50 transition-all duration-200 text-left group flex flex-row items-center gap-3 relative"
-                                        onClick={() => { addBlock('text'); toast.success('Text block added'); }}
+                                        onClick={() => addBlock('text')}
                                     >
                                         <div className="relative">
                                             <div className="w-9 h-9 bg-orange-500 rounded-md flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-all">
@@ -883,7 +914,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
 
                                     <button
                                         className="p-3 rounded-lg border border-[#CDD0DB] hover:border-black hover:bg-zinc-50 transition-all duration-200 text-left group flex flex-row items-center gap-3 relative"
-                                        onClick={() => { addBlock('url'); toast.success('Link block added'); }}
+                                        onClick={() => addBlock('url')}
                                     >
                                         <div className="relative">
                                             <div className="w-9 h-9 bg-blue-500 rounded-md flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-all">
@@ -898,7 +929,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
 
                                     <button
                                         className="p-3 rounded-lg border border-[#CDD0DB] hover:border-black hover:bg-zinc-50 transition-all duration-200 text-left group flex flex-row items-center gap-3 relative"
-                                        onClick={() => { addBlock('page_link'); toast.success('Page link added'); }}
+                                        onClick={() => addBlock('page_link')}
                                     >
                                         <div className="relative">
                                             <div className="w-9 h-9 bg-purple-500 rounded-md flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-all">
@@ -917,7 +948,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                 <div className="grid grid-cols-2 gap-3">
                                     <button
                                         className="p-3 rounded-lg border border-[#CDD0DB] hover:border-black hover:bg-zinc-50 transition-all duration-200 text-left group flex flex-row items-center gap-3 relative"
-                                        onClick={() => { addBlock('opening_hours'); toast.success('Hours block added'); }}
+                                        onClick={() => addBlock('opening_hours')}
                                     >
                                         <div className="relative">
                                             <div className="w-9 h-9 bg-blue-600 rounded-md flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-all">
@@ -937,7 +968,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
 
                                     <button
                                         className="p-3 rounded-lg border border-[#CDD0DB] hover:border-black hover:bg-zinc-50 transition-all duration-200 text-left group flex flex-row items-center gap-3 relative"
-                                        onClick={() => { addBlock('contact_info'); toast.success('Contact info added'); }}
+                                        onClick={() => addBlock('contact_info')}
                                     >
                                         <div className="relative">
                                             <div className="w-9 h-9 bg-green-500 rounded-md flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-all">
@@ -957,7 +988,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
 
                                     <button
                                         className="p-3 rounded-lg border border-[#CDD0DB] hover:border-black hover:bg-zinc-50 transition-all duration-200 text-left group flex flex-row items-center gap-3 relative"
-                                        onClick={() => { addBlock('location'); toast.success('Location block added'); }}
+                                        onClick={() => addBlock('location')}
                                     >
                                         <div className="relative">
                                             <div className="w-9 h-9 bg-red-500 rounded-md flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-all">
@@ -977,7 +1008,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
 
                                     <button
                                         className="p-3 rounded-lg border border-[#CDD0DB] hover:border-black hover:bg-zinc-50 transition-all duration-200 text-left group flex flex-row items-center gap-3 relative"
-                                        onClick={() => { addBlock('facilities'); toast.success('Facilities block added'); }}
+                                        onClick={() => addBlock('facilities')}
                                     >
                                         <div className="relative">
                                             <div className="w-9 h-9 bg-teal-500 rounded-md flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-all">
@@ -997,7 +1028,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
 
                                     <button
                                         className="p-3 rounded-lg border border-[#CDD0DB] hover:border-black hover:bg-zinc-50 transition-all duration-200 text-left group flex flex-row items-center gap-3 relative"
-                                        onClick={() => { addBlock('about'); toast.success('About block added'); }}
+                                        onClick={() => addBlock('about')}
                                     >
                                         <div className="relative">
                                             <div className="w-9 h-9 bg-indigo-500 rounded-md flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-all">
@@ -1017,7 +1048,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
 
                                     <button
                                         className="p-3 rounded-lg border border-[#CDD0DB] hover:border-black hover:bg-zinc-50 transition-all duration-200 text-left group flex flex-row items-center gap-3 relative"
-                                        onClick={() => { addBlock('social_networks'); toast.success('Social links added'); }}
+                                        onClick={() => addBlock('social_networks')}
                                     >
                                         <div className="relative">
                                             <div className="w-9 h-9 bg-pink-500 rounded-md flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-all">
@@ -1037,7 +1068,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
 
                                     <button
                                         className="p-3 rounded-lg border border-[#CDD0DB] hover:border-black hover:bg-zinc-50 transition-all duration-200 text-left group flex flex-row items-center gap-3 relative"
-                                        onClick={() => { addBlock('services'); toast.success('Services block added'); }}
+                                        onClick={() => addBlock('services')}
                                     >
                                         <div className="relative">
                                             <div className="w-9 h-9 bg-orange-500 rounded-md flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-all">
@@ -1057,7 +1088,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
 
                                     <button
                                         className="p-3 rounded-lg border border-[#CDD0DB] hover:border-black hover:bg-zinc-50 transition-all duration-200 text-left group flex flex-row items-center gap-3 relative"
-                                        onClick={() => { addBlock('products'); toast.success('Products block added'); }}
+                                        onClick={() => addBlock('products')}
                                     >
                                         <div className="relative">
                                             <div className="w-9 h-9 bg-blue-500 rounded-md flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-all">
@@ -1506,7 +1537,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                             onChange={(e) => updateBlock(editingBlock.id, { pageType: e.target.value })}
                                             className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                         >
-                                            <option value="storefront">Storefront</option>
+                                            <option value="profile">Profile</option>
                                             <option value="shop">Shop</option>
                                             <option value="bookings">Bookings</option>
                                             <option value="quote">Quote</option>

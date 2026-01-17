@@ -96,6 +96,7 @@ const bookings = {
     label: "Bookings",
     href: "#",
     children: [
+        { label: "Overview", href: "/business/bookings/overview" },
         { label: "Booking Page", href: "/business/booking-page" },
         { label: "Tickets", href: "/business/tickets" },
     ]
@@ -182,7 +183,7 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
 
     const handleOpenStore = () => {
         if (business) {
-            window.open(`/${business.slug}`, '_blank')
+            window.open(`/bized`, '_blank')
         }
     }
 
@@ -317,7 +318,7 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                             <DropdownMenuContent align="start" className="w-56">
                                 <DropdownMenuItem onClick={handleOpenStore} className="cursor-pointer">
                                     <ExternalLink className="w-4 h-4 mr-2" />
-                                    Open
+                                    Client Portal
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={handleChangeStore} className="cursor-pointer">
                                     <RefreshCw className="w-4 h-4 mr-2" />

@@ -168,7 +168,7 @@ const BusinessSchema = new mongoose.Schema({
         title: String,
         slug: String,
         enabled: { type: Boolean, default: true },
-        type: { type: String, enum: ['storefront', 'bookings', 'shop', 'quote'] },
+        type: { type: String, enum: ['profile', 'bookings', 'shop', 'quote', 'storefront'] },
         settings: { type: mongoose.Schema.Types.Mixed, default: {} }
     }],
     setupStep: {
