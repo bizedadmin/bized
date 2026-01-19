@@ -34,6 +34,8 @@ import {
     Sparkles,
     Briefcase,
     HandPlatter,
+    FileText,
+    Receipt,
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -114,11 +116,12 @@ const quotesMenu = {
 
 const storeMenu = {
     icon: Store,
-    label: "Store",
+    label: "Sales & Store",
     href: "#",
     children: [
-        { label: "Shop Page", href: "/business/shop-page" },
         { label: "Orders", href: "/business/orders" },
+        { label: "Invoices", href: "/business/invoices" },
+        { label: "Shop Page", href: "/business/shop-page" },
     ]
 }
 
