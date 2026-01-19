@@ -63,7 +63,7 @@ export default function PricingRulesPage() {
             <Card className="border-zinc-200">
                 <CardHeader>
                     <div className="flex items-center gap-2">
-                        <Coins className="w-5 h-5 text-emerald-600" />
+                        <Coins className="w-5 h-5 text-blue-600" />
                         <CardTitle className="text-lg">Global Currency</CardTitle>
                     </div>
                     <CardDescription>Default currency for all invoices and quotes.</CardDescription>

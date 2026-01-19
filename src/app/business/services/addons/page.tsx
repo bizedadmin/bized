@@ -190,7 +190,7 @@ export default function AddOnsPage() {
                                 <TableRow key={addon._id}>
                                     <TableCell className="font-medium text-gray-900">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
                                                 <PlusCircle className="w-4 h-4" />
                                             </div>
                                             {addon.name}
@@ -199,8 +199,8 @@ export default function AddOnsPage() {
                                     <TableCell>{addon.currency} {addon.price}</TableCell>
                                     <TableCell>{addon.duration} mins</TableCell>
                                     <TableCell>
-                                        <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                        <div className="flex items-center gap-1.5 text-xs text-blue-600 font-medium">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                                             Active
                                         </div>
                                     </TableCell>

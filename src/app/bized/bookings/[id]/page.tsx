@@ -96,7 +96,7 @@ export default function BookingDetailPage({ params: paramsPromise }: { params: P
     if (status === "loading" || isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-950">
-                <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
             </div>
         )
     }
@@ -118,11 +118,11 @@ export default function BookingDetailPage({ params: paramsPromise }: { params: P
         )
     }
 
-    const themeColor = booking.businessId.themeColor || "#10b981"
+    const themeColor = booking.businessId.themeColor || "#007AFF"
 
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
-            case 'confirmed': return 'bg-emerald-50 text-emerald-600 border-emerald-100'
+            case 'confirmed': return 'bg-green-50 text-green-600 border-green-100'
             case 'pending': return 'bg-amber-50 text-amber-600 border-amber-100'
             case 'cancelled': return 'bg-red-50 text-red-600 border-red-100'
             case 'completed': return 'bg-blue-50 text-blue-600 border-blue-100'

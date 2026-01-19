@@ -48,7 +48,7 @@ const CATEGORIES = [
     { id: 'Construction', name: 'Construction', icon: Hammer, color: 'text-blue-600', bgColor: 'bg-blue-50' },
     { id: 'Education', name: 'Education', icon: BookOpen, color: 'text-sky-600', bgColor: 'bg-sky-50' },
     { id: 'Electronics', name: 'Electronics', icon: Zap, color: 'text-yellow-600', bgColor: 'bg-yellow-50' },
-    { id: 'Financial Services', name: 'Financial Services', icon: CircleDollarSign, color: 'text-emerald-600', bgColor: 'bg-emerald-50' },
+    { id: 'Financial Services', name: 'Financial Services', icon: CircleDollarSign, color: 'text-blue-600', bgColor: 'bg-blue-50' },
     { id: 'Food/Restaurant', name: 'Food/Restaurant', icon: UtensilsCrossed, color: 'text-red-600', bgColor: 'bg-red-50' },
     { id: 'Clothes/Fashion', name: 'Clothes/Fashion', icon: Shirt, color: 'text-indigo-600', bgColor: 'bg-indigo-50' },
     { id: 'Hardware', name: 'Hardware', icon: PaintRoller, color: 'text-teal-600', bgColor: 'bg-teal-50' },
@@ -276,7 +276,7 @@ export default function CreateBusinessPage() {
         <div className="min-h-screen bg-background font-sans text-foreground overflow-x-hidden flex flex-col relative">
             {/* GLOBAL GRID BACKGROUND */}
             <div className="fixed inset-0 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10" />
-            <div className="fixed inset-0 h-full w-full bg-[radial-gradient(circle_800px_at_50%_-30%,#10b98115,transparent)] pointer-events-none -z-10" />
+            <div className="fixed inset-0 h-full w-full bg-[radial-gradient(circle_800px_at_50%_-30%,#007AFF15,transparent)] pointer-events-none -z-10" />
 
             {/* Header */}
             <header className="h-16 sticky top-0 bg-background/80 backdrop-blur-xl border-b border-border/40 z-50 px-4 md:px-0">
@@ -300,7 +300,7 @@ export default function CreateBusinessPage() {
                     <div className="flex-1 flex justify-center px-4">
                         <div className="max-w-[140px] md:max-w-[200px] w-full bg-muted/50 h-1.5 rounded-full overflow-hidden border border-border/20">
                             <motion.div
-                                className="h-full bg-primary shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                                className="h-full bg-primary shadow-[0_0_10px_rgba(0,122,255,0.3)]"
                                 initial={{ width: `${((step - 1) / 4) * 100}%` }}
                                 animate={{ width: `${(step / 4) * 100}%` }}
                             />

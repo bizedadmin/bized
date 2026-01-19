@@ -51,11 +51,12 @@ const Navbar = () => {
     return (
         <nav
             className={cn(
-                "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4",
+                "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6",
                 isScrolled
-                    ? "bg-white border-b border-zinc-200 py-3 dark:bg-zinc-950 dark:border-zinc-800 shadow-sm"
-                    : "bg-transparent"
+                    ? "bg-white/80 backdrop-blur-xl border-b border-zinc-200/50 py-3 dark:bg-zinc-950/80 dark:border-zinc-800/50 shadow-sm"
+                    : "bg-transparent py-4"
             )}
+            style={{ paddingTop: 'calc(env(safe-area-inset-top) + 0.5rem)' }}
         >
             <div className="max-w-7xl mx-auto flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2 group">
@@ -79,7 +80,7 @@ const Navbar = () => {
                 </Link>
 
                 {/* Desktop Menu */}
-                <div className="hidden md:flex items-center gap-8">
+                <div className="hidden lg:flex items-center gap-8">
                     {[
                         {
                             key: "features",
@@ -138,12 +139,12 @@ const Navbar = () => {
                     ))}
                 </div>
 
-                <div className="hidden md:flex items-center gap-4">
+                <div className="hidden lg:flex items-center gap-4">
                     <Link href="/login" className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                         {t("navbar.signin")}
                     </Link>
                     <Link href="/register">
-                        <button className="bg-primary text-primary-foreground px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 flex items-center gap-2 group">
+                        <button className="bg-blue-600 text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/25 flex items-center gap-2 group">
                             {t("navbar.getstarted")}
                             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                         </button>
@@ -157,7 +158,7 @@ const Navbar = () => {
                                 className={cn(
                                     "p-2.5 rounded-xl transition-all duration-300 flex items-center justify-center border-2 border-transparent",
                                     isSettingsOpen
-                                        ? "bg-primary border-primary shadow-lg shadow-primary/30 rotate-90 text-primary-foreground"
+                                        ? "bg-blue-600 border-blue-600 shadow-lg shadow-blue-600/30 rotate-90 text-white"
                                         : "bg-muted/50 text-foreground border-border hover:bg-muted"
                                 )}
                                 aria-label="Settings"
@@ -246,7 +247,7 @@ const Navbar = () => {
 
                 {/* Mobile Toggle */}
                 <button
-                    className="md:hidden p-2 text-zinc-600 dark:text-zinc-400"
+                    className="lg:hidden p-2 text-zinc-600 dark:text-zinc-400"
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 >
                     {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -260,7 +261,8 @@ const Navbar = () => {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="absolute top-full left-0 right-0 bg-white border-b border-zinc-200 p-6 flex flex-col gap-4 md:hidden dark:bg-zinc-950 dark:border-zinc-800 overflow-hidden"
+                        className="absolute top-full left-0 right-0 bg-white/90 backdrop-blur-2xl border-b border-zinc-200/50 p-6 flex flex-col gap-4 lg:hidden dark:bg-zinc-950/90 dark:border-zinc-800/50 overflow-hidden"
+                        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1.5rem)' }}
                     >
                         {[
                             { key: "features", label: t("navbar.features") },
@@ -276,7 +278,7 @@ const Navbar = () => {
                                 {item.label}
                             </Link>
                         ))}
-                        <button className="w-full bg-primary text-primary-foreground py-3 rounded-xl font-semibold mt-2">{t("navbar.getstarted")}</button>
+                        <button className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold mt-2">{t("navbar.getstarted")}</button>
                     </motion.div>
                 )}
             </AnimatePresence>

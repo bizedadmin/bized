@@ -605,7 +605,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                                                                 {block.type === 'url' && <Link1 size={12} color="#3b82f6" />}
                                                                                 {block.type === 'page_link' && <Layer size={12} color="#a855f7" />}
                                                                                 {block.type === 'opening_hours' && <Clock size={12} className="text-blue-500" />}
-                                                                                {block.type === 'contact_info' && <Phone size={12} className="text-green-500" />}
+                                                                                {block.type === 'contact_info' && <Phone size={12} className="text-blue-500" />}
                                                                                 {block.type === 'location' && <MapPin size={12} className="text-red-500" />}
                                                                                 {block.type === 'facilities' && <CheckCircle2 size={12} className="text-teal-500" />}
                                                                                 {block.type === 'about' && <Info size={12} className="text-indigo-500" />}
@@ -694,7 +694,7 @@ function PageBuilderContent({ pageType }: { pageType: string }) {
                                                 className="bg-zinc-50 font-mono text-xs h-10 pr-10 text-zinc-600"
                                             />
                                             <div className="absolute right-0 top-0 bottom-0 flex items-center pr-3">
-                                                <div className="h-4 w-4 bg-green-500 rounded-full flex items-center justify-center opacity-0 transition-opacity data-[copied=true]:opacity-100">
+                                                <div className="h-4 w-4 bg-blue-500 rounded-full flex items-center justify-center opacity-0 transition-opacity data-[copied=true]:opacity-100">
                                                     <Check className="w-2.5 h-2.5 text-white" />
                                                 </div>
                                             </div>

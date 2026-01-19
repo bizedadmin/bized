@@ -245,7 +245,7 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-9 w-9 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
+                        className="h-9 w-9 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
                         onClick={() => setIsAiAssistantOpen(true)}
                     >
                         <Sparkles className="w-5 h-5" />

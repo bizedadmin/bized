@@ -337,7 +337,7 @@ export function ServiceForm({ initialData, businessId, isEditing = false }: Serv
                                             type="button"
                                             variant="ghost"
                                             size="sm"
-                                            className="h-7 px-2 text-[10px] gap-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 font-bold uppercase tracking-wider transition-all"
+                                            className="h-7 px-2 text-[10px] gap-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-bold uppercase tracking-wider transition-all"
                                             onClick={handleGenerateDescription}
                                             disabled={!name || isGeneratingDescription}
                                         >
@@ -354,7 +354,7 @@ export function ServiceForm({ initialData, businessId, isEditing = false }: Serv
                                 <Textarea
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value.slice(0, 1500))}
-                                    className="min-h-[120px] text-sm resize-none leading-relaxed focus-visible:ring-emerald-500"
+                                    className="min-h-[120px] text-sm resize-none leading-relaxed focus-visible:ring-blue-500"
                                     placeholder="Provide a comprehensive description of what this service entails..."
                                 />
                             </div>
@@ -600,7 +600,7 @@ export function ServiceForm({ initialData, businessId, isEditing = false }: Serv
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                className="h-8 text-[10px] gap-1.5 border-emerald-200 text-emerald-700 bg-emerald-50/50 hover:bg-emerald-100/80 hover:text-emerald-800 font-bold uppercase tracking-wider transition-all duration-300 shadow-sm"
+                                className="h-8 text-[10px] gap-1.5 border-blue-200 text-blue-700 bg-blue-50/50 hover:bg-blue-100/80 hover:text-blue-800 font-bold uppercase tracking-wider transition-all duration-300 shadow-sm"
                                 onClick={() => setIsGeneratorOpen(true)}
                             >
                                 <Sparkles className="w-3.5 h-3.5 animate-pulse" />
@@ -621,7 +621,7 @@ export function ServiceForm({ initialData, businessId, isEditing = false }: Serv
                                             type="button"
                                             variant="secondary"
                                             size="icon"
-                                            className="h-8 w-8 rounded-full bg-white shadow-md border-zinc-200 hover:bg-emerald-50 hover:text-emerald-600"
+                                            className="h-8 w-8 rounded-full bg-white shadow-md border-zinc-200 hover:bg-blue-50 hover:text-blue-600"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 setGeneratorInitialImage(images[0]);

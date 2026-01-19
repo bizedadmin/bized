@@ -61,7 +61,7 @@ export function Step7WhatsApp() {
                             type="button"
                             onClick={testConnection}
                             disabled={testing || !data.whatsappNumber}
-                            className="bg-green-600 hover:bg-green-700"
+                            className="bg-blue-600 hover:bg-blue-700"
                         >
                             {testing ? "Testing..." : "Test Connection"}
                         </Button>

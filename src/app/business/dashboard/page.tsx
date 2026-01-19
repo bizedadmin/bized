@@ -80,7 +80,7 @@ export default function BusinessDashboard() {
                         </Link>
                         <Link href="/business/design">
                             <div className="p-4 border border-gray-200 dark:border-zinc-800 rounded-lg hover:border-blue-500 dark:hover:border-blue-400 transition-colors cursor-pointer">
-                                <Globe className="w-8 h-8 text-green-600 mb-2" />
+                                <Globe className="w-8 h-8 text-blue-600 mb-2" />
                                 <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Customize Website</h3>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">Design your online storefront</p>
                             </div>

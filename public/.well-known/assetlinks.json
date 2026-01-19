@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.bized.app",
+            "sha256_cert_fingerprints": [
+                "YOUR_APP_SHA256_FINGERPRINT_HERE"
+            ]
+        }
+    }
+]

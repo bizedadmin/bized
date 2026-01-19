@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "npx -y kill-port 3000 && next dev -p 3000",
+    "dev:ngrok": "concurrently \"npm run dev\" \"ngrok http 3000\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -54,10 +55,13 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.0.1",
+    "@capacitor/core": "^8.0.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "tailwindcss": "^4",

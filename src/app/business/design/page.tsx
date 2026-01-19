@@ -92,9 +92,9 @@ const DESIGN_OPTIONS = [
         label: "Shop",
         description: "Online store product listing",
         icon: ShoppingBag,
-        color: "text-green-600",
-        bg: "bg-green-100 dark:bg-green-900/20",
-        borderHover: "hover:border-green-500",
+        color: "text-blue-600",
+        bg: "bg-blue-100 dark:bg-blue-900/20",
+        borderHover: "hover:border-blue-500",
     },
     {
         id: "quote",

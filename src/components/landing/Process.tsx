@@ -28,7 +28,7 @@ const Process = () => {
             title: "Get paid instantly",
             description: "Accept payments globally with automated invoicing and zero-hassle financial reconciliation.",
             icon: Wallet,
-            color: "bg-emerald-500",
+            color: "bg-blue-600",
         }
     ];
 
@@ -44,7 +44,7 @@ const Process = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
                     {/* Connecting Line (Desktop) */}
-                    <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-blue-200 via-indigo-200 to-emerald-200 dark:from-blue-900 dark:via-indigo-900 dark:to-emerald-900" />
+                    <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-blue-200 via-indigo-200 to-blue-300 dark:from-blue-900 dark:via-indigo-900 dark:to-blue-800" />
 
                     {steps.map((step, idx) => (
                         <motion.div

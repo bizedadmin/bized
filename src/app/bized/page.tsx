@@ -119,7 +119,7 @@ function PortalContent() {
         }
     }
 
-    const themeColor = business?.themeColor || "#10b981";
+    const themeColor = business?.themeColor || "#007AFF";
 
     if (!session || !business) return null
 
@@ -242,7 +242,7 @@ function PortalContent() {
                                                         <span className="text-lg font-bold">{new Date(booking.date).getDate()}</span>
                                                     </div>
                                                     <div>
-                                                        <h3 className="font-bold text-gray-900 dark:text-white text-lg transition-colors group-hover:text-emerald-600">
+                                                        <h3 className="font-bold text-gray-900 dark:text-white text-lg transition-colors group-hover:text-blue-600">
                                                             {booking.serviceId?.name || "Service Appointment"}
                                                         </h3>
                                                         <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
@@ -349,7 +349,7 @@ export default function ClientPortalPage() {
     return (
         <Suspense fallback={
             <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-950">
-                <Loader2 className="w-10 h-10 animate-spin text-emerald-600" />
+                <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
             </div>
         }>
             <PortalContent />

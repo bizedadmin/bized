@@ -72,8 +72,8 @@ export default function AnalyticsPage() {
                                 >
                                     <defs>
                                         <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#10B981" stopOpacity={0.8} />
-                                            <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                                            <stop offset="5%" stopColor="#007AFF" stopOpacity={0.8} />
+                                            <stop offset="95%" stopColor="#007AFF" stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
                                     <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
@@ -85,7 +85,7 @@ export default function AnalyticsPage() {
                                     <Area
                                         type="monotone"
                                         dataKey="users"
-                                        stroke="#10B981"
+                                        stroke="#007AFF"
                                         fillOpacity={1}
                                         fill="url(#colorUsers)"
                                     />
@@ -138,7 +138,7 @@ export default function AnalyticsPage() {
                         <div className="text-2xl font-bold">3.2%</div>
                         <p className="text-xs text-muted-foreground">+0.4% from last month</p>
                         <div className="mt-4 h-[4px] w-full bg-muted rounded-full overflow-hidden">
-                            <div className="h-full bg-emerald-500 w-[65%]" />
+                            <div className="h-full bg-blue-500 w-[65%]" />
                         </div>
                     </CardContent>
                 </Card>

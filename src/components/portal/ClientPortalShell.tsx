@@ -81,7 +81,7 @@ export default function ClientPortalShell({
     if (status === "loading" || (isLoading && !business)) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-950">
-                <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
             </div>
         )
     }
@@ -166,7 +166,7 @@ export default function ClientPortalShell({
                         <Search className="absolute left-3 w-4 h-4 text-gray-400" />
                         <Input
                             placeholder="Search in portal..."
-                            className="pl-10 h-10 bg-gray-100/50 dark:bg-zinc-800/50 border-none rounded-full focus-visible:ring-emerald-500/50"
+                            className="pl-10 h-10 bg-gray-100/50 dark:bg-zinc-800/50 border-none rounded-full focus-visible:ring-blue-500/50"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />

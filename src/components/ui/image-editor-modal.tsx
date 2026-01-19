@@ -251,11 +251,11 @@ export function ImageEditorModal({
                                     onClick={() => fileInputRef.current?.click()}
                                 >
                                     {isUploading ? (
-                                        <Loader2 className="w-10 h-10 animate-spin text-emerald-500" />
+                                        <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
                                     ) : (
                                         <>
-                                            <div className="p-4 bg-emerald-50 rounded-full">
-                                                <Upload className="w-8 h-8 text-emerald-600" />
+                                            <div className="p-4 bg-blue-50 rounded-full">
+                                                <Upload className="w-8 h-8 text-blue-600" />
                                             </div>
                                             <div className="text-center">
                                                 <p className="text-sm font-bold text-zinc-800">No Image Selected</p>
@@ -288,7 +288,7 @@ export function ImageEditorModal({
                                     className={cn(
                                         "flex-1 py-3 text-[10px] font-bold flex flex-col items-center gap-1 transition-all border-b-2",
                                         activeTab === tab.id
-                                            ? "border-emerald-500 text-emerald-600 bg-emerald-50/30"
+                                            ? "border-blue-500 text-blue-600 bg-blue-50/30"
                                             : "border-transparent text-zinc-400 hover:text-zinc-600 hover:bg-zinc-50"
                                     )}
                                 >
@@ -331,7 +331,7 @@ export function ImageEditorModal({
                                                         max={ctrl.max}
                                                         value={ctrl.value}
                                                         onChange={(e) => ctrl.onChange(parseInt(e.target.value))}
-                                                        className="w-full h-1.5 bg-zinc-100 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:bg-zinc-200 transition-colors"
+                                                        className="w-full h-1.5 bg-zinc-100 rounded-lg appearance-none cursor-pointer accent-blue-500 hover:bg-zinc-200 transition-colors"
                                                     />
                                                 </div>
                                             ))}
@@ -354,7 +354,7 @@ export function ImageEditorModal({
                                                 className={cn(
                                                     "p-2 rounded-xl border text-[10px] font-bold text-left transition-all group",
                                                     activePreset === p.name
-                                                        ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                                                        ? "bg-blue-50 border-blue-200 text-blue-700"
                                                         : "bg-white border-zinc-100 text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50"
                                                 )}
                                             >
@@ -368,7 +368,7 @@ export function ImageEditorModal({
                                                         />
                                                     )}
                                                     {activePreset === p.name && (
-                                                        <div className="absolute inset-0 bg-emerald-500/20 flex items-center justify-center">
+                                                        <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center">
                                                             <Check className="w-5 h-5 text-white drop-shadow-md" />
                                                         </div>
                                                     )}
@@ -390,7 +390,7 @@ export function ImageEditorModal({
                                         <div className="grid grid-cols-2 gap-2">
                                             <Button
                                                 variant="outline"
-                                                className="h-12 flex flex-col gap-1 border-zinc-200 hover:border-emerald-200 hover:bg-emerald-50/50"
+                                                className="h-12 flex flex-col gap-1 border-zinc-200 hover:border-blue-200 hover:bg-blue-50/50"
                                                 onClick={() => setRotation(r => (r - 90) % 360)}
                                             >
                                                 <RotateCcw className="w-4 h-4" />
@@ -398,7 +398,7 @@ export function ImageEditorModal({
                                             </Button>
                                             <Button
                                                 variant="outline"
-                                                className="h-12 flex flex-col gap-1 border-zinc-200 hover:border-emerald-200 hover:bg-emerald-50/50"
+                                                className="h-12 flex flex-col gap-1 border-zinc-200 hover:border-blue-200 hover:bg-blue-50/50"
                                                 onClick={() => setRotation(r => (r + 90) % 360)}
                                             >
                                                 <RotateCw className="w-4 h-4" />
@@ -406,7 +406,7 @@ export function ImageEditorModal({
                                             </Button>
                                             <Button
                                                 variant="outline"
-                                                className="h-12 flex flex-col gap-1 border-zinc-200 hover:border-emerald-200 hover:bg-emerald-50/50"
+                                                className="h-12 flex flex-col gap-1 border-zinc-200 hover:border-blue-200 hover:bg-blue-50/50"
                                                 onClick={() => setFlipX(f => f * -1)}
                                             >
                                                 <FlipHorizontal className="w-4 h-4" />
@@ -414,7 +414,7 @@ export function ImageEditorModal({
                                             </Button>
                                             <Button
                                                 variant="outline"
-                                                className="h-12 flex flex-col gap-1 border-zinc-200 hover:border-emerald-200 hover:bg-emerald-50/50"
+                                                className="h-12 flex flex-col gap-1 border-zinc-200 hover:border-blue-200 hover:bg-blue-50/50"
                                                 onClick={() => setFlipY(f => f * -1)}
                                             >
                                                 <FlipVertical className="w-4 h-4" />

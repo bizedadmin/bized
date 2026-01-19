@@ -28,14 +28,23 @@ const notoSans = Noto_Sans({
 export const metadata: Metadata = {
   title: "Bized | All-in-One Business Operating System",
   description: "Bized empowers businesses to build their online presence, manage operations, and handle finances in one unified platform.",
-  manifest: "/manifest.json",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "Bized",
+    statusBarStyle: "black-translucent",
+  },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#10B981",
+  themeColor: "#007AFF",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  viewportFit: "cover",
 };
 
 import { ThemeProvider } from "@/components/theme-provider";
@@ -63,6 +72,21 @@ export default function RootLayout({
             <LanguageProvider>
               {children}
             </LanguageProvider>
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', function() {
+                      navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                      }, function(err) {
+                        console.log('ServiceWorker registration failed: ', err);
+                      });
+                    });
+                  }
+                `,
+              }}
+            />
             <Toaster />
           </Providers>
         </ThemeProvider>

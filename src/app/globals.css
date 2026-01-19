@@ -99,6 +99,7 @@
       transform: translateY(0);
     }
   }
+
   @keyframes check-draw {
     0% {
       stroke-dasharray: 100;
@@ -122,35 +123,97 @@
       opacity: 1;
     }
   }
+
+  /* Liquid Glass Animations */
+  @keyframes liquid-flow {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  @keyframes blob-bounce {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+  }
 }
 
 @layer base {
   :root {
-    --radius: 0.65rem;
+    --radius: 0.75rem;
+    /* Smoother Apple-like rounded corners */
+
+    /* Apple Light Mode Palette */
     --background: hsl(0 0% 100%);
-    --foreground: hsl(240 10% 3.9%);
+    /* Pure White */
+    --foreground: hsl(0 0% 0%);
+    /* Pure Black */
+
     --card: hsl(0 0% 100%);
-    --card-foreground: hsl(240 10% 3.9%);
+    --card-foreground: hsl(0 0% 0%);
+
     --popover: hsl(0 0% 100%);
-    --popover-foreground: hsl(240 10% 3.9%);
-    --primary: hsl(142.1 76.2% 36.3%);
-    --primary-foreground: hsl(355.7 100% 97.3%);
-    --secondary: hsl(240 4.8% 95.9%);
-    --secondary-foreground: hsl(240 5.9% 10%);
-    --muted: hsl(240 4.8% 95.9%);
+    --popover-foreground: hsl(0 0% 0%);
+
+    --primary: #007AFF;
+    /* System Blue #007AFF */
+    --primary-foreground: #FFFFFF;
+
+    --secondary: hsl(240 14% 96%);
+    /* System Gray 6 #F2F2F7 */
+    --secondary-foreground: hsl(211 100% 50%);
+    /* System Blue Text */
+
+    --muted: hsl(240 14% 96%);
+    /* System Gray 6 */
     --muted-foreground: hsl(240 3.8% 46.1%);
-    --accent: hsl(240 4.8% 95.9%);
-    --accent-foreground: hsl(240 5.9% 10%);
-    --destructive: hsl(0 84.2% 60.2%);
-    --destructive-foreground: hsl(0 0% 98%);
+    /* System Gray 2 */
+
+    --accent: hsl(211 100% 95%);
+    /* Light Blue Tint */
+    --accent-foreground: hsl(211 100% 50%);
+
+    --destructive: hsl(3 100% 59%);
+    /* System Red #FF3B30 */
+    --destructive-foreground: hsl(0 0% 100%);
+
     --border: hsl(240 5.9% 90%);
+    /* Light Gray Border */
     --input: hsl(240 5.9% 90%);
-    --ring: hsl(142.1 76.2% 36.3%);
-    --chart-1: hsl(12 76% 61%);
-    --chart-2: hsl(173 58% 39%);
-    --chart-3: hsl(197 37% 24%);
-    --chart-4: hsl(43 74% 66%);
-    --chart-5: hsl(27 87% 67%);
+    --ring: hsl(211 100% 50%);
+    /* Focus Ring System Blue */
+
+    --chart-1: hsl(211 100% 50%);
+    /* Blue */
+    --chart-2: hsl(135 59% 49%);
+    /* Green #34C759 */
+    --chart-3: hsl(35 100% 50%);
+    /* Orange #FF9500 */
+    --chart-4: hsl(280 65% 60%);
+    /* Purple */
+    --chart-5: hsl(340 75% 55%);
+    /* Pink */
+
     --sidebar: hsl(0 0% 98%);
     --sidebar-foreground: hsl(240 5.3% 26.1%);
     --sidebar-primary: hsl(240 5.9% 10%);
@@ -158,34 +221,56 @@
     --sidebar-accent: hsl(240 4.8% 95.9%);
     --sidebar-accent-foreground: hsl(240 5.9% 10%);
     --sidebar-border: hsl(220 13% 91%);
-    --sidebar-ring: hsl(217.2 91.2% 59.8%);
+    --sidebar-ring: hsl(211 100% 50%);
   }
 
   .dark {
-    --background: hsl(20 14.3% 4.1%);
-    --foreground: hsl(0 0% 95%);
-    --card: hsl(24 9.8% 10%);
-    --card-foreground: hsl(0 0% 95%);
-    --popover: hsl(0 0% 9%);
-    --popover-foreground: hsl(0 0% 95%);
-    --primary: hsl(142.1 70.6% 45.3%);
-    --primary-foreground: hsl(144.9 80.4% 10%);
-    --secondary: hsl(240 3.7% 15.9%);
-    --secondary-foreground: hsl(0 0% 98%);
-    --muted: hsl(0 0% 15%);
+    /* Apple Dark Mode Palette */
+    --background: hsl(0 0% 0%);
+    /* Pure Black */
+    --foreground: hsl(0 0% 100%);
+    /* Pure White */
+
+    --card: hsl(240 4% 11%);
+    /* System Gray 6 Dark #1C1C1E */
+    --card-foreground: hsl(0 0% 100%);
+
+    --popover: hsl(240 4% 11%);
+    --popover-foreground: hsl(0 0% 100%);
+
+    --primary: hsl(210 100% 52%);
+    /* System Blue Dark #0A84FF */
+    --primary-foreground: hsl(0 0% 100%);
+
+    --secondary: hsl(240 4% 16%);
+    /* System Gray 5 Dark #2C2C2E */
+    --secondary-foreground: hsl(0 0% 100%);
+
+    --muted: hsl(240 4% 16%);
     --muted-foreground: hsl(240 5% 64.9%);
-    --accent: hsl(12 6.5% 15.1%);
-    --accent-foreground: hsl(0 0% 98%);
-    --destructive: hsl(0 62.8% 30.6%);
-    --destructive-foreground: hsl(0 85.7% 97.3%);
-    --border: hsl(240 3.7% 15.9%);
-    --input: hsl(240 3.7% 15.9%);
-    --ring: hsl(142.4 71.8% 29.2%);
-    --chart-1: hsl(220 70% 50%);
-    --chart-2: hsl(160 60% 45%);
-    --chart-3: hsl(30 80% 55%);
+    /* System Gray 2 Dark */
+
+    --accent: hsl(210 100% 12%);
+    /* Dark Blue Tint */
+    --accent-foreground: hsl(0 0% 100%);
+
+    --destructive: hsl(3 100% 61%);
+    /* System Red Dark #FF453A */
+    --destructive-foreground: hsl(0 0% 100%);
+
+    --border: hsl(240 4% 25%);
+    /* Dark Gray Border */
+    --input: hsl(240 4% 25%);
+    --ring: hsl(210 100% 52%);
+    /* Focus Ring System Blue */
+
+    --chart-1: hsl(210 100% 52%);
+    --chart-2: hsl(135 65% 50%);
+    /* Green Dark #30D158 */
+    --chart-3: hsl(35 100% 50%);
     --chart-4: hsl(280 65% 60%);
     --chart-5: hsl(340 75% 55%);
+
     --sidebar: hsl(240 5.9% 10%);
     --sidebar-foreground: hsl(240 4.8% 95.9%);
     --sidebar-primary: hsl(224.3 76.3% 48%);
@@ -193,17 +278,50 @@
     --sidebar-accent: hsl(240 3.7% 15.9%);
     --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
     --sidebar-border: hsl(240 3.7% 15.9%);
-    --sidebar-ring: hsl(217.2 91.2% 59.8%);
+    --sidebar-ring: hsl(210 100% 52%);
   }
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    /* Safe Area Insets for iOS Notch */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+
+    /* Disable long-press menus for better app feel */
+    -webkit-touch-callout: none;
+  }
+
+  /* Allow text selection only where needed */
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  span,
+  input,
+  textarea {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* Global native-like button tap effect */
+  button:active,
+  .clickable:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
   }
 }
 

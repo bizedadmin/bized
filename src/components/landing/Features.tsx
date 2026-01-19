@@ -37,7 +37,7 @@ const Features = () => {
             title: t("features.items.checkout.title"),
             description: t("features.items.checkout.desc"),
             icon: ShoppingCart,
-            color: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400",
+            color: "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400",
         },
         {
             title: t("features.items.orders.title"),

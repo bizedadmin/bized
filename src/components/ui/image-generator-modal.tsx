@@ -96,7 +96,7 @@ const STYLE_PRESETS = [
     { value: "digital-art", label: "Digital", icon: Wand2, color: "bg-orange-500" },
     { value: "oil-painting", label: "Classic", icon: ChevronDown, color: "bg-yellow-600" },
     { value: "cinematic", label: "Movie", icon: Settings2, color: "bg-zinc-800" },
-    { value: "minimalist", label: "Modern", icon: Check, color: "bg-emerald-500" },
+    { value: "minimalist", label: "Modern", icon: Check, color: "bg-blue-500" },
 ]
 
 const ASPECT_RATIOS = [
@@ -370,13 +370,13 @@ export function ImageGeneratorModal({
                     {/* Header */}
                     <div className="p-4 bg-white border-b border-zinc-200 flex items-center justify-between z-10 shrink-0">
                         <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-200">
+                            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-200">
                                 <Sparkles className="w-5 h-5 text-white" />
                             </div>
                             <div>
                                 <SheetTitle className="text-sm font-bold flex items-center gap-2">
                                     AI Visual Assistant
-                                    <span className="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full uppercase font-bold tracking-tight">Pro</span>
+                                    <span className="text-[9px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full uppercase font-bold tracking-tight">Pro</span>
                                 </SheetTitle>
                                 <p className="text-[10px] text-zinc-500 font-medium">Bized Intelligence • Active</p>
                             </div>
@@ -428,7 +428,7 @@ export function ImageGeneratorModal({
                                 >
                                     <div className={cn(
                                         "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-1 shadow-sm",
-                                        msg.type === 'user' ? "bg-zinc-800 text-white" : "bg-emerald-100 text-emerald-600"
+                                        msg.type === 'user' ? "bg-zinc-800 text-white" : "bg-blue-100 text-blue-600"
                                     )}>
                                         {msg.type === 'user' ? <div className="text-[10px] font-bold">ME</div> : <Sparkles className="w-3.5 h-3.5" />}
                                     </div>
@@ -449,7 +449,7 @@ export function ImageGeneratorModal({
                                                         <span className="text-[9px] px-1.5 py-0.5 rounded border border-white/20 uppercase tracking-tighter">{msg.params.style}</span>
                                                         <span className="text-[9px] px-1.5 py-0.5 rounded border border-white/20 uppercase tracking-tighter">{msg.params.aspectRatio}</span>
                                                         {msg.params.overlay && (
-                                                            <span className="text-[9px] px-1.5 py-0.5 rounded border border-emerald-500/30 text-emerald-300 uppercase tracking-tighter flex items-center gap-1">
+                                                            <span className="text-[9px] px-1.5 py-0.5 rounded border border-blue-500/30 text-blue-600 uppercase tracking-tighter flex items-center gap-1">
                                                                 <Type className="w-2.5 h-2.5" /> Text Overlay
                                                             </span>
                                                         )}
@@ -498,8 +498,8 @@ export function ImageGeneratorModal({
 
                         {isGenerating && (
                             <div className="flex gap-3">
-                                <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0 animate-pulse">
-                                    <Loader2 className="w-3.5 h-3.5 text-emerald-600 animate-spin" />
+                                <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0 animate-pulse">
+                                    <Loader2 className="w-3.5 h-3.5 text-blue-600 animate-spin" />
                                 </div>
                                 <div className="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm w-full space-y-3">
                                     <div className="flex items-center justify-between text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
@@ -508,7 +508,7 @@ export function ImageGeneratorModal({
                                     </div>
                                     <div className="w-full h-1.5 bg-zinc-100 rounded-full overflow-hidden">
                                         <motion.div
-                                            className="h-full bg-emerald-500"
+                                            className="h-full bg-blue-600"
                                             initial={{ width: "0%" }}
                                             animate={{ width: "100%" }}
                                             transition={{ duration: 15, repeat: Infinity }}
@@ -610,7 +610,7 @@ export function ImageGeneratorModal({
                                                 value={negativePrompt}
                                                 onChange={(e) => setNegativePrompt(e.target.value)}
                                                 placeholder="e.g. text, watermark, blurry, extra fingers"
-                                                className="w-full h-8 px-3 rounded-lg bg-zinc-50 border border-zinc-200 text-[10px] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                className="w-full h-8 px-3 rounded-lg bg-zinc-50 border border-zinc-200 text-[10px] focus:outline-none focus:ring-1 focus:ring-blue-500"
                                             />
                                             {negativePrompt && (
                                                 <button
@@ -633,7 +633,7 @@ export function ImageGeneratorModal({
                                                         value={textTitle}
                                                         onChange={(e) => setTextTitle(e.target.value)}
                                                         placeholder="Add a title..."
-                                                        className="flex-1 h-8 px-3 rounded-lg bg-zinc-50 border border-zinc-200 text-[10px] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                        className="flex-1 h-8 px-3 rounded-lg bg-zinc-50 border border-zinc-200 text-[10px] focus:outline-none focus:ring-1 focus:ring-blue-500"
                                                     />
                                                     <Select value={textTitleSize} onValueChange={(val: any) => setTextTitleSize(val)}>
                                                         <SelectTrigger className="w-16 h-8 text-[10px] bg-zinc-50">
@@ -655,7 +655,7 @@ export function ImageGeneratorModal({
                                                         value={textDescription}
                                                         onChange={(e) => setTextDescription(e.target.value)}
                                                         placeholder="Add a description..."
-                                                        className="flex-1 h-8 px-3 rounded-lg bg-zinc-50 border border-zinc-200 text-[10px] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                        className="flex-1 h-8 px-3 rounded-lg bg-zinc-50 border border-zinc-200 text-[10px] focus:outline-none focus:ring-1 focus:ring-blue-500"
                                                     />
                                                     <Select value={textDescriptionSize} onValueChange={(val: any) => setTextDescriptionSize(val)}>
                                                         <SelectTrigger className="w-16 h-8 text-[10px] bg-zinc-50">
@@ -738,7 +738,7 @@ export function ImageGeneratorModal({
                                                     presets={[
                                                         { name: 'White', value: '#ffffff' },
                                                         { name: 'Black', value: '#000000' },
-                                                        { name: 'Emerald', value: '#10b981' }
+                                                        { name: 'Blue', value: '#007aff' }
                                                     ]}
                                                 />
                                             </div>
@@ -751,7 +751,7 @@ export function ImageGeneratorModal({
                         {/* Main Input Area */}
                         <div className="space-y-3">
                             {currentInitialImage && (
-                                <div className="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-emerald-500 shadow-lg group ml-1">
+                                <div className="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-blue-600 shadow-lg group ml-1">
                                     <img src={currentInitialImage} className="w-full h-full object-cover" alt="Context" />
                                     <button
                                         onClick={() => setCurrentInitialImage(undefined)}
@@ -759,7 +759,7 @@ export function ImageGeneratorModal({
                                     >
                                         <X className="w-5 h-5" />
                                     </button>
-                                    <div className="absolute bottom-0 inset-x-0 bg-emerald-500 text-[8px] text-white font-bold text-center py-0.5 uppercase tracking-tighter">
+                                    <div className="absolute bottom-0 inset-x-0 bg-blue-600 text-[8px] text-white font-bold text-center py-0.5 uppercase tracking-tighter">
                                         Base Context
                                     </div>
                                 </div>
@@ -767,7 +767,7 @@ export function ImageGeneratorModal({
                             <div className="space-y-2">
                                 <div className="relative group">
                                     <Textarea
-                                        placeholder="A sleek, modern hair salon with emerald green chairs and soft hanging lights..."
+                                        placeholder="A sleek, modern hair salon with sapphire blue chairs and soft hanging lights..."
                                         value={prompt}
                                         onChange={(e) => setPrompt(e.target.value)}
                                         onKeyDown={(e) => {
@@ -776,14 +776,14 @@ export function ImageGeneratorModal({
                                                 handleGenerate()
                                             }
                                         }}
-                                        className="min-h-[100px] text-[11px] resize-none pr-12 pt-4 pb-4 bg-zinc-50 border-zinc-200 rounded-2xl focus-visible:ring-emerald-500 transition-all group-hover:bg-white"
+                                        className="min-h-[100px] text-[11px] resize-none pr-12 pt-4 pb-4 bg-zinc-50 border-zinc-200 rounded-2xl focus-visible:ring-blue-600 transition-all group-hover:bg-white"
                                     />
                                     <div className="absolute right-3 bottom-3 flex items-center gap-2">
                                         <Button
                                             type="button"
                                             variant="outline"
                                             size="icon"
-                                            className="h-8 w-8 rounded-xl border-zinc-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 transition-all shadow-sm"
+                                            className="h-8 w-8 rounded-xl border-zinc-200 text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition-all shadow-sm"
                                             onClick={handleRefinePrompt}
                                             disabled={!prompt || isRefining || isGenerating}
                                             title="Magic Refine"

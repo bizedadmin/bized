@@ -184,7 +184,7 @@ export default function BundlesPage() {
                         </p>
                     </div>
                 </div>
-                <Button onClick={() => setIsDialogOpen(true)} className="gap-2 bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-100">
+                <Button onClick={() => setIsDialogOpen(true)} className="gap-2 bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-100">
                     <Sparkles className="h-4 w-4" />
                     New Package
                 </Button>
@@ -228,7 +228,7 @@ export default function BundlesPage() {
                                     <TableRow key={bundle._id} className="group hover:bg-zinc-50/50 transition-colors">
                                         <TableCell className="font-bold text-gray-900">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                                                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
                                                     {bundle.name.charAt(0)}
                                                 </div>
                                                 {bundle.name}
@@ -243,10 +243,10 @@ export default function BundlesPage() {
                                                 ))}
                                             </div>
                                         </TableCell>
-                                        <TableCell className="font-bold text-emerald-600">{bundle.currency} {bundle.price}</TableCell>
+                                        <TableCell className="font-bold text-blue-600">{bundle.currency} {bundle.price}</TableCell>
                                         <TableCell>
                                             {savings > 0 ? (
-                                                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100">
+                                                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full border border-blue-100">
                                                     Save {bundle.currency} {savings.toFixed(2)}
                                                 </span>
                                             ) : (
@@ -273,12 +273,12 @@ export default function BundlesPage() {
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden border-none shadow-2xl">
-                    <div className="bg-emerald-600 p-6 text-white shrink-0">
+                    <div className="bg-blue-600 p-6 text-white shrink-0">
                         <DialogTitle className="text-xl font-bold flex items-center gap-2">
                             <Sparkles className="w-5 h-5" />
                             Design Service Package
                         </DialogTitle>
-                        <p className="text-emerald-100 text-xs mt-1 font-medium italic">Create a value bundle to increase your conversion rate.</p>
+                        <p className="text-blue-100 text-xs mt-1 font-medium italic">Create a value bundle to increase your conversion rate.</p>
                     </div>
 
                     <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto font-sans">
@@ -289,7 +289,7 @@ export default function BundlesPage() {
                                     placeholder="e.g. VIP Business Transformation"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="h-10 text-sm font-semibold border-zinc-200 focus:ring-emerald-500"
+                                    className="h-10 text-sm font-semibold border-zinc-200 focus:ring-blue-500"
                                     required
                                 />
                             </div>
@@ -300,7 +300,7 @@ export default function BundlesPage() {
                                     placeholder="0.00"
                                     value={price}
                                     onChange={(e) => setPrice(e.target.value)}
-                                    className="h-10 text-sm font-bold text-emerald-700 bg-emerald-50/30 border-emerald-100"
+                                    className="h-10 text-sm font-bold text-blue-700 bg-blue-50/30 border-blue-100"
                                     required
                                 />
                             </div>
@@ -335,7 +335,7 @@ export default function BundlesPage() {
                                     <div key={s.service} className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-zinc-100 shadow-sm animate-in fade-in slide-in-from-bottom-1">
                                         <div className="flex items-center gap-3">
                                             <div className="w-6 h-6 rounded-lg bg-zinc-100 flex items-center justify-center">
-                                                <Check className="w-3 h-3 text-emerald-500" />
+                                                <Check className="w-3 h-3 text-blue-500" />
                                             </div>
                                             <span className="text-xs font-bold text-zinc-700">{s.name}</span>
                                         </div>
@@ -389,7 +389,7 @@ export default function BundlesPage() {
 
                     <div className="p-6 bg-zinc-50 border-t border-zinc-100 flex items-center justify-end gap-3 shrink-0">
                         <Button type="button" variant="ghost" onClick={() => setIsDialogOpen(false)} className="text-xs font-bold text-zinc-400 hover:text-zinc-600">DISCARD</Button>
-                        <Button type="button" className="bg-emerald-600 text-white hover:bg-emerald-700 px-8 h-10 rounded-xl shadow-lg shadow-emerald-100 text-xs font-bold tracking-widest" onClick={handleSave} disabled={isSaving}>
+                        <Button type="button" className="bg-blue-600 text-white hover:bg-blue-700 px-8 h-10 rounded-xl shadow-lg shadow-blue-100 text-xs font-bold tracking-widest" onClick={handleSave} disabled={isSaving}>
                             {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                             LAUNCH PACKAGE
                         </Button>
