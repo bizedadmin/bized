@@ -47,6 +47,9 @@ const BusinessSchema = new mongoose.Schema({
         addressRegion: String,
         postalCode: String,
         addressCountry: String,
+        lat: Number,
+        lng: Number,
+        mapSnapshotUrl: String,
     },
 
     // --- Social & Metadata ---
@@ -183,6 +186,26 @@ const BusinessSchema = new mongoose.Schema({
     businessType: {
         type: String,
         required: false,
+    },
+    // --- Configuration & Settings ---
+    configuration: {
+        invoice: {
+            prefix: { type: String, default: 'INV' },
+            footerMessage: { type: String, default: '' },
+            defaultTerms: { type: String, default: 'Payment due upon receipt.' },
+            taxRate: { type: Number, default: 0 },
+            taxName: { type: String, default: 'Tax' },
+            showLogo: { type: Boolean, default: true },
+        },
+        order: {
+            prefix: { type: String, default: 'ORD' },
+            defaultStatus: { type: String, default: 'pending' },
+            enableNotifications: { type: Boolean, default: true },
+        },
+        customer: {
+            welcomeMessage: { type: String, default: '' },
+            requirePhone: { type: Boolean, default: false },
+        },
     },
 }, { timestamps: true });
 

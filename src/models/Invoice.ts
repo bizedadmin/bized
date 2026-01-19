@@ -1,22 +1,48 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
+/**
+ * Invoice Status mapped to Schema.org (though Schema.org uses strings/text)
+ * We use an enum for internal consistency.
+ */
 export enum InvoiceStatus {
-    DRAFT = 'draft',
-    SENT = 'sent',
-    PAID = 'paid',
-    OVERDUE = 'overdue',
-    CANCELLED = 'cancelled',
-    VOID = 'void',
+    DRAFT = 'Draft',
+    SENT = 'Sent',
+    PAID = 'Paid',
+    OVERDUE = 'Overdue',
+    CANCELLED = 'Cancelled',
+    VOID = 'Void',
 }
 
 export interface IInvoice extends Document {
-    businessId: mongoose.Types.ObjectId;
-    orderId?: mongoose.Types.ObjectId;
-    customerId?: mongoose.Types.ObjectId;
-    invoiceNumber: string;
-    customerName: string;
-    customerEmail: string;
-    customerAddress?: string;
+    // Schema.org Fields
+    identifier: string;            // The identifier for the invoice.
+    accountId?: string;           // The identifier for the account the invoice is about.
+    billingPeriod?: string;       // The time period covered by this invoice.
+    broker?: any;                 // An entity that arranges for an exchange between a buyer and a seller.
+    confirmationNumber?: string;  // A number that confirms the invoice.
+    customer: {                   // Party placing the order or paying the invoice.
+        name: string;
+        email: string;
+        address?: string;
+        id?: mongoose.Types.ObjectId;
+    };
+    minimumPaymentDue?: {         // The minimum amount due at this time.
+        price: number;
+        priceCurrency: string;
+    };
+    paymentDueDate: Date;         // The date that payment is due.
+    paymentMethod?: string;       // The name of the credit card or other method of payment.
+    paymentMethodId?: string;     // An identifier for the method of payment used.
+    paymentStatus: InvoiceStatus; // The status of payment.
+    provider: mongoose.Types.ObjectId; // The service provider, service operator, or vendor (Business).
+    referencesOrder?: mongoose.Types.ObjectId; // The Order(s) related to this Invoice.
+    scheduledPaymentDate?: Date;  // The date the payment is scheduled to occur.
+    totalPaymentDue: {            // The total amount due at this time.
+        price: number;
+        priceCurrency: string;
+    };
+
+    // Internal / Custom Fields (Not explicitly in schema.org/Invoice but needed for app)
     items: {
         description: string;
         quantity: number;
@@ -26,24 +52,44 @@ export interface IInvoice extends Document {
     subtotal: number;
     tax: number;
     discount: number;
-    total: number;
-    currency: string;
-    status: InvoiceStatus;
-    dueDate: Date;
-    notes?: string;
+    notes?: string;               // Can be mapped to 'description' from Thing
     createdAt: Date;
     updatedAt: Date;
 }
 
 const InvoiceSchema = new Schema<IInvoice>(
     {
-        businessId: { type: Schema.Types.ObjectId, ref: 'Business', required: true },
-        orderId: { type: Schema.Types.ObjectId, ref: 'Order' },
-        customerId: { type: Schema.Types.ObjectId, ref: 'User' },
-        invoiceNumber: { type: String, required: true, unique: true },
-        customerName: { type: String, required: true },
-        customerEmail: { type: String, required: true },
-        customerAddress: { type: String },
+        identifier: { type: String, required: true, unique: true },
+        accountId: { type: String },
+        billingPeriod: { type: String },
+        broker: { type: Schema.Types.Mixed },
+        confirmationNumber: { type: String },
+        customer: {
+            name: { type: String, required: true },
+            email: { type: String, required: true },
+            address: { type: String },
+            id: { type: Schema.Types.ObjectId, ref: 'User' },
+        },
+        minimumPaymentDue: {
+            price: { type: Number },
+            priceCurrency: { type: String },
+        },
+        paymentDueDate: { type: Date, required: true },
+        paymentMethod: { type: String },
+        paymentMethodId: { type: String },
+        paymentStatus: {
+            type: String,
+            enum: Object.values(InvoiceStatus),
+            default: InvoiceStatus.DRAFT,
+        },
+        provider: { type: Schema.Types.ObjectId, ref: 'Business', required: true, index: true },
+        referencesOrder: { type: Schema.Types.ObjectId, ref: 'Order' },
+        scheduledPaymentDate: { type: Date },
+        totalPaymentDue: {
+            price: { type: Number, required: true },
+            priceCurrency: { type: String, required: true },
+        },
+        // Line items and totals for internal processing
         items: [
             {
                 description: { type: String, required: true },
@@ -55,14 +101,6 @@ const InvoiceSchema = new Schema<IInvoice>(
         subtotal: { type: Number, required: true },
         tax: { type: Number, default: 0 },
         discount: { type: Number, default: 0 },
-        total: { type: Number, required: true },
-        currency: { type: String, default: 'KES' },
-        status: {
-            type: String,
-            enum: Object.values(InvoiceStatus),
-            default: InvoiceStatus.DRAFT,
-        },
-        dueDate: { type: Date, required: true },
         notes: { type: String },
     },
     { timestamps: true }

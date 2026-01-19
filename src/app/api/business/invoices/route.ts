@@ -26,7 +26,7 @@ export async function GET(req: Request) {
             }
         }
 
-        const invoices = await Invoice.find({ businessId })
+        const invoices = await Invoice.find({ provider: businessId })
             .sort({ createdAt: -1 });
 
         return NextResponse.json(invoices);
@@ -46,13 +46,15 @@ export async function POST(req: Request) {
         await dbConnect();
         const data = await req.json();
 
-        // Generate invoice number if not provided
-        if (!data.invoiceNumber) {
-            const count = await Invoice.countDocuments({ businessId: data.businessId });
-            data.invoiceNumber = `INV-${new Date().getFullYear()}-${(count + 1).toString().padStart(4, '0')}`;
+        const payload = { ...data };
+
+        // Generate identifier if not provided
+        if (!payload.identifier) {
+            const count = await Invoice.countDocuments({ provider: payload.provider });
+            payload.identifier = `INV-${new Date().getFullYear()}-${(count + 1).toString().padStart(4, '0')}`;
         }
 
-        const invoice = await Invoice.create(data);
+        const invoice = await Invoice.create(payload);
         return NextResponse.json(invoice, { status: 201 });
     } catch (error) {
         console.error('Error creating invoice:', error);
