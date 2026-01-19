@@ -22,6 +22,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation"
 
 interface InvoiceTableProps {
     invoices: any[]
@@ -29,6 +30,7 @@ interface InvoiceTableProps {
 }
 
 export function InvoiceTable({ invoices, loading }: InvoiceTableProps) {
+    const router = useRouter()
     const getStatusBadge = (status: string) => {
         switch (status.toLowerCase()) {
             case 'draft':
@@ -49,12 +51,12 @@ export function InvoiceTable({ invoices, loading }: InvoiceTableProps) {
     return (
         <Table>
             <TableHeader>
-                <TableRow className="hover:bg-transparent border-zinc-100 dark:border-zinc-800">
-                    <TableHead className="w-[120px] font-bold">Invoice #</TableHead>
-                    <TableHead className="font-bold">Customer</TableHead>
-                    <TableHead className="font-bold">Status</TableHead>
-                    <TableHead className="font-bold text-right">Amount</TableHead>
-                    <TableHead className="font-bold">Due Date</TableHead>
+                <TableRow className="hover:bg-transparent border-b">
+                    <TableHead className="w-[120px] font-semibold">Invoice #</TableHead>
+                    <TableHead className="font-semibold">Customer</TableHead>
+                    <TableHead className="font-semibold">Status</TableHead>
+                    <TableHead className="font-semibold text-right">Amount</TableHead>
+                    <TableHead className="font-semibold">Due Date</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
             </TableHeader>
@@ -72,46 +74,58 @@ export function InvoiceTable({ invoices, loading }: InvoiceTableProps) {
                         </TableCell>
                     </TableRow>
                 ) : (
-                    invoices.map((invoice) => (
-                        <TableRow key={invoice._id} className="border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50 transition-colors">
-                            <TableCell className="font-medium text-zinc-900 dark:text-zinc-50">
-                                {invoice.invoiceNumber}
-                            </TableCell>
-                            <TableCell>
-                                <div className="flex flex-col">
-                                    <span className="font-bold text-zinc-900 dark:text-zinc-50">{invoice.customerName}</span>
-                                    <span className="text-xs text-zinc-500">{invoice.customerEmail}</span>
-                                </div>
-                            </TableCell>
-                            <TableCell>{getStatusBadge(invoice.status)}</TableCell>
-                            <TableCell className="text-right font-black text-zinc-900 dark:text-zinc-50">
-                                {invoice.currency} {invoice.total.toLocaleString()}
-                            </TableCell>
-                            <TableCell className="text-zinc-500 text-sm">
-                                {new Date(invoice.dueDate).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-zinc-200 dark:hover:bg-zinc-700">
-                                            <MoreHorizontal className="h-4 w-4" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-[160px]">
-                                        <DropdownMenuItem className="cursor-pointer">
-                                            <Eye className="mr-2 h-4 w-4" /> View Invoice
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="cursor-pointer">
-                                            <Send className="mr-2 h-4 w-4" /> Send to Client
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="cursor-pointer">
-                                            <Download className="mr-2 h-4 w-4" /> Download PDF
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </TableCell>
-                        </TableRow>
-                    ))
+                    invoices.map((invoice) => {
+                        const invoiceNumber = invoice.identifier
+                        const paymentStatus = invoice.paymentStatus
+                        const totalAmount = invoice.totalPaymentDue.price
+                        const currency = invoice.totalPaymentDue.priceCurrency
+                        const dueDate = invoice.paymentDueDate
+                        const customer = invoice.customer
+
+                        return (
+                            <TableRow key={invoice._id} className="border-b transition-colors">
+                                <TableCell className="font-medium">
+                                    {invoiceNumber}
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex flex-col">
+                                        <span className="font-semibold">{customer.name}</span>
+                                        <span className="text-xs text-muted-foreground">{customer.email}</span>
+                                    </div>
+                                </TableCell>
+                                <TableCell>{getStatusBadge(paymentStatus)}</TableCell>
+                                <TableCell className="text-right font-bold">
+                                    {currency} {totalAmount.toLocaleString()}
+                                </TableCell>
+                                <TableCell className="text-muted-foreground text-sm">
+                                    {new Date(dueDate).toLocaleDateString()}
+                                </TableCell>
+                                <TableCell>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                <MoreHorizontal className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="w-[160px]">
+                                            <DropdownMenuItem
+                                                className="cursor-pointer"
+                                                onClick={() => router.push(`/business/invoices/${invoice._id}`)}
+                                            >
+                                                <Eye className="mr-2 h-4 w-4" /> View Invoice
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem className="cursor-pointer text-primary focus:text-primary">
+                                                <Send className="mr-2 h-4 w-4" /> Send to Client
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem className="cursor-pointer">
+                                                <Download className="mr-2 h-4 w-4" /> Download PDF
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </TableCell>
+                            </TableRow>
+                        )
+                    })
                 )}
             </TableBody>
         </Table>

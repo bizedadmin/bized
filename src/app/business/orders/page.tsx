@@ -11,8 +11,11 @@ import {
     Truck,
     CheckCircle2,
     Clock,
+    Plus,
+    Link as LinkIcon,
     XCircle
 } from "lucide-react"
+import Link from "next/link"
 import {
     Card,
     CardContent,
@@ -82,82 +85,90 @@ export default function OrdersPage() {
         }
     }
 
-    const filteredOrders = orders.filter(order =>
-        order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (order._id && order._id.toLowerCase().includes(searchTerm.toLowerCase()))
-    )
+    const filteredOrders = orders.filter(order => {
+        const name = order.customer.name
+        const email = order.customer.email
+        const id = order.identifier
+        return (
+            name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            id.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+    })
 
     return (
-        <div className="space-y-8 max-w-[1600px] mx-auto font-sans">
+        <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">Orders</h1>
-                    <p className="text-zinc-500 dark:text-zinc-400 mt-2 font-medium">Manage and track your customer orders.</p>
+                    <h1 className="text-2xl font-bold tracking-tight">Orders</h1>
+                    <p className="text-muted-foreground mt-1">Manage and track your customer orders.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button className="bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 font-bold hover:opacity-90 transition-opacity">
-                        Create Order
-                    </Button>
+                    <Link href="/business/orders/new">
+                        <Button className="font-semibold gap-2">
+                            <Plus className="h-4 w-4" />
+                            Create Order
+                        </Button>
+                    </Link>
                 </div>
             </div>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="border-zinc-200 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900">
+                <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-zinc-500">Total Orders</CardTitle>
-                        <ShoppingCart className="h-4 w-4 text-zinc-500" />
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Total Orders</CardTitle>
+                        <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-black text-zinc-900 dark:text-white">{orders.length}</div>
+                        <div className="text-2xl font-bold">{orders.length}</div>
                     </CardContent>
                 </Card>
-                <Card className="border-zinc-200 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900">
+                <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-zinc-500">Pending</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
                         <Clock className="h-4 w-4 text-amber-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-black text-zinc-900 dark:text-white">
-                            {orders.filter(o => o.status === 'pending').length}
+                        <div className="text-2xl font-bold">
+                            {orders.filter(o => o.orderStatus === 'OrderPending').length}
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="border-zinc-200 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900">
+                <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-zinc-500">Processing</CardTitle>
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Processing</CardTitle>
                         <RefreshCw className="h-4 w-4 text-blue-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-black text-zinc-900 dark:text-white">
-                            {orders.filter(o => o.status === 'processing').length}
+                        <div className="text-2xl font-bold">
+                            {orders.filter(o => o.orderStatus === 'OrderProcessing').length}
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="border-zinc-200 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900">
+                <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-zinc-500">Completed</CardTitle>
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
+                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-black text-zinc-900 dark:text-white">
-                            {orders.filter(o => o.status === 'delivered').length}
+                        <div className="text-2xl font-bold">
+                            {orders.filter(o => o.orderStatus === 'OrderDelivered').length}
                         </div>
                     </CardContent>
                 </Card>
             </div>
 
-            <Card className="border-zinc-200 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900 overflow-hidden">
-                <CardHeader className="border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+            <Card className="overflow-hidden">
+                <CardHeader className="border-b bg-muted/30">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <CardTitle className="text-lg font-bold">All Orders</CardTitle>
+                        <CardTitle className="text-lg font-semibold">All Orders</CardTitle>
                         <div className="flex items-center gap-2">
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     placeholder="Search orders..."
-                                    className="pl-9 w-full md:w-[300px] h-9 bg-white dark:bg-zinc-800"
+                                    className="pl-9 w-full md:w-[300px] h-9"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />

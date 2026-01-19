@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
-import Order from '@/models/Order';
+import Customer from '@/models/Customer';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Business from "@/models/Business";
@@ -26,12 +26,12 @@ export async function GET(req: Request) {
             }
         }
 
-        const orders = await Order.find({ seller: businessId })
+        const customers = await Customer.find({ businessId })
             .sort({ createdAt: -1 });
 
-        return NextResponse.json(orders);
+        return NextResponse.json(customers);
     } catch (error) {
-        console.error('Error fetching orders:', error);
+        console.error('Error fetching customers:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
@@ -46,18 +46,28 @@ export async function POST(req: Request) {
         await dbConnect();
         const data = await req.json();
 
-        const payload = { ...data };
-
-        // Generate identifier if not provided
-        if (!payload.identifier) {
-            const count = await Order.countDocuments({ seller: payload.seller });
-            payload.identifier = `ORD-${new Date().getFullYear()}-${(count + 1).toString().padStart(4, '0')}`;
+        if (!data.businessId) {
+            const business = await Business.findOne({ email: session.user.email });
+            if (business) {
+                data.businessId = business._id;
+            } else {
+                return NextResponse.json({ error: 'Business not found' }, { status: 404 });
+            }
         }
 
-        const order = await Order.create(payload);
-        return NextResponse.json(order, { status: 201 });
-    } catch (error) {
-        console.error('Error creating order:', error);
+        // Generate identifier if not provided
+        if (!data.identifier) {
+            const count = await Customer.countDocuments({ businessId: data.businessId });
+            data.identifier = `CUST-${(count + 1).toString().padStart(4, '0')}`;
+        }
+
+        const customer = await Customer.create(data);
+        return NextResponse.json(customer, { status: 201 });
+    } catch (error: any) {
+        if (error.code === 11000) {
+            return NextResponse.json({ error: 'Customer with this email already exists' }, { status: 400 });
+        }
+        console.error('Error creating customer:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

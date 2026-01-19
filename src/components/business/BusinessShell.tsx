@@ -36,6 +36,9 @@ import {
     HandPlatter,
     FileText,
     Receipt,
+    Tags,
+    FileStack,
+    MapPin,
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -55,6 +58,17 @@ const navigationItems = [
     { icon: Users, label: "Customers", href: "/business/customers", badge: null },
     { icon: MessageSquare, label: "Chats", href: "/business/chats", badge: null },
 ]
+
+const ordersMenu = {
+    icon: ShoppingCart,
+    label: "Orders",
+    href: "#",
+    children: [
+        { label: "Orders", href: "/business/orders" },
+        { label: "Labels", href: "/business/orders/labels" },
+        { label: "Manifests", href: "/business/orders/manifests" },
+    ]
+}
 
 const servicesMenu = {
     icon: HandPlatter,
@@ -76,6 +90,7 @@ const businessMenu = {
     href: "#",
     children: [
         { label: "Profile", href: "/business/profile" },
+        { label: "Stores/Locations", href: "/business/locations" },
         { label: "Analytics", href: "/business/analytics" },
         { label: "Settings", href: "/business/settings" },
     ]
@@ -114,16 +129,6 @@ const quotesMenu = {
     ]
 }
 
-const storeMenu = {
-    icon: Store,
-    label: "Sales & Store",
-    href: "#",
-    children: [
-        { label: "Orders", href: "/business/orders" },
-        { label: "Invoices", href: "/business/invoices" },
-        { label: "Shop Page", href: "/business/shop-page" },
-    ]
-}
 
 const salesChannels = [
     {
@@ -160,9 +165,9 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [websiteExpanded, setWebsiteExpanded] = useState(false)
     const [storeExpanded, setStoreExpanded] = useState(false)
-    const [storeMenuExpanded, setStoreMenuExpanded] = useState(false)
     const [quotesExpanded, setQuotesExpanded] = useState(false)
     const [servicesExpanded, setServicesExpanded] = useState(false)
+    const [ordersExpanded, setOrdersExpanded] = useState(false)
     const [bookingsExpanded, setBookingsExpanded] = useState(false)
     const [businessExpanded, setBusinessExpanded] = useState(false)
     const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false)
@@ -409,6 +414,52 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                                 </div>
                             )}
 
+                            {/* Orders */}
+                            <button
+                                onClick={() => setOrdersExpanded(!ordersExpanded)}
+                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <ordersMenu.icon className="w-5 h-5" />
+                                    <span>{ordersMenu.label}</span>
+                                </div>
+                                <ChevronDown className={cn("w-4 h-4 transition-transform", ordersExpanded && "rotate-180")} />
+                            </button>
+                            {ordersExpanded && (
+                                <div className="ml-9 space-y-1">
+                                    {ordersMenu.children.map((child) => (
+                                        <Link
+                                            key={child.label}
+                                            href={child.href}
+                                            className={cn(
+                                                "block px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                                                pathname === child.href
+                                                    ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
+                                                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
+                                            )}
+                                        >
+                                            {child.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Invoices */}
+                            <Link
+                                href="/business/invoices"
+                                className={cn(
+                                    "flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                                    pathname === "/business/invoices"
+                                        ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
+                                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
+                                )}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Receipt className="w-5 h-5" />
+                                    <span>Invoices</span>
+                                </div>
+                            </Link>
+
                             {/* Services */}
                             <button
                                 onClick={() => setServicesExpanded(!servicesExpanded)}
@@ -439,14 +490,14 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                                 </div>
                             )}
 
-                            {/* Products */}
+                            {/* Products & Store */}
                             <button
                                 onClick={() => setStoreExpanded(!storeExpanded)}
                                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                             >
                                 <div className="flex items-center gap-3">
                                     <productsAndStore.icon className="w-5 h-5" />
-                                    <span>Products</span>
+                                    <span>{productsAndStore.label}</span>
                                 </div>
                                 <ChevronDown className={cn("w-4 h-4 transition-transform", storeExpanded && "rotate-180")} />
                             </button>
@@ -499,38 +550,9 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                                 </div>
                             )}
 
-                            {/* Store Menu (New) */}
-                            <button
-                                onClick={() => setStoreMenuExpanded(!storeMenuExpanded)}
-                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <storeMenu.icon className="w-5 h-5" />
-                                    <span>{storeMenu.label}</span>
-                                </div>
-                                <ChevronDown className={cn("w-4 h-4 transition-transform", storeMenuExpanded && "rotate-180")} />
-                            </button>
-                            {storeMenuExpanded && (
-                                <div className="ml-9 space-y-1">
-                                    {storeMenu.children.map((child) => (
-                                        <Link
-                                            key={child.label}
-                                            href={child.href}
-                                            className={cn(
-                                                "block px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                                                pathname === child.href
-                                                    ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
-                                                    : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
-                                            )}
-                                        >
-                                            {child.label}
-                                        </Link>
-                                    ))}
-                                </div>
-                            )}
 
                             {/* Other Items */}
-                            {navigationItems.filter(i => !['Dashboard', 'Services'].includes(i.label)).map((item) => (
+                            {navigationItems.filter(i => !['Dashboard', 'Services', 'Business', 'Products & store'].includes(i.label)).map((item) => (
                                 <Link
                                     key={item.label}
                                     href={item.href}
