@@ -26,13 +26,23 @@ export async function POST(req: NextRequest) {
         if (!user) {
             // Create new user
             // We use the Firebase UID as the _id to make it easy to match later
+            const { generateUniqueUserSlug } = await import('@/lib/slugs');
+            const slug = await generateUniqueUserSlug(name || email?.split('@')[0] || 'User');
+
             user = await User.create({
                 _id: uid,
                 name: name || email?.split('@')[0] || 'User',
                 email,
                 image: picture,
+                slug,
                 role: email === 'admin@bized.app' ? 'admin' : 'user', // <--- Auto-assign admin role
                 provider: 'firebase-google',
+                pages: [
+                    { title: 'Profile', slug: 'profile', type: 'profile', enabled: true },
+                    { title: 'Bookings', slug: 'bookings', type: 'bookings', enabled: true },
+                    { title: 'Shop', slug: 'shop', type: 'shop', enabled: true },
+                    { title: 'Quote', slug: 'quote', type: 'quote', enabled: true },
+                ]
             });
         } else {
             // Update existing user with latest info if needed
@@ -50,7 +60,8 @@ export async function POST(req: NextRequest) {
                 id: user._id.toString(),
                 email: user.email,
                 name: user.name,
-                role: user.role
+                role: user.role,
+                slug: user.slug
             }
         });
 

@@ -31,11 +31,16 @@ export async function POST(req: Request) {
         const hashedPassword = await bcrypt.hash(password, 10);
         const role = checkUser.length === 0 ? 'admin' : 'user';
 
+        // Generate unique slug
+        const { generateUniqueUserSlug } = await import('@/lib/slugs');
+        const slug = await generateUniqueUserSlug(name);
+
         // Create user
         await User.create({
             name,
             email,
             password: hashedPassword,
+            slug,
             role: role
         });
 

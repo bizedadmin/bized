@@ -59,6 +59,8 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion"
 
+import { ProfileData } from "@/types/profile"
+
 interface Product {
     _id: string
     name: string
@@ -74,57 +76,8 @@ interface Product {
     }
 }
 
-interface Business {
-    _id: string
-    name: string
-    slug: string
-    description?: string
-    industry?: string
-    themeColor?: string
-    secondaryColor?: string
-    buttonColor?: string
-    image?: string
-    logo?: string
-    whatsappNumber?: string
-    whatsappConnected?: boolean
-    showBookNow?: boolean
-    showShopNow?: boolean
-    showQuoteRequest?: boolean
-    phone?: {
-        code: string
-        number: string
-    }
-    email?: string
-    url?: string
-    address?: {
-        streetAddress?: string
-        addressLocality?: string
-        addressRegion?: string
-        postalCode?: string
-        addressCountry?: string
-    }
-    sameAs?: string[]
-    selectedFacilities?: string[]
-    businessHours?: Array<{
-        day: string;
-        isOpen: boolean;
-        openTime: string;
-        closeTime: string;
-    }>
-    pages?: Array<{
-        title: string
-        slug: string
-        enabled: boolean
-        type: 'profile' | 'bookings' | 'shop' | 'quote' | 'storefront'
-        settings: any
-    }>
-    fontFamily?: string
-    glassmorphism?: boolean
-    borderRadius?: 'none' | 'md' | 'xl' | 'full'
-}
-
 interface BusinessProfileProps {
-    business: Business
+    business: ProfileData
     products: Product[]
     services?: any[]
     pageType?: 'profile' | 'bookings' | 'shop' | 'quote' | 'storefront'
@@ -243,7 +196,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
     // Current page specific settings
     const pageData = business.pages?.find((p: any) => p.type === pageType)
         || (pageType === 'profile' ? business.pages?.find((p: any) => p.type === 'storefront') : undefined)
-    const settings = pageData?.settings || {}
+    const settings: any = pageData?.settings || {}
     let blocks = settings.blocks || []
 
     // If no blocks defined and we have a specific page type, use defaults if in preview or if the page should have content
@@ -254,9 +207,12 @@ export function BusinessProfile({ business, products, services = [], pageType = 
             blocks = [{ id: 'default-services', type: 'services', title: 'Book an Appointment', description: 'Choose a service to get started' }]
         } else if (pageType === 'quote') {
             blocks = [{ id: 'default-quote', type: 'text', title: 'Request a Quote', content: 'Tell us what you need and we will get back to you with a personalized estimate.' }]
-        } else if ((pageType === 'profile' || pageType === 'storefront') && isPreview) {
-            // For profile in preview, if empty, show a welcome
-            blocks = [{ id: 'default-welcome', type: 'text', title: `Welcome to ${business.name}`, content: business.description || 'Welcome to our business profile. Feel free to browse our services and products.' }]
+        } else if (pageType === 'profile' || pageType === 'storefront') {
+            // For profile, if empty, show a welcome and my contacts
+            blocks = [
+                { id: 'default-welcome', type: 'text', title: `About ${business.name}`, content: business.description || `Welcome to ${business.name}. We are happy to have you here.` },
+                { id: 'default-contacts', type: 'my_contacts', title: 'My Contacts' }
+            ]
         }
     }
 
@@ -1026,6 +982,59 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                             </AccordionContent>
                         </AccordionItem>
                     </Accordion>
+                )
+            case 'my_contacts':
+                return (
+                    <div key={block.id} className={cn(
+                        "p-5 border border-[#CDD0DB]/60 bg-white dark:bg-zinc-900 shadow-sm space-y-4",
+                        isGlass && "bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md",
+                        br
+                    )}>
+                        {block.title && <h2 className="text-[16px] font-medium text-[#0A0909] dark:text-white font-noto-sans">{block.title}</h2>}
+                        <div className="space-y-3">
+                            {(business.phone || block.phone) && (
+                                <a href={`tel:${typeof business.phone === 'string' ? business.phone : business.phone?.code ? `${business.phone.code}${business.phone.number}` : block.phone}`} className="flex items-center gap-3 text-sm text-[#3F3E3E] hover:text-[#0A0909] dark:text-gray-300 dark:hover:text-white transition-colors group">
+                                    <div className="w-8 h-8 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-100 dark:group-hover:bg-zinc-700 transition-colors">
+                                        <Phone className="w-4 h-4" />
+                                    </div>
+                                    <span className="font-medium font-noto-sans">
+                                        {typeof business.phone === 'string' ? business.phone : business.phone?.code ? `${business.phone.code} ${business.phone.number}` : block.phone}
+                                    </span>
+                                </a>
+                            )}
+                            {(business.email || block.email) && (
+                                <a href={`mailto:${business.email || block.email}`} className="flex items-center gap-3 text-sm text-[#3F3E3E] hover:text-[#0A0909] dark:text-gray-300 dark:hover:text-white transition-colors group">
+                                    <div className="w-8 h-8 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-100 dark:group-hover:bg-zinc-700 transition-colors">
+                                        <Mail className="w-4 h-4" />
+                                    </div>
+                                    <span className="font-medium font-noto-sans">{business.email || block.email}</span>
+                                </a>
+                            )}
+                            {(business.url || business.website || block.website) && (
+                                <a href={business.url || business.website || block.website} target="_blank" className="flex items-center gap-3 text-sm text-[#3F3E3E] hover:text-[#0A0909] dark:text-gray-300 dark:hover:text-white transition-colors group">
+                                    <div className="w-8 h-8 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-100 dark:group-hover:bg-zinc-700 transition-colors">
+                                        <Globe className="w-4 h-4" />
+                                    </div>
+                                    <span className="font-medium font-noto-sans">Visit Website</span>
+                                </a>
+                            )}
+                            {business.address && (
+                                <a
+                                    href={`https://maps.google.com/?q=${encodeURIComponent(typeof business.address === 'string' ? business.address : Object.values(business.address).join(', '))}`}
+                                    target="_blank"
+                                    className="flex items-center gap-3 text-sm text-[#3F3E3E] hover:text-[#0A0909] dark:text-gray-300 dark:hover:text-white transition-colors group"
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-100 dark:group-hover:bg-zinc-700 transition-colors">
+                                        <MapPin className="w-4 h-4" />
+                                    </div>
+                                    <span className="font-medium font-noto-sans whitespace-pre-wrap">
+                                        {typeof business.address === 'string' ? business.address :
+                                            [business.address.streetAddress, business.address.addressLocality, business.address.addressRegion, business.address.postalCode].filter(Boolean).join(', ')}
+                                    </span>
+                                </a>
+                            )}
+                        </div>
+                    </div>
                 )
             case 'location':
                 const locationAddress = [block.street, block.city, block.state, block.postalCode].filter(Boolean).join(', ')

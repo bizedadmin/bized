@@ -1,30 +1,42 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
 import Link from "next/link"
 import Image from "next/image"
 import { useTheme } from "next-themes"
-import { Plus, ChevronRight, Loader2, Building2, Zap, LogOut, User, Settings, Shield, ArrowLeft } from "lucide-react"
+import {
+    Plus,
+    Search,
+    User,
+    ArrowRight,
+    LogOut,
+    Loader2,
+    Briefcase,
+    Building2,
+    Settings,
+    Info,
+    ChevronRight,
+    Home,
+    BadgeCheck
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
     Avatar,
     AvatarFallback,
     AvatarImage,
 } from "@/components/ui/avatar"
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+} from "@/components/ui/sheet"
 
 interface Business {
     _id: string
@@ -43,6 +55,16 @@ export default function BusinessSelectorPage() {
     const [businesses, setBusinesses] = useState<Business[]>([])
     const [loading, setLoading] = useState(true)
     const [mounted, setMounted] = useState(false)
+    const [searchQuery, setSearchQuery] = useState("")
+    const [activeInfo, setActiveInfo] = useState<"profile" | "portal" | "business" | null>(null)
+    const [isRefreshing, setIsRefreshing] = useState(false)
+    const [pullDistance, setPullDistance] = useState(0)
+    const touchStartY = useRef(0)
+    const containerRef = useRef<HTMLDivElement>(null)
+
+    // Gradient Colors
+    const myPortalGradient = { light: "from-blue-50/90 via-cyan-50/80 to-sky-50/70", dark: "from-blue-950/40 via-cyan-950/40 to-sky-950/30" }
+    const businessPortalGradient = { light: "from-slate-50/90 via-gray-50/80 to-zinc-50/70", dark: "from-slate-950/40 via-gray-950/40 to-zinc-950/30" }
 
     useEffect(() => {
         setMounted(true)
@@ -70,268 +92,374 @@ export default function BusinessSelectorPage() {
         }
     }
 
+    // Pull-to-refresh handlers
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+        if (containerRef.current && containerRef.current.scrollTop === 0) {
+            touchStartY.current = e.touches[0].clientY
+        }
+    }, [])
+
+    const handleTouchMove = useCallback((e: React.TouchEvent) => {
+        if (touchStartY.current === 0) return
+
+        const touchY = e.touches[0].clientY
+        const pull = touchY - touchStartY.current
+
+        if (pull > 0 && containerRef.current && containerRef.current.scrollTop === 0) {
+            setPullDistance(Math.min(pull, 100))
+        }
+    }, [])
+
+    const handleTouchEnd = useCallback(async () => {
+        if (pullDistance > 60 && !isRefreshing) {
+            setIsRefreshing(true)
+            // Refresh data
+            await fetchBusinesses()
+            // Small delay for better UX
+            setTimeout(() => {
+                setIsRefreshing(false)
+                setPullDistance(0)
+            }, 500)
+        } else {
+            setPullDistance(0)
+        }
+        touchStartY.current = 0
+    }, [pullDistance, isRefreshing])
+
     const handleSelectBusiness = (business: Business) => {
-        // Store selected business in localStorage or session
         localStorage.setItem("selectedBusiness", JSON.stringify(business))
         router.push("/business/dashboard")
     }
 
-    const handleCreateBusiness = () => {
-        router.push("/create-business")
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault()
+        console.log("Searching for:", searchQuery)
     }
 
     if (status === "loading" || loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-zinc-950">
-                <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
         )
     }
 
-    return (
-        <div className="min-h-screen bg-gray-50 dark:bg-zinc-950">
-            {/* Header */}
-            <header className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200 dark:border-zinc-800">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex items-center justify-between">
-                        <Link href="/" className="flex items-center gap-2 group">
-                            <div className="flex items-center gap-2">
-                                <Image
-                                    src={mounted && (theme === "dark" || resolvedTheme === "dark") ? "/logo-dark-mode.png" : "/logo-light-mode.png"}
-                                    alt="Bized Logo"
-                                    width={40}
-                                    height={40}
-                                    className={cn(
-                                        "h-10 w-auto group-hover:scale-105 transition-transform rounded-sm"
-                                    )}
-                                    priority
-                                />
-                                <span className={cn(
-                                    "font-bold text-xl tracking-tight text-foreground"
-                                )}>
-                                    BizedApp
-                                </span>
-                            </div>
-                        </Link>
+    // Refined Glass Card Component
+    const GlassCard = ({ children, className, onClick }: { children: React.ReactNode, className?: string, onClick?: () => void }) => (
+        <div
+            onClick={onClick}
+            className={cn(
+                "group relative overflow-hidden rounded-2xl border border-white/10 dark:border-white/5 bg-white/60 dark:bg-black/40 backdrop-blur-2xl shadow-sm transition-all duration-300",
+                onClick ? "hover:shadow-md hover:border-white/20 dark:hover:border-white/10 cursor-pointer hover:scale-[1.02]" : "",
+                className
+            )}
+        >
+            {children}
+        </div>
+    )
 
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all duration-200">
-                                    <Avatar className="h-9 w-9 border border-gray-200 dark:border-zinc-700">
-                                        <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || ""} />
-                                        <AvatarFallback className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-700 text-sm font-medium">
-                                            {session?.user?.name?.charAt(0) || session?.user?.email?.charAt(0) || "U"}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-64 p-2 mt-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 shadow-xl rounded-xl" align="end" forceMount>
-                                <DropdownMenuLabel className="font-normal p-2">
-                                    <div className="flex flex-col space-y-1">
-                                        <p className="text-sm font-semibold leading-none text-gray-900 dark:text-white">{session?.user?.name || "User"}</p>
-                                        <p className="text-xs leading-none text-gray-500 dark:text-gray-400 truncate">
-                                            {session?.user?.email}
-                                        </p>
-                                    </div>
-                                </DropdownMenuLabel>
-                                <DropdownMenuSeparator className="bg-gray-100 dark:bg-zinc-800" />
-                                <DropdownMenuItem
-                                    onClick={() => router.push('/account')}
-                                    className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-                                >
-                                    <User className="w-4 h-4 text-gray-500" />
-                                    <span className="text-sm font-medium">My Profile</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
-                                    <Settings className="w-4 h-4 text-gray-500" />
-                                    <span className="text-sm font-medium">Account Settings</span>
-                                </DropdownMenuItem>
-                                {session?.user?.role === 'admin' && (
-                                    <DropdownMenuItem
-                                        onClick={() => router.push('/admin')}
-                                        className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-                                    >
-                                        <Shield className="w-4 h-4 text-blue-500" />
-                                        <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Admin Portal</span>
-                                    </DropdownMenuItem>
-                                )}
-                                <DropdownMenuSeparator className="bg-gray-100 dark:bg-zinc-800" />
-                                <DropdownMenuItem
-                                    onClick={() => signOut({ callbackUrl: '/login' })}
-                                    className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/10 text-red-600 dark:text-red-400 transition-colors"
-                                >
-                                    <LogOut className="w-4 h-4" />
-                                    <span className="text-sm font-medium">Log out</span>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
+    return (
+        <div
+            ref={containerRef}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            className="min-h-screen font-sans text-foreground overflow-x-hidden overflow-y-auto selection:bg-primary/30 relative flex flex-col items-center"
+            style={{ overscrollBehavior: 'contain' }}
+        >
+
+            {/* GLOBAL BACKGROUND - Refined & Subtle */}
+            <div className="fixed inset-0 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-20" />
+            <div className="fixed inset-0 w-full h-full pointer-events-none -z-10 overflow-hidden opacity-30 dark:opacity-20">
+                <div className="absolute top-[-10%] left-[-10%] w-[70vw] md:w-[50vw] h-[70vw] md:h-[50vw] bg-primary/10 rounded-full blur-[80px] md:blur-[120px] animate-pulse" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[60vw] md:w-[40vw] h-[60vw] md:h-[40vw] bg-blue-500/5 rounded-full blur-[80px] md:blur-[120px] animate-pulse" />
+            </div>
+
+            {/* Pull-to-Refresh Indicator */}
+            {pullDistance > 0 && (
+                <div
+                    className="fixed top-0 left-0 right-0 z-40 flex items-center justify-center transition-all duration-200"
+                    style={{
+                        height: `${pullDistance}px`,
+                        opacity: pullDistance / 100,
+                        paddingTop: 'env(safe-area-inset-top)'
+                    }}
+                >
+                    <Loader2
+                        className={cn(
+                            "w-6 h-6 text-primary transition-transform",
+                            isRefreshing ? "animate-spin" : ""
+                        )}
+                        style={{
+                            transform: `rotate(${pullDistance * 3.6}deg)`
+                        }}
+                    />
+                </div>
+            )}
+
+            {/* Header / Nav - FIXED & PINNED WITH OFFICIAL LOGO & SAFE AREA */}
+            <header
+                className="fixed top-0 left-0 right-0 z-50 px-6 transition-all duration-300 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-white/10 dark:border-white/5 shadow-sm"
+                style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)', paddingBottom: '1rem' }}
+            >
+                <div className="max-w-lg mx-auto flex justify-between items-center">
+                    <Link href="/" className="flex items-center gap-2 group z-10">
+                        {mounted && (
+                            <Image
+                                src={(theme === "dark" || resolvedTheme === "dark") ? "/logo-dark-mode.png" : "/logo-light-mode.png"}
+                                alt="Bized Logo"
+                                width={40}
+                                height={40}
+                                className="h-10 w-auto group-hover:scale-105 transition-transform"
+                                priority
+                            />
+                        )}
+                        {!mounted && <div className="w-10 h-10 bg-muted/20 rounded-lg animate-pulse" />}
+
+                        <span className="font-bold text-xl tracking-tight text-foreground group-hover:text-primary transition-colors">BizedApp</span>
+                    </Link>
+                    <Button variant="ghost" size="icon" onClick={() => signOut()} className="rounded-full hover:bg-black/5 dark:hover:bg-white/10 z-10 w-10 h-10">
+                        <LogOut className="w-5 h-5 opacity-60 group-hover:opacity-100" />
+                    </Button>
                 </div>
             </header>
 
-            {/* Main Content */}
-            <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            {/* MAIN CONTENT - Added Top Padding for Fixed Header */}
+            <main
+                className="w-full max-w-lg mx-auto px-6 pb-12 flex flex-col gap-8 z-10"
+                style={{ paddingTop: 'calc(env(safe-area-inset-top) + 6rem)' }}
+            >
+
+                {/* 1. User Profile Focus - WRAPPED IN LINK */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4 }}
+                    transition={{ delay: 0.1 }}
                 >
-                    <div className="text-center mb-8 relative">
-                        <Button
-                            variant="ghost"
-                            className="absolute left-0 top-0 pl-0 hover:bg-transparent hover:text-muted-foreground hidden sm:flex"
-                            onClick={() => router.back()}
+                    <div className="flex items-center gap-2 mb-3 ml-1">
+                        <User className="w-4 h-4 text-muted-foreground" />
+                        <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wide">My Portal</h2>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setActiveInfo("profile") }}
+                            className="ml-auto p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors group/info"
                         >
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back
-                        </Button>
-                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                            Select a business
-                        </h2>
-                        <p className="text-gray-600 dark:text-gray-400">
-                            Choose a business to manage or create a new one
-                        </p>
+                            <Info className="w-5 h-5 text-muted-foreground/60 group-hover/info:text-primary transition-colors" />
+                        </button>
                     </div>
 
-                    <div className="space-y-4">
-                        {/* Business Cards */}
-                        {businesses.map((business, index) => (
+                    <Link href="/account" className="block group">
+                        <GlassCard className={`aspect-[16/9] p-6 flex flex-col justify-between rounded-2xl relative overflow-hidden hover:shadow-xl hover:border-white/20 dark:hover:border-white/10 cursor-pointer hover:scale-[1.02] transition-all duration-300 bg-gradient-to-br ${myPortalGradient.light} dark:${myPortalGradient.dark}`}>
+                            {/* Decorative background elements */}
+                            <div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+                            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
+
+                            {/* Top section with avatar and status */}
+                            <div className="flex items-start justify-between z-10">
+                                <div className="flex items-center gap-3">
+                                    <Avatar className="h-14 w-14 border-2 border-white/40 dark:border-white/20 shadow-lg ring-2 ring-primary/10">
+                                        <AvatarImage src={session?.user?.image || ""} />
+                                        <AvatarFallback className="text-lg bg-primary/10 text-primary font-bold">{session?.user?.name?.charAt(0) || "U"}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <h3 className="font-bold text-lg leading-tight text-foreground tracking-tight">{session?.user?.name || "User"}</h3>
+                                        <p className="text-xs font-medium text-muted-foreground mt-0.5">Personal Account</p>
+                                    </div>
+                                </div>
+                                <div className="bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20 flex items-center gap-1.5 shadow-sm">
+                                    <BadgeCheck className="w-3.5 h-3.5 text-emerald-500" />
+                                    <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wide">Verified</span>
+                                </div>
+                            </div>
+
+                            {/* Bottom section with details */}
+                            <div className="z-10 flex flex-col gap-3">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mb-1">Email</span>
+                                        <span className="text-xs font-medium text-foreground/80 truncate max-w-[140px]">{session?.user?.email}</span>
+                                    </div>
+                                    <div className="h-8 w-px bg-white/20 dark:bg-white/10" />
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mb-1">Businesses</span>
+                                        <span className="text-xs font-bold text-foreground">{businesses.length} Active</span>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-end gap-1 text-primary/60 group-hover:text-primary transition-colors">
+                                    <span className="text-xs font-medium">View Portal</span>
+                                    <ChevronRight className="w-4 h-4" />
+                                </div>
+                            </div>
+                        </GlassCard>
+                    </Link>
+                </motion.div>
+
+
+
+                {/* 3. Business Selector */}
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                >
+                    <div className="flex items-center justify-between mb-4 pl-1 pr-1">
+                        <div className="flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-muted-foreground" />
+                            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wide">Business Portal</label>
+                        </div>
+                        <button
+                            onClick={() => setActiveInfo("business")}
+                            className="mr-auto ml-2 p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors group/info"
+                        >
+                            <Info className="w-5 h-5 text-muted-foreground/60 group-hover/info:text-primary transition-colors" />
+                        </button>
+                    </div>
+
+                    <div className="space-y-3">
+                        {businesses.map((business, idx) => (
                             <motion.div
                                 key={business._id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3, delay: index * 0.1 }}
+                                initial={{ opacity: 0, x: -5 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.3 + (idx * 0.05) }}
                             >
-                                <Card
-                                    className="p-6 hover:shadow-lg transition-all duration-200 cursor-pointer border-2 hover:border-blue-500 dark:hover:border-blue-400 group"
-                                    onClick={() => handleSelectBusiness(business)}
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4 flex-1">
-                                            {/* Business Logo/Icon */}
+                                <GlassCard className={`aspect-[16/9] p-5 flex flex-col justify-between hover:bg-white/80 dark:hover:bg-black/60 rounded-2xl hover:shadow-xl transition-all duration-300 bg-gradient-to-br ${businessPortalGradient.light} dark:${businessPortalGradient.dark}`} onClick={() => handleSelectBusiness(business)}>
+                                    {/* Decorative corner accent */}
+                                    <div
+                                        className="absolute top-0 right-0 w-24 h-24 opacity-10 rounded-full blur-2xl pointer-events-none"
+                                        style={{ backgroundColor: business.themeColor || '#2563eb' }}
+                                    />
+
+                                    {/* Top section with logo and badge */}
+                                    <div className="flex items-start justify-between z-10">
+                                        <div className="flex items-center gap-3">
                                             <div
-                                                className="w-14 h-14 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-md"
-                                                style={{ backgroundColor: business.themeColor || '#1f2937' }}
+                                                className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg shrink-0 ring-2 ring-white/20"
+                                                style={{ backgroundColor: business.themeColor || '#2563eb' }}
                                             >
                                                 {business.logo ? (
                                                     <img src={business.logo} alt={business.name} className="w-full h-full object-cover rounded-xl" />
                                                 ) : (
-                                                    business.name.substring(0, 1).toUpperCase()
+                                                    <Building2 className="w-6 h-6" />
                                                 )}
                                             </div>
-
-                                            {/* Business Info */}
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-3 mb-1">
-                                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                                        {business.name}
-                                                    </h3>
-                                                    {business.plan && (
-                                                        <Badge
-                                                            variant="secondary"
-                                                            className="text-xs font-semibold uppercase"
-                                                        >
-                                                            {business.plan}
-                                                        </Badge>
-                                                    )}
-                                                </div>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                    bized.app/{business.slug}
-                                                </p>
-                                                {business.industry && (
-                                                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                                        {business.industry}
-                                                    </p>
-                                                )}
+                                            <div>
+                                                <h3 className="font-bold text-sm text-foreground tracking-tight leading-tight">{business.name}</h3>
+                                                <p className="text-xs font-medium text-muted-foreground mt-0.5">{business.industry || "Business"}</p>
                                             </div>
                                         </div>
-
-                                        {/* Arrow Icon */}
-                                        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
                                     </div>
-                                </Card>
+
+                                    {/* Bottom section with plan info and action */}
+                                    <div className="flex flex-col gap-3 z-10">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex flex-col">
+                                                <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mb-1">Plan</span>
+                                                <span className="text-xs font-bold text-foreground">{business.plan || "Free Plan"}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-end gap-1.5 transition-colors">
+                                            <span className="text-xs font-semibold" style={{ color: business.themeColor || '#2563eb' }}>Open Dashboard</span>
+                                            <ChevronRight className="w-3.5 h-3.5" style={{ color: business.themeColor || '#2563eb' }} />
+                                        </div>
+                                    </div>
+                                </GlassCard>
                             </motion.div>
                         ))}
 
-                        {/* Create New Business Card */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3, delay: businesses.length * 0.1 }}
-                        >
-                            <Card
-                                className="p-6 border-2 border-dashed border-gray-300 dark:border-zinc-700 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all duration-200 cursor-pointer group"
-                                onClick={handleCreateBusiness}
+                        {/* Create Business Card - WRAPPED IN LINK */}
+                        {businesses.length > 0 && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 + (businesses.length * 0.05) }}
                             >
-                                <div className="flex items-center justify-center gap-3 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-zinc-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 flex items-center justify-center transition-colors">
-                                        <Plus className="w-5 h-5" />
-                                    </div>
-                                    <span className="font-semibold">Create new business</span>
-                                </div>
-                            </Card>
-                        </motion.div>
+                                <Link href="/create-business" className="block group/create-link">
+                                    <GlassCard
+                                        className="p-3 flex items-center justify-center gap-2 border-dashed border-black/10 dark:border-white/10 hover:border-primary/50 hover:bg-primary/5 group/create hover:shadow-md hover:scale-[1.02] cursor-pointer transition-all duration-300"
+                                    >
+                                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover/create:scale-110 transition-transform">
+                                            <Plus className="w-4 h-4" />
+                                        </div>
+                                        <span className="text-sm font-semibold text-primary">Create new business</span>
+                                    </GlassCard>
+                                </Link>
+                            </motion.div>
+                        )}
 
-                        {/* Empty State */}
+                        {/* Empty State - Refined & WRAPPED IN LINK */}
                         {businesses.length === 0 && (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.4, delay: 0.2 }}
-                                className="text-center py-12"
+                                transition={{ duration: 0.4 }}
                             >
-                                <div className="w-16 h-16 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Building2 className="w-8 h-8 text-gray-400" />
-                                </div>
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                                    No businesses yet
-                                </h3>
-                                <p className="text-gray-600 dark:text-gray-400 mb-6">
-                                    Get started by creating your first business
-                                </p>
-                                <Button
-                                    onClick={handleCreateBusiness}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                                >
-                                    <Plus className="w-4 h-4 mr-2" />
-                                    Create Business
-                                </Button>
+                                <Link href="/create-business" className="block">
+                                    <GlassCard
+                                        className="text-center py-10 px-4 border-dashed border-black/10 dark:border-white/10 hover:border-primary/50 cursor-pointer flex flex-col items-center hover:scale-[1.02] transition-all duration-300"
+                                    >
+                                        <Building2 className="w-8 h-8 text-muted-foreground/30 mx-auto mb-3" />
+                                        <p className="text-sm font-semibold text-foreground">No businesses found</p>
+                                        <p className="text-xs font-medium text-muted-foreground mt-1 mb-4">Start your journey by creating a business.</p>
+                                        <Button variant="outline" size="sm" className="text-xs h-8 pointer-events-none">
+                                            Create Business
+                                        </Button>
+                                    </GlassCard>
+                                </Link>
                             </motion.div>
                         )}
                     </div>
-
-                    {/* Upgrade Banner */}
-                    {businesses.length > 0 && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.4, delay: 0.5 }}
-                            className="mt-8"
-                        >
-                            <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-blue-200 dark:border-blue-800">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                                            <Zap className="w-5 h-5 text-white" />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-semibold text-gray-900 dark:text-white">
-                                                Upgrade to Business
-                                            </h4>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                Unlock advanced features and grow your business
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <Button variant="outline" className="bg-white dark:bg-zinc-900">
-                                        Upgrade
-                                    </Button>
-                                </div>
-                            </Card>
-                        </motion.div>
-                    )}
                 </motion.div>
+
             </main>
+
+            {/* Contextual Help Sheet - PROFESSIONAL REDESIGN */}
+            <Sheet open={!!activeInfo} onOpenChange={() => setActiveInfo(null)}>
+                <SheetContent side="bottom" className="rounded-t-[40px] border-t border-white/20 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-3xl shadow-2xl p-0 overflow-hidden outline-none">
+                    {/* Access handle */}
+                    <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-black/10 dark:bg-white/10 rounded-full z-20" />
+
+                    <div className="relative p-8 pb-10 flex flex-col items-center">
+                        {/* Decorative Background Blur */}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-primary/10 blur-[60px] rounded-full pointer-events-none -z-10" />
+
+                        {/* Large Icon Container */}
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: "spring", duration: 0.5 }}
+                            className={cn("w-20 h-20 rounded-3xl flex items-center justify-center mb-6 shadow-xl border border-white/20",
+                                activeInfo === 'profile' ? "bg-primary text-white shadow-primary/30" :
+                                    activeInfo === 'portal' ? "bg-purple-500 text-white shadow-purple-500/30" :
+                                        "bg-emerald-500 text-white shadow-emerald-500/30"
+                            )}>
+                            {activeInfo === "profile" && <User className="w-10 h-10" />}
+                            {activeInfo === "portal" && <Search className="w-10 h-10" />}
+                            {activeInfo === "business" && <Building2 className="w-10 h-10" />}
+                        </motion.div>
+
+                        <div className="text-center space-y-2 max-w-xs mx-auto mb-8">
+                            <SheetTitle className="text-xl font-bold tracking-tight text-foreground">
+                                {activeInfo === "profile" && "User Profile"}
+                                {activeInfo === "portal" && "Client Portals"}
+                                {activeInfo === "business" && "Business Management"}
+                            </SheetTitle>
+                            <SheetDescription className="text-center text-sm font-medium text-muted-foreground leading-relaxed">
+                                {activeInfo === "profile" && "Manage your personal account settings, verify your identity, and customize your application preferences."}
+                                {activeInfo === "portal" && "Securely access specific client portals. Use a unique access code provided to you to enter."}
+                                {activeInfo === "business" && "Overview of all business entities you manage. Select a business to access its dashboard."}
+                            </SheetDescription>
+                        </div>
+
+                        <Button
+                            className="w-full max-w-sm h-12 rounded-2xl text-base font-semibold shadow-xl shadow-primary/10 hover:shadow-primary/20 transition-all hover:scale-[1.02]"
+                            onClick={() => setActiveInfo(null)}
+                        >
+                            Got it
+                        </Button>
+                    </div>
+                </SheetContent>
+            </Sheet>
+
         </div>
     )
 }

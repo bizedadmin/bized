@@ -119,7 +119,7 @@ export default function UsersOverviewPage() {
                         <div className="flex flex-col gap-1">
                             <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-50">Total Stakeholders</span>
                             <span className="text-4xl font-black">{data?.stats.total}</span>
-                            <div className="flex items-center gap-1 mt-4 text-[10px] font-bold text-green-400">
+                            <div className="flex items-center gap-1 mt-4 text-[10px] font-bold text-blue-400">
                                 <TrendingUp className="w-3 h-3" />
                                 <span>VERIFIED PLATFORM USERS</span>
                             </div>
@@ -150,7 +150,7 @@ export default function UsersOverviewPage() {
                                 <UserCheck className="w-3 h-3" /> NON-SUSPENDED
                             </span>
                         </div>
-                        <UserCheck className="absolute top-6 right-6 h-12 w-12 text-green-500/10 group-hover:text-green-500/20 transition-colors" />
+                        <UserCheck className="absolute top-6 right-6 h-12 w-12 text-blue-500/10 group-hover:text-blue-500/20 transition-colors" />
                     </CardContent>
                 </Card>
 
@@ -255,7 +255,7 @@ export default function UsersOverviewPage() {
                             </div>
                             <div className="p-3 bg-zinc-800/50 rounded-xl border border-zinc-700/50">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <ShieldCheck className="w-4 h-4 text-green-400" />
+                                    <ShieldCheck className="w-4 h-4 text-blue-400" />
                                     <span className="text-[10px] font-bold uppercase tracking-widest">Protocol Sync</span>
                                 </div>
                                 <p className="text-[10px] opacity-60 leading-relaxed font-medium">All active sessions are verified under current cryptographic standards.</p>

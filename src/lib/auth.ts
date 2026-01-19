@@ -31,13 +31,23 @@ export const authOptions: NextAuthOptions = {
                     let user = await User.findOne({ email });
 
                     if (!user) {
+                        const { generateUniqueUserSlug } = await import('./slugs');
+                        const slug = await generateUniqueUserSlug(name || email?.split('@')[0] || 'User');
+
                         user = await User.create({
                             _id: uid,
                             name: name || email?.split('@')[0] || 'User',
                             email,
                             image: picture,
+                            slug,
                             role: email === 'admin@bized.app' ? 'admin' : 'user',
                             provider: 'firebase',
+                            pages: [
+                                { title: 'Profile', slug: 'profile', type: 'profile', enabled: true },
+                                { title: 'Bookings', slug: 'bookings', type: 'bookings', enabled: true },
+                                { title: 'Shop', slug: 'shop', type: 'shop', enabled: true },
+                                { title: 'Quote', slug: 'quote', type: 'quote', enabled: true },
+                            ]
                         });
                     }
 
@@ -48,6 +58,7 @@ export const authOptions: NextAuthOptions = {
                         email: user.email,
                         image: user.image,
                         role: user.role,
+                        slug: user.slug,
                         accessToken: credentials.accessToken,
                     };
 
@@ -111,6 +122,17 @@ export const authOptions: NextAuthOptions = {
                 }
                 if (dbUser) {
                     dbUser.lastActive = new Date();
+
+                    // Migration: Generate pages if missing
+                    if (!dbUser.pages || dbUser.pages.length === 0) {
+                        dbUser.pages = [
+                            { title: 'Profile', slug: 'profile', type: 'profile', enabled: true },
+                            { title: 'Bookings', slug: 'bookings', type: 'bookings', enabled: true },
+                            { title: 'Shop', slug: 'shop', type: 'shop', enabled: true },
+                            { title: 'Quote', slug: 'quote', type: 'quote', enabled: true },
+                        ];
+                    }
+
                     await dbUser.save();
                 }
                 return true;
@@ -123,6 +145,7 @@ export const authOptions: NextAuthOptions = {
             if (user) {
                 token.role = user.role;
                 token.id = user.id;
+                token.slug = user.slug;
                 if ((user as any).accessToken) {
                     token.accessToken = (user as any).accessToken;
                 }
@@ -138,6 +161,7 @@ export const authOptions: NextAuthOptions = {
             if (session?.user) {
                 session.user.role = token.role as string;
                 session.user.id = token.id as string;
+                session.user.slug = token.slug as string;
             }
             // @ts-ignore
             session.accessToken = token.accessToken;

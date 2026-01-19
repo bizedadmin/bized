@@ -12,6 +12,17 @@ const UserSchema = new mongoose.Schema({
         maxlength: [60, 'Email cannot be more than 60 characters'],
         unique: true,
     },
+    phone: {
+        type: String,
+        maxlength: [20, 'Phone number cannot be more than 20 characters'],
+    },
+    slug: {
+        type: String,
+        unique: true,
+        lowercase: true,
+        trim: true,
+        sparse: true, // Allow existing users to not have it initially
+    },
     _id: {
         type: String, // We will manually set this to the Google ID
     },
@@ -42,6 +53,38 @@ const UserSchema = new mongoose.Schema({
         enum: ['active', 'suspended', 'unverified'],
         default: 'active',
     },
+    // --- Profile Customization ---
+    themeColor: {
+        type: String,
+        default: '#1f2937',
+    },
+    secondaryColor: {
+        type: String,
+        default: '#f3f4f6',
+    },
+    buttonColor: {
+        type: String,
+        default: '#1f2937',
+    },
+    fontFamily: {
+        type: String,
+        default: 'system',
+    },
+    glassmorphism: {
+        type: Boolean,
+        default: false,
+    },
+    borderRadius: {
+        type: String,
+        default: 'xl',
+    },
+    pages: [{
+        title: String,
+        slug: String,
+        enabled: { type: Boolean, default: true },
+        type: { type: String, enum: ['profile', 'bookings', 'shop', 'quote', 'storefront'] },
+        settings: { type: mongoose.Schema.Types.Mixed, default: {} }
+    }],
     lastActive: {
         type: Date,
         default: Date.now,

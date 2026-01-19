@@ -513,7 +513,7 @@ export default function StylePage() {
                     <div className="absolute -right-24 top-1/4 space-y-4">
                         <Card className="p-3 w-40 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-zinc-200 dark:border-zinc-800 shadow-xl animate-bounce-slow">
                             <div className="flex items-center gap-2 mb-2">
-                                <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                <div className="w-2 h-2 rounded-full bg-blue-500"></div>
                                 <span className="text-[10px] font-bold uppercase text-zinc-500">Active Theme</span>
                             </div>
                             <div className="flex items-center gap-2">

@@ -33,7 +33,7 @@ export default function LandingPage2() {
                     {/* Top Right Aura */}
                     <div className="absolute -top-[20%] -right-[10%] w-[50vw] h-[50vw] rounded-full bg-gradient-to-br from-purple-200 via-pink-200 to-transparent blur-3xl opacity-60 animate-aura" />
                     {/* Bottom Left Aura */}
-                    <div className="absolute -bottom-[20%] -left-[10%] w-[60vw] h-[60vw] rounded-full bg-gradient-to-tr from-blue-100 via-green-100 to-transparent blur-3xl opacity-60 animate-aura" style={{ animationDelay: '-5s' }} />
+                    <div className="absolute -bottom-[20%] -left-[10%] w-[60vw] h-[60vw] rounded-full bg-gradient-to-tr from-blue-100 via-sky-100 to-transparent blur-3xl opacity-60 animate-aura" style={{ animationDelay: '-5s' }} />
                 </div>
 
                 {/* Hero Card Container */}

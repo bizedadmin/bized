@@ -721,7 +721,7 @@ export default function TicketsPage() {
                                 )}
                                 {selectedTicket && selectedTicket.status === 'confirmed' && (
                                     <Button
-                                        className="w-full bg-green-600 text-white hover:bg-green-700"
+                                        className="w-full bg-blue-600 text-white hover:bg-blue-700"
                                         disabled
                                     >
                                         Checked In

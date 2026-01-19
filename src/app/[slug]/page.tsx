@@ -2,33 +2,40 @@
 import { notFound } from 'next/navigation'
 import dbConnect from '@/lib/db'
 import Business from '@/models/Business'
+import User from '@/models/User'
 import Product from '@/models/Product'
 import Service from '@/models/Service'
 import { BusinessProfile } from '@/components/business/business-profile'
-
 
 interface PageProps {
     params: Promise<{ slug: string }>
 }
 
-export default async function BusinessPage({ params }: PageProps) {
+export default async function SlugPage({ params }: PageProps) {
     const { slug } = await params
 
     await dbConnect()
-    const business = await Business.findOne({ slug }).lean()
 
-    if (!business) {
-        notFound()
+    // First try to find a business
+    let profileData: any = await Business.findOne({ slug }).lean()
+    let products: any[] = []
+    let services: any[] = []
+
+    if (profileData) {
+        products = await Product.find({ business: profileData._id }).lean()
+        services = await Service.find({ business: profileData._id }).lean()
+    } else {
+        // If no business, try to find a user
+        profileData = await User.findOne({ slug }).lean()
+        if (!profileData) {
+            notFound()
+        }
     }
 
-    // Fetch products
-    const products = await Product.find({ business: business._id }).lean()
-    const services = await Service.find({ business: business._id }).lean()
-
     // Serialize data
-    const plainBusiness = JSON.parse(JSON.stringify(business))
+    const plainProfile = JSON.parse(JSON.stringify(profileData))
     const plainProducts = JSON.parse(JSON.stringify(products))
     const plainServices = JSON.parse(JSON.stringify(services))
 
-    return <BusinessProfile business={plainBusiness} products={plainProducts} services={plainServices} />
+    return <BusinessProfile business={plainProfile} products={plainProducts} services={plainServices} />
 }

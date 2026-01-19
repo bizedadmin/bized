@@ -296,8 +296,8 @@ export default function UsersPage() {
                                                 </Avatar>
                                                 {user.lastActive && (new Date().getTime() - new Date(user.lastActive).getTime() < 15 * 60 * 1000) && (
                                                     <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500 border-2 border-background"></span>
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500 border-2 border-background"></span>
                                                     </span>
                                                 )}
                                             </div>
@@ -313,7 +313,7 @@ export default function UsersPage() {
                                                         ) : user.status === 'unverified' ? (
                                                             <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 shadow-[0_0_5px_rgba(234,179,8,0.5)]" />
                                                         ) : (
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.5)]" />
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_5px_rgba(59,130,246,0.5)]" />
                                                         )}
                                                     </div>
                                                 </div>
@@ -347,7 +347,7 @@ export default function UsersPage() {
                                                     <Shield className="w-3 h-3" /> Unverified
                                                 </div>
                                             ) : (
-                                                <div className="flex items-center gap-1.5 text-green-600 font-semibold text-[10px] tracking-tight">
+                                                <div className="flex items-center gap-1.5 text-blue-600 font-semibold text-[10px] tracking-tight">
                                                     <UserCheck className="w-3 h-3" /> Healthy
                                                 </div>
                                             )}
@@ -356,10 +356,10 @@ export default function UsersPage() {
                                     <TableCell className="hidden sm:table-cell py-4">
                                         <div className="flex items-center gap-2">
                                             {user.lastActive && (new Date().getTime() - new Date(user.lastActive).getTime() < 15 * 60 * 1000) ? (
-                                                <div className="flex items-center gap-1.5 text-green-600 font-black text-[10px] tracking-tighter uppercase">
+                                                <div className="flex items-center gap-1.5 text-blue-600 font-black text-[10px] tracking-tighter uppercase">
                                                     <span className="flex h-2 w-2 relative">
-                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                                                     </span>
                                                     Online
                                                 </div>
@@ -416,7 +416,7 @@ export default function UsersPage() {
                                                 <DropdownMenuLabel className="text-destructive">Critical Safety</DropdownMenuLabel>
                                                 {user.status === 'suspended' ? (
                                                     <DropdownMenuItem onClick={() => handleUpdateUser(user._id, { status: 'active' })}>
-                                                        <UserCheck className="mr-2 h-4 w-4 text-green-600" /> Reinstate Stakeholder
+                                                        <UserCheck className="mr-2 h-4 w-4 text-blue-600" /> Reinstate Stakeholder
                                                     </DropdownMenuItem>
                                                 ) : (
                                                     <DropdownMenuItem
@@ -531,7 +531,7 @@ export default function UsersPage() {
                                         </div>
                                         <div className="flex justify-between items-center py-1">
                                             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pulse Verification</span>
-                                            <span className="text-xs font-mono text-green-600 font-bold">CRYPTOGRAPHICALLY_VERIFIED</span>
+                                            <span className="text-xs font-mono text-blue-600 font-bold">CRYPTOGRAPHICALLY_VERIFIED</span>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -617,8 +617,8 @@ export default function UsersPage() {
 
                             <div className="pt-4 border-t flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                    <Globe className="w-3 h-3 text-green-500" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-green-600">Route Identified</span>
+                                    <Globe className="w-3 h-3 text-blue-500" />
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600">Route Identified</span>
                                 </div>
                                 <span className="text-[10px] font-mono opacity-50">{ipInfo.lat}, {ipInfo.lon}</span>
                             </div>

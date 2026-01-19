@@ -20,6 +20,18 @@ export async function GET(req: Request) {
             return NextResponse.json({ message: 'User not found' }, { status: 404 });
         }
 
+        if (!user.slug && user.email) {
+            const baseSlug = user.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+            user.slug = baseSlug;
+            try {
+                await user.save();
+            } catch (error) {
+                // If slug collision, append random number
+                user.slug = `${baseSlug}${Math.floor(Math.random() * 1000)}`;
+                await user.save();
+            }
+        }
+
         return NextResponse.json(user);
     } catch (error) {
         console.error('Error fetching profile:', error);
@@ -36,7 +48,7 @@ export async function PUT(req: Request) {
         }
 
         const body = await req.json();
-        const { name, jobTitle, bio, website, image } = body;
+        const { name, jobTitle, bio, website, image, phone } = body;
 
         await dbConnect();
 
@@ -47,7 +59,8 @@ export async function PUT(req: Request) {
                 jobTitle,
                 bio,
                 website,
-                image
+                image,
+                phone
             },
             { new: true, runValidators: true }
         ).select('-password');
