@@ -4,7 +4,8 @@ import { useEffect, useState, Suspense } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
+import * as m from "framer-motion"
+const { motion, AnimatePresence } = m
 import {
     User,
     FileText,
@@ -67,6 +68,7 @@ function PortalContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const tabParam = searchParams.get('tab')
+    const searchQuery = searchParams.get('q')?.toLowerCase() || ""
 
     // State
     const [isLoading, setIsLoading] = useState(true)
@@ -240,36 +242,44 @@ function PortalContent() {
                                         </h2>
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-                                        {business.pages.filter(p => p.enabled).map((page, idx) => {
-                                            const PageIcon = getIconForPageType(page.type);
-                                            return (
-                                                <Card key={idx} className="group border-none shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 overflow-hidden bg-white dark:bg-zinc-900 p-1 rounded-3xl">
-                                                    <div className="p-6 flex flex-col">
-                                                        <div
-                                                            className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500 group-hover:scale-110 shadow-sm"
-                                                            style={{ backgroundColor: `${themeColor}10` }}
-                                                        >
-                                                            <PageIcon className="w-6 h-6 transition-colors" style={{ color: themeColor }} />
-                                                        </div>
-                                                        <CardTitle className="text-xl font-bold mb-1 tracking-tight">{page.title}</CardTitle>
-                                                        <CardDescription className="text-xs font-medium text-gray-500 mb-6">
-                                                            Manage your {page.type} preferences.
-                                                        </CardDescription>
+                                        {business.pages
+                                            .filter(p => p.enabled)
+                                            .filter(p => !searchQuery || p.title.toLowerCase().includes(searchQuery) || p.type.toLowerCase().includes(searchQuery))
+                                            .map((page, idx) => {
+                                                const PageIcon = getIconForPageType(page.type);
+                                                return (
+                                                    <Card key={idx} className="group border-none shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 overflow-hidden bg-white dark:bg-zinc-900 p-1 rounded-3xl">
+                                                        <div className="p-6 flex flex-col">
+                                                            <div
+                                                                className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500 group-hover:scale-110 shadow-sm"
+                                                                style={{ backgroundColor: `${themeColor}10` }}
+                                                            >
+                                                                <PageIcon className="w-6 h-6 transition-colors" style={{ color: themeColor }} />
+                                                            </div>
+                                                            <CardTitle className="text-xl font-bold mb-1 tracking-tight">{page.title}</CardTitle>
+                                                            <CardDescription className="text-xs font-medium text-gray-500 mb-6">
+                                                                Manage your {page.type} preferences.
+                                                            </CardDescription>
 
-                                                        <Button
-                                                            className="w-full bg-gray-50 dark:bg-zinc-800 hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-700 text-gray-900 dark:text-white border-none shadow-none h-11 rounded-xl group/btn transition-all duration-300 font-bold"
-                                                            asChild
-                                                        >
-                                                            <Link href={page.type === 'storefront' ? `/${business.slug}` : `/${business.slug}/${page.slug}`}>
-                                                                Launch Section
-                                                                <ArrowUpRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
-                                                            </Link>
-                                                        </Button>
-                                                    </div>
-                                                </Card>
-                                            )
-                                        })}
+                                                            <Button
+                                                                className="w-full bg-gray-50 dark:bg-zinc-800 hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-700 text-gray-900 dark:text-white border-none shadow-none h-11 rounded-xl group/btn transition-all duration-300 font-bold"
+                                                                asChild
+                                                            >
+                                                                <Link href={page.type === 'storefront' ? `/${business.slug}` : `/${business.slug}/${page.slug}`}>
+                                                                    Launch Section
+                                                                    <ArrowUpRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
+                                                                </Link>
+                                                            </Button>
+                                                        </div>
+                                                    </Card>
+                                                )
+                                            })}
                                     </div>
+                                    {business.pages.filter(p => p.enabled).filter(p => !searchQuery || p.title.toLowerCase().includes(searchQuery) || p.type.toLowerCase().includes(searchQuery)).length === 0 && (
+                                        <div className="text-center py-20 bg-white dark:bg-zinc-900 rounded-[32px] border border-dashed">
+                                            <p className="text-gray-500 font-bold italic">No sections found matching "{searchQuery}"</p>
+                                        </div>
+                                    )}
                                 </section>
 
                                 {/* Bottom Info Grid */}
@@ -313,58 +323,59 @@ function PortalContent() {
                                     </Button>
                                 </div>
                                 <div className="grid gap-4">
-                                    {bookings.length > 0 ? bookings.map((booking) => (
-                                        <Card key={booking._id} className="border-none shadow-[0_4px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(0,0,0,0.06)] transition-all duration-500 overflow-hidden bg-white dark:bg-zinc-900 group rounded-[24px]">
-                                            <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                                <div className="flex items-center gap-6">
-                                                    <div
-                                                        className="w-16 h-16 rounded-[20px] flex flex-col items-center justify-center shrink-0 shadow-inner"
-                                                        style={{ backgroundColor: `${themeColor}08`, border: `1px solid ${themeColor}15` }}
-                                                    >
-                                                        <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: themeColor }}>{new Date(booking.date).toLocaleDateString('en-US', { month: 'short' })}</span>
-                                                        <span className="text-2xl font-black italic -mt-1" style={{ color: themeColor }}>{new Date(booking.date).getDate()}</span>
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-black text-gray-900 dark:text-white text-xl tracking-tight leading-none mb-2 group-hover:italic transition-all">
-                                                            {booking.serviceId?.name || "Service Appointment"}
-                                                        </h3>
-                                                        <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs font-bold text-gray-400 uppercase tracking-tighter">
-                                                            <span className="flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5" /> {booking.businessId?.name}</span>
-                                                            <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {booking.startTime}</span>
-                                                            <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> On-site</span>
+                                    {(bookings.filter(b => !searchQuery || b.serviceId?.name.toLowerCase().includes(searchQuery))).length > 0 ?
+                                        bookings.filter(b => !searchQuery || b.serviceId?.name.toLowerCase().includes(searchQuery)).map((booking) => (
+                                            <Card key={booking._id} className="border-none shadow-[0_4px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(0,0,0,0.06)] transition-all duration-500 overflow-hidden bg-white dark:bg-zinc-900 group rounded-[24px]">
+                                                <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                                    <div className="flex items-center gap-6">
+                                                        <div
+                                                            className="w-16 h-16 rounded-[20px] flex flex-col items-center justify-center shrink-0 shadow-inner"
+                                                            style={{ backgroundColor: `${themeColor}08`, border: `1px solid ${themeColor}15` }}
+                                                        >
+                                                            <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: themeColor }}>{new Date(booking.date).toLocaleDateString('en-US', { month: 'short' })}</span>
+                                                            <span className="text-2xl font-black italic -mt-1" style={{ color: themeColor }}>{new Date(booking.date).getDate()}</span>
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-black text-gray-900 dark:text-white text-xl tracking-tight leading-none mb-2 group-hover:italic transition-all">
+                                                                {booking.serviceId?.name || "Service Appointment"}
+                                                            </h3>
+                                                            <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs font-bold text-gray-400 uppercase tracking-tighter">
+                                                                <span className="flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5" /> {booking.businessId?.name}</span>
+                                                                <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {booking.startTime}</span>
+                                                                <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> On-site</span>
+                                                            </div>
                                                         </div>
                                                     </div>
+                                                    <div className="flex items-center gap-4 justify-between md:justify-end">
+                                                        <Badge
+                                                            className="rounded-xl px-4 py-1.5 text-[10px] font-black tracking-widest border-none uppercase italic"
+                                                            style={{
+                                                                backgroundColor: booking.status === 'confirmed' ? `${themeColor}15` : '#fef3c7',
+                                                                color: booking.status === 'confirmed' ? themeColor : '#b45309'
+                                                            }}
+                                                        >
+                                                            {booking.status}
+                                                        </Badge>
+                                                        <Button variant="outline" className="rounded-xl h-11 px-6 border-gray-100 hover:bg-zinc-900 hover:text-white transition-all font-bold text-xs" asChild>
+                                                            <Link href={`/bized/bookings/${booking._id}`}>
+                                                                Manage
+                                                            </Link>
+                                                        </Button>
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center gap-4 justify-between md:justify-end">
-                                                    <Badge
-                                                        className="rounded-xl px-4 py-1.5 text-[10px] font-black tracking-widest border-none uppercase italic"
-                                                        style={{
-                                                            backgroundColor: booking.status === 'confirmed' ? `${themeColor}15` : '#fef3c7',
-                                                            color: booking.status === 'confirmed' ? themeColor : '#b45309'
-                                                        }}
-                                                    >
-                                                        {booking.status}
-                                                    </Badge>
-                                                    <Button variant="outline" className="rounded-xl h-11 px-6 border-gray-100 hover:bg-zinc-900 hover:text-white transition-all font-bold text-xs" asChild>
-                                                        <Link href={`/bized/bookings/${booking._id}`}>
-                                                            Manage
-                                                        </Link>
-                                                    </Button>
+                                            </Card>
+                                        )) : (
+                                            <Card className="border-dashed border-2 py-20 text-center bg-transparent rounded-3xl">
+                                                <div className="w-20 h-20 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                                                    <Calendar className="w-10 h-10 text-gray-300" />
                                                 </div>
-                                            </div>
-                                        </Card>
-                                    )) : (
-                                        <Card className="border-dashed border-2 py-20 text-center bg-transparent rounded-3xl">
-                                            <div className="w-20 h-20 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                                                <Calendar className="w-10 h-10 text-gray-300" />
-                                            </div>
-                                            <h3 className="text-xl font-bold mb-2">No Active Bookings</h3>
-                                            <p className="text-gray-500 mb-8 max-w-xs mx-auto text-sm">You haven't scheduled any services with {business?.name || "Bized"} yet.</p>
-                                            <Button variant="outline" className="rounded-xl px-10 h-11 border-gray-200" asChild>
-                                                <Link href="/bized/bookings">Start Booking</Link>
-                                            </Button>
-                                        </Card>
-                                    )}
+                                                <h3 className="text-xl font-bold mb-2">No Active Bookings</h3>
+                                                <p className="text-gray-500 mb-8 max-w-xs mx-auto text-sm">You haven't scheduled any services with {business?.name || "Bized"} yet.</p>
+                                                <Button variant="outline" className="rounded-xl px-10 h-11 border-gray-200" asChild>
+                                                    <Link href="/bized/bookings">Start Booking</Link>
+                                                </Button>
+                                            </Card>
+                                        )}
                                 </div>
                             </div>
                         )}

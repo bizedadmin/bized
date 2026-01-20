@@ -5,7 +5,8 @@ import { useSession, signOut } from "next-auth/react"
 import { useRouter, usePathname } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
+import * as m from "framer-motion"
+const { motion, AnimatePresence } = m
 import {
     LogOut,
     User,
@@ -65,6 +66,19 @@ export default function ClientPortalShell({
     const [business, setBusiness] = useState<Business | null>(propBusiness || null)
     const [isLoading, setIsLoading] = useState(!propBusiness)
     const [searchQuery, setSearchQuery] = useState("")
+
+    useEffect(() => {
+        const q = new URLSearchParams(window.location.search).get('q') || ""
+        setSearchQuery(q)
+    }, [])
+
+    const handleSearch = (value: string) => {
+        setSearchQuery(value)
+        const params = new URLSearchParams(window.location.search)
+        if (value) params.set('q', value)
+        else params.delete('q')
+        router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    }
 
     useEffect(() => {
         if (!propBusiness) {
@@ -179,7 +193,7 @@ export default function ClientPortalShell({
                             placeholder="Search in portal..."
                             className="pl-10 h-10 bg-gray-100/50 dark:bg-zinc-800/50 border-none rounded-full focus-visible:ring-blue-500/50"
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e) => handleSearch(e.target.value)}
                         />
                     </div>
 
