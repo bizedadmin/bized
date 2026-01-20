@@ -16,7 +16,8 @@ import {
     Layout,
     Ticket,
     Search,
-    Loader2
+    Loader2,
+    Compass
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -51,6 +52,7 @@ const navItems = [
     { id: "bookings", label: "My Bookings", icon: Calendar, href: "/bized?tab=bookings" },
     { id: "orders", label: "My Orders", icon: ShoppingBag, href: "/bized?tab=orders" },
     { id: "tickets", label: "Support Tickets", icon: Ticket, href: "/bized?tab=tickets" },
+    { id: "marketplace", label: "Marketplace", icon: Compass, href: "/marketplace" },
 ]
 
 export default function ClientPortalShell({
