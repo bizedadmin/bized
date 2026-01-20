@@ -906,13 +906,13 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                 )
             case 'opening_hours':
                 return (
-                    <Accordion key={block.id} type="single" collapsible className="w-full">
+                    <Accordion key={block.id} type="multiple" defaultValue={["hours"]} className="w-full">
                         <AccordionItem value="hours" className={cn(
-                            "border border-[#CDD0DB]/60 px-3 bg-white dark:bg-zinc-900 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] border-b-[#CDD0DB]/60",
+                            "border border-[#EFEFF0] bg-white dark:bg-zinc-900",
                             isGlass && "bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md",
                             br
                         )}>
-                            <AccordionTrigger className="hover:no-underline py-3">
+                            <AccordionTrigger className="hover:no-underline py-4 px-5">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
                                         <Clock className="w-5 h-5 text-[#0A0909] dark:text-white" />
@@ -920,7 +920,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                                     <div className="text-left text-[14px] font-medium text-[#0A0909] dark:text-white">Opening Hours</div>
                                 </div>
                             </AccordionTrigger>
-                            <AccordionContent className="pb-4">
+                            <AccordionContent className="pb-6 px-5">
                                 {block.isOpen247 ? (
                                     <div className="text-center py-2 text-[10px] font-normal text-[#0A0909] dark:text-white">Open 24 / 7</div>
                                 ) : (
@@ -941,13 +941,13 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                 )
             case 'contact_info':
                 return (
-                    <Accordion key={block.id} type="single" collapsible className="w-full">
+                    <Accordion key={block.id} type="multiple" defaultValue={["contacts"]} className="w-full">
                         <AccordionItem value="contacts" className={cn(
-                            "border border-[#CDD0DB]/60 px-3 bg-white dark:bg-zinc-900 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] border-b-[#CDD0DB]/60",
+                            "border border-[#EFEFF0] bg-white dark:bg-zinc-900",
                             isGlass && "bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md",
                             br
                         )}>
-                            <AccordionTrigger className="hover:no-underline py-3">
+                            <AccordionTrigger className="hover:no-underline py-4 px-5">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
                                         <Phone className="w-5 h-5 text-[#0A0909] dark:text-white" />
@@ -955,7 +955,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                                     <div className="text-left text-[14px] font-medium text-[#0A0909] dark:text-white">Contact Us</div>
                                 </div>
                             </AccordionTrigger>
-                            <AccordionContent className="pb-4 space-y-3">
+                            <AccordionContent className="pb-6 px-5 space-y-3">
                                 {(business.name || block.fullName) && <div className="text-[12px] font-medium text-[#0A0909] dark:text-white mb-2">{business.name || block.fullName}</div>}
                                 <div className="grid gap-2">
                                     {(business.phone || block.phone) && (
@@ -988,7 +988,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
 
                 return (
                     <div key={block.id} className={cn(
-                        "p-5 border border-[#CDD0DB]/60 bg-white dark:bg-zinc-900 shadow-sm space-y-4",
+                        "p-6 border border-[#EFEFF0] bg-white dark:bg-zinc-900 shadow-none space-y-4",
                         isGlass && "bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md",
                         br
                     )}>
@@ -1041,13 +1041,13 @@ export function BusinessProfile({ business, products, services = [], pageType = 
             case 'location':
                 const locationAddress = [block.street, block.city, block.state, block.postalCode].filter(Boolean).join(', ')
                 return (
-                    <Accordion key={block.id} type="single" collapsible className="w-full">
+                    <Accordion key={block.id} type="multiple" defaultValue={["location"]} className="w-full">
                         <AccordionItem value="location" className={cn(
-                            "border border-[#CDD0DB]/60 px-3 bg-white dark:bg-zinc-900 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] border-b-[#CDD0DB]/60",
+                            "border border-[#EFEFF0] bg-white dark:bg-zinc-900",
                             isGlass && "bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md",
                             br
                         )}>
-                            <AccordionTrigger className="hover:no-underline py-3">
+                            <AccordionTrigger className="hover:no-underline py-4 px-5">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
                                         <MapPin className="w-5 h-5 text-[#0A0909] dark:text-white" />
@@ -1055,7 +1055,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                                     <div className="text-left text-[14px] font-medium text-[#0A0909] dark:text-white">Location</div>
                                 </div>
                             </AccordionTrigger>
-                            <AccordionContent className="pb-4 space-y-3">
+                            <AccordionContent className="pb-6 px-5 space-y-3">
                                 {block.locationType === 'manual' || business.address ? (
                                     <>
                                         <p className="text-[10px] text-[#3F3E3E] dark:text-gray-400">
@@ -1095,13 +1095,13 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                     { id: 'seating', label: 'Seating', icon: <Layers className="w-4 h-4" /> },
                 ]
                 return (
-                    <Accordion key={block.id} type="single" collapsible className="w-full">
+                    <Accordion key={block.id} type="multiple" defaultValue={["facilities"]} className="w-full">
                         <AccordionItem value="facilities" className={cn(
-                            "border border-[#CDD0DB]/60 px-3 bg-white dark:bg-zinc-900 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] border-b-[#CDD0DB]/60",
+                            "border border-[#EFEFF0] bg-white dark:bg-zinc-900",
                             isGlass && "bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md",
                             br
                         )}>
-                            <AccordionTrigger className="hover:no-underline py-3">
+                            <AccordionTrigger className="hover:no-underline py-4 px-5">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
                                         <CheckCircle2 className="w-5 h-5 text-[#0A0909] dark:text-white" />
@@ -1109,7 +1109,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                                     <div className="text-left text-[14px] font-medium text-[#0A0909] dark:text-white">Facilities</div>
                                 </div>
                             </AccordionTrigger>
-                            <AccordionContent className="pb-4">
+                            <AccordionContent className="pb-6 px-5">
                                 <div key={block.id} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                     {facilitiesList.filter(f => (business.selectedFacilities || block.selectedFacilities)?.includes(f.id)).map((facility) => (
                                         <div key={facility.id} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700">
@@ -1141,7 +1141,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                                         br,
                                         selectedServices.includes(service._id)
                                             ? "border-orange-500 bg-orange-50/30 ring-1 ring-orange-500"
-                                            : cn("border-[#CDD0DB] bg-white hover:border-zinc-300 shadow-sm", isGlass && "bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md")
+                                            : cn("border-[#EFEFF0] bg-white hover:border-zinc-300 shadow-none", isGlass && "bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md")
                                     )}
                                 >
                                     <div className="flex items-start gap-3 sm:gap-4">
@@ -1224,7 +1224,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                                 <div
                                     key={product._id}
                                     className={cn(
-                                        "group bg-white dark:bg-zinc-900 border border-[#CDD0DB]/60 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col",
+                                        "group bg-white dark:bg-zinc-900 border border-[#EFEFF0] overflow-hidden shadow-none hover:shadow-md transition-all duration-300 flex flex-col",
                                         isGlass && "bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md",
                                         br
                                     )}
@@ -1274,7 +1274,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
             case 'about':
                 return (
                     <div key={block.id} className={cn(
-                        "p-6 border border-[#CDD0DB] bg-white dark:bg-zinc-900 space-y-3 shadow-sm",
+                        "p-6 border border-[#EFEFF0] bg-white dark:bg-zinc-900 space-y-3 shadow-none",
                         isGlass && "bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md",
                         br
                     )}>
@@ -1399,110 +1399,112 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                 </div>
             </div>
 
-            <main className={cn("max-w-2xl mx-auto pb-20 pt-4", selectedServices.length > 0 && "pb-40")}>
+            <main className={cn("max-w-xl mx-auto pb-20 sm:pt-4 sm:px-4", selectedServices.length > 0 && "pb-40")}>
+                <div className="bg-white dark:bg-zinc-950/50 sm:border border-[#EFEFF0] sm:rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
 
-                {/* Hero / Brand Section */}
-                <div className="relative">
-                    {/* Banner with secondary color */}
-                    <div
-                        className="h-32 w-full rounded-b-xl relative overflow-hidden bg-cover bg-center"
-                        style={{
-                            backgroundColor: business.secondaryColor || "#f3f4f6",
-                            backgroundImage: business.image ? `url(${business.image})` : undefined
-                        }}
-                    >
-                        {/* Abstract background decorative elements - only show if no image */}
-                        {!business.image && (
-                            <>
-                                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
-                                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-black/5 rounded-full blur-2xl" />
-                            </>
-                        )}
-                        {/* Overlay darker if image exists to ensure text contrast if needed, though text is below */}
-                        {business.image && <div className="absolute inset-0 bg-black/10" />}
-                    </div>
+                    {/* Hero / Brand Section */}
+                    <div className="relative">
+                        {/* Banner with secondary color */}
+                        <div
+                            className="h-32 w-full rounded-b-xl relative overflow-hidden bg-cover bg-center"
+                            style={{
+                                backgroundColor: business.secondaryColor || "#f3f4f6",
+                                backgroundImage: business.image ? `url(${business.image})` : undefined
+                            }}
+                        >
+                            {/* Abstract background decorative elements - only show if no image */}
+                            {!business.image && (
+                                <>
+                                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
+                                    <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-black/5 rounded-full blur-2xl" />
+                                </>
+                            )}
+                            {/* Overlay darker if image exists to ensure text contrast if needed, though text is below */}
+                            {business.image && <div className="absolute inset-0 bg-black/10" />}
+                        </div>
 
-                    <div className="px-6 relative z-10">
-                        {/* Logo Avatar - positioned to overlap banner */}
-                        <div className="-mt-12 mb-4 flex justify-between items-end">
-                            <div
-                                className="w-20 h-20 rounded-full flex items-center justify-center text-white text-3xl font-black shadow-2xl ring-4 ring-white dark:ring-zinc-950 transform hover:scale-105 transition-transform overflow-hidden bg-cover bg-center"
-                                style={{
-                                    backgroundColor: business.themeColor || "#1f2937",
-                                    backgroundImage: business.logo ? `url(${business.logo})` : undefined
-                                }}
-                            >
-                                {!business.logo && business.name.substring(0, 1).toUpperCase()}
+                        <div className="px-6 relative z-10">
+                            {/* Logo Avatar - positioned to overlap banner */}
+                            <div className="-mt-12 mb-4 flex justify-between items-end">
+                                <div
+                                    className="w-20 h-20 rounded-full flex items-center justify-center text-white text-3xl font-black shadow-2xl ring-4 ring-white dark:ring-zinc-950 transform hover:scale-105 transition-transform overflow-hidden bg-cover bg-center"
+                                    style={{
+                                        backgroundColor: business.themeColor || "#1f2937",
+                                        backgroundImage: business.logo ? `url(${business.logo})` : undefined
+                                    }}
+                                >
+                                    {!business.logo && business.name.substring(0, 1).toUpperCase()}
+                                </div>
+                            </div>
+
+                            <div className="space-y-1 text-center mt-4">
+                                <h1 className="text-[18px] font-medium leading-[26px] text-[#0A0909] dark:text-white font-rubik">
+                                    {business.name}
+                                </h1>
+                                <p className="text-[10px] font-normal leading-[18px] text-[#3F3E3E]">@{business.slug}</p>
+                            </div>
+
+
+
+                            {/* Quick Contact Info */}
+                            <div className="flex justify-center gap-4 mt-4 text-[10px] text-[#3F3E3E] font-normal">
+                                {business.phone && (
+                                    <div className="flex items-center gap-1">
+                                        <Phone className="w-3 h-3" />
+                                        {business.phone.code} {business.phone.number}
+                                    </div>
+                                )}
+                                <div className="flex items-center gap-1">
+                                    <MapPin className="w-3 h-3" />
+                                    View Location
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div className="space-y-1 text-center mt-4">
-                            <h1 className="text-[18px] font-medium leading-[26px] text-[#0A0909] dark:text-white font-rubik">
-                                {business.name}
-                            </h1>
-                            <p className="text-[10px] font-normal leading-[18px] text-[#3F3E3E]">@{business.slug}</p>
-                        </div>
+                    {/* Content Sections based on pageType */}
 
-
-
-                        {/* Quick Contact Info */}
-                        <div className="flex justify-center gap-4 mt-4 text-[10px] text-[#3F3E3E] font-normal">
-                            {business.phone && (
-                                <div className="flex items-center gap-1">
-                                    <Phone className="w-3 h-3" />
-                                    {business.phone.code} {business.phone.number}
+                    {(pageType === 'storefront' || pageType === 'profile') && (
+                        <div className="p-2 space-y-2">
+                            {/* Dynamic Blocks */}
+                            {blocks.length > 0 && (
+                                <div className="flex flex-col gap-2">
+                                    {blocks.map(renderBlock)}
                                 </div>
                             )}
-                            <div className="flex items-center gap-1">
-                                <MapPin className="w-3 h-3" />
-                                View Location
-                            </div>
                         </div>
-                    </div>
+                    )}
+
+                    {pageType === 'shop' && (
+                        <div className="p-2">
+                            {blocks.length > 0 && (
+                                <div className="space-y-6">
+                                    {blocks.map(renderBlock)}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {pageType === 'bookings' && (
+                        <div className="p-2">
+                            {blocks.length > 0 && (
+                                <div className="space-y-6">
+                                    {blocks.map(renderBlock)}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {pageType === 'quote' && (
+                        <div className="px-6 pt-10 space-y-8">
+                            {blocks.length > 0 && (
+                                <div className="space-y-6">
+                                    {blocks.map(renderBlock)}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
-
-                {/* Content Sections based on pageType */}
-
-                {(pageType === 'storefront' || pageType === 'profile') && (
-                    <div className="px-6 pt-6 space-y-2">
-                        {/* Dynamic Blocks */}
-                        {blocks.length > 0 && (
-                            <div className="space-y-2">
-                                {blocks.map(renderBlock)}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {pageType === 'shop' && (
-                    <div className="px-6 pt-10">
-                        {blocks.length > 0 && (
-                            <div className="space-y-6">
-                                {blocks.map(renderBlock)}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {pageType === 'bookings' && (
-                    <div className="px-6 pt-10 space-y-8">
-                        {blocks.length > 0 && (
-                            <div className="space-y-6">
-                                {blocks.map(renderBlock)}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {pageType === 'quote' && (
-                    <div className="px-6 pt-10 space-y-8">
-                        {blocks.length > 0 && (
-                            <div className="space-y-6">
-                                {blocks.map(renderBlock)}
-                            </div>
-                        )}
-                    </div>
-                )}
             </main>
 
             {/* Cart Overlay */}
