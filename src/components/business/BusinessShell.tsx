@@ -191,7 +191,7 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
 
     const handleOpenStore = () => {
         if (business) {
-            window.open(`/bized?bizId=${business._id}`, '_blank')
+            window.open(`/${business.slug}`, '_blank')
         }
     }
 
