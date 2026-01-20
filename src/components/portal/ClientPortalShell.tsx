@@ -45,9 +45,12 @@ interface ClientPortalShellProps {
     activeTab?: string
     onTabChange?: (tab: string) => void
     business?: Business | null
+    customNavItems?: { id: string; label: string; icon: any; href?: string; onClick?: () => void }[]
+    hideSidebar?: boolean
+    headerContent?: React.ReactNode
 }
 
-const navItems = [
+const navItems: { id: string; label: string; icon: any; href: string; onClick?: () => void }[] = [
     { id: "pages", label: "Public Pages", icon: Layout, href: "/bized?tab=pages" },
     { id: "bookings", label: "My Bookings", icon: Calendar, href: "/bized?tab=bookings" },
     { id: "orders", label: "My Orders", icon: ShoppingBag, href: "/bized?tab=orders" },
@@ -59,7 +62,10 @@ export default function ClientPortalShell({
     children,
     activeTab: propActiveTab,
     onTabChange,
-    business: propBusiness
+    business: propBusiness,
+    customNavItems,
+    hideSidebar = false,
+    headerContent
 }: ClientPortalShellProps) {
     const { data: session, status } = useSession()
     const router = useRouter()
@@ -108,95 +114,102 @@ export default function ClientPortalShell({
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex transition-colors duration-300">
             {/* Desktop Sidebar */}
-            <aside className="hidden lg:flex w-72 flex-col bg-white dark:bg-zinc-900 border-r border-gray-200 dark:border-zinc-800 fixed h-full z-20">
-                <div className="p-6">
-                    <Link href="/bized" className="flex items-center gap-4 group">
-                        <div
-                            className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-105"
-                            style={{ backgroundColor: themeColor, boxShadow: `${themeColor}33 0px 8px 16px` }}
-                        >
-                            {business?.logo ? (
-                                <Image src={business.logo} alt={business.name} width={28} height={28} className="rounded-lg object-contain brightness-0 invert" />
-                            ) : (
-                                <Image src="/logo-light-mode.png" alt="B" width={28} height={28} className="brightness-0 invert" />
-                            )}
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                            <span className="text-lg font-black tracking-tight text-gray-900 dark:text-white truncate uppercase italic">
-                                {business?.name || "Client Portal"}
-                            </span>
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Workspace</span>
-                        </div>
-                    </Link>
-                </div>
-
-                <nav className="flex-1 px-4 py-8 space-y-2">
-                    {navItems.map((item) => {
-                        const isActive = propActiveTab === item.id
-
-                        return (
-                            <button
-                                key={item.id}
-                                onClick={() => {
-                                    if (onTabChange) {
-                                        onTabChange(item.id)
-                                    } else {
-                                        router.push(item.href)
-                                    }
-                                }}
-                                className={cn(
-                                    "w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 group text-left relative",
-                                    isActive
-                                        ? "font-bold bg-gray-50 dark:bg-zinc-800 shadow-sm"
-                                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-gray-900 dark:hover:text-white"
-                                )}
-                                style={{ color: isActive ? themeColor : undefined }}
+            {!hideSidebar && (
+                <aside className="hidden lg:flex w-72 flex-col bg-white dark:bg-zinc-900 border-r border-gray-200 dark:border-zinc-800 fixed h-full z-20">
+                    <div className="p-6">
+                        <Link href="/bized" className="flex items-center gap-4 group">
+                            <div
+                                className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-105"
+                                style={{ backgroundColor: themeColor, boxShadow: `${themeColor}33 0px 8px 16px` }}
                             >
-                                {isActive && (
-                                    <motion.div
-                                        layoutId="sidebar-active"
-                                        className="absolute left-0 w-1.5 h-6 rounded-r-full"
-                                        style={{ backgroundColor: themeColor }}
-                                    />
+                                {business?.logo ? (
+                                    <Image src={business.logo} alt={business.name} width={28} height={28} className="rounded-lg object-contain brightness-0 invert" />
+                                ) : (
+                                    <Image src="/logo-light-mode.png" alt="B" width={28} height={28} className="brightness-0 invert" />
                                 )}
-                                <item.icon className={cn(
-                                    "w-5 h-5 transition-transform duration-300 group-hover:scale-110",
-                                    isActive ? "" : "text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200"
-                                )} style={{ color: isActive ? themeColor : undefined }} />
-                                <span className="text-sm tracking-tight">{item.label}</span>
-                            </button>
-                        )
-                    })}
-                </nav>
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-lg font-black tracking-tight text-gray-900 dark:text-white truncate uppercase italic">
+                                    {business?.name || "Client Portal"}
+                                </span>
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Workspace</span>
+                            </div>
+                        </Link>
+                    </div>
 
-                <div className="p-6 border-t border-gray-200 dark:border-zinc-800">
-                    <div className="flex flex-col items-center text-center">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">Powered by</p>
-                        <div className="flex items-center gap-2 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
-                            <Image src="/logo-dark-mode.png" alt="Bized" width={20} height={20} className="dark:brightness-0 dark:invert" />
-                            <span className="text-sm font-bold text-gray-900 dark:text-white">Bized app</span>
+                    <nav className="flex-1 px-4 py-8 space-y-2">
+                        {(customNavItems || navItems).map((item) => {
+                            const isActive = propActiveTab === item.id
+
+                            return (
+                                <button
+                                    key={item.id}
+                                    onClick={() => {
+                                        if (item.onClick) {
+                                            item.onClick()
+                                        } else if (onTabChange && !item.href) {
+                                            onTabChange(item.id)
+                                        } else if (item.href) {
+                                            router.push(item.href)
+                                        }
+                                    }}
+                                    className={cn(
+                                        "w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 group text-left relative",
+                                        isActive
+                                            ? "font-bold bg-gray-50 dark:bg-zinc-800 shadow-sm"
+                                            : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-gray-900 dark:hover:text-white"
+                                    )}
+                                    style={{ color: isActive ? themeColor : undefined }}
+                                >
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="sidebar-active"
+                                            className="absolute left-0 w-1.5 h-6 rounded-r-full"
+                                            style={{ backgroundColor: themeColor }}
+                                        />
+                                    )}
+                                    <item.icon className={cn(
+                                        "w-5 h-5 transition-transform duration-300 group-hover:scale-110",
+                                        isActive ? "" : "text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200"
+                                    )} style={{ color: isActive ? themeColor : undefined }} />
+                                    <span className="text-sm tracking-tight">{item.label}</span>
+                                </button>
+                            )
+                        })}
+                    </nav>
+
+                    <div className="p-6 border-t border-gray-200 dark:border-zinc-800">
+                        <div className="flex flex-col items-center text-center">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">Powered by</p>
+                            <div className="flex items-center gap-2 grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
+                                <Image src="/logo-dark-mode.png" alt="Bized" width={20} height={20} className="dark:brightness-0 dark:invert" />
+                                <span className="text-sm font-bold text-gray-900 dark:text-white">Bized app</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </aside>
+                </aside>
+            )}
 
             {/* Main Content Area */}
-            <div className="flex-1 lg:ml-72 flex flex-col min-w-0">
-                {/* Top Navbar */}
-                <header className="h-16 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-30 px-4 sm:px-8 flex items-center justify-between">
+            <div className={cn("flex-1 flex flex-col min-w-0", !hideSidebar && "lg:ml-72")}>
+                <header className="h-16 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-50 px-4 sm:px-8 flex items-center justify-between">
                     <div className="flex items-center gap-4 lg:hidden">
                         <Image src="/logo-dark-mode.png" alt="B" width={32} height={32} />
                         <span className="font-bold">Portal</span>
                     </div>
 
-                    <div className="relative hidden md:flex items-center flex-1 max-w-md">
-                        <Search className="absolute left-3 w-4 h-4 text-gray-400" />
-                        <Input
-                            placeholder="Search in portal..."
-                            className="pl-10 h-10 bg-gray-100/50 dark:bg-zinc-800/50 border-none rounded-full focus-visible:ring-blue-500/50"
-                            value={searchQuery}
-                            onChange={(e) => handleSearch(e.target.value)}
-                        />
+                    <div className="relative hidden md:flex items-center flex-1 max-w-4xl mx-4">
+                        {headerContent ? headerContent : (
+                            <>
+                                <Search className="absolute left-3 w-4 h-4 text-gray-400" />
+                                <Input
+                                    placeholder="Search in portal..."
+                                    className="pl-10 h-10 bg-gray-100/50 dark:bg-zinc-800/50 border-none rounded-full focus-visible:ring-blue-500/50"
+                                    value={searchQuery}
+                                    onChange={(e) => handleSearch(e.target.value)}
+                                />
+                            </>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-3">
