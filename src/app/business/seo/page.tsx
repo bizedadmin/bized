@@ -38,7 +38,6 @@ export default function SeoSettingsPage() {
         { id: "search", label: "Search Listing", icon: Search },
         { id: "branding", label: "Branding & Icons", icon: ImageIcon },
         { id: "social", label: "Social Preview", icon: Share2 },
-        { id: "preview", label: "Live Preview", icon: Eye },
     ]
 
     useEffect(() => {
@@ -314,55 +313,6 @@ export default function SeoSettingsPage() {
                                 </AccordionContent>
                             </AccordionItem>
                         </Accordion>
-                    )}
-
-                    {activeSection === "preview" && (
-                        <div className="space-y-6">
-                            <Card className="bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800">
-                                <CardHeader>
-                                    <CardTitle className="text-xs font-bold uppercase tracking-widest text-zinc-500">Google Preview</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm space-y-1 border border-zinc-100 dark:border-zinc-800 max-w-2xl">
-                                        <div className="text-[14px] text-zinc-500 dark:text-zinc-400 mb-1 flex items-center gap-1">
-                                            bized.app/{businessSlug} <span className="text-[10px]">▼</span>
-                                        </div>
-                                        <div className="text-[20px] text-[#1a0dab] dark:text-[#8ab4f8] hover:underline cursor-pointer leading-tight mb-1 font-medium">
-                                            {seoData.title || "Your Business Title"}
-                                        </div>
-                                        <div className="text-[14px] text-zinc-600 dark:text-zinc-300 leading-normal line-clamp-2">
-                                            {seoData.description || "Enter a description to see how it looks in search results."}
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="bg-zinc-50 dark:bg-zinc-950/50 border-zinc-200 dark:border-zinc-800">
-                                <CardHeader>
-                                    <CardTitle className="text-xs font-bold uppercase tracking-widest text-zinc-500">Social Share Preview</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="bg-white dark:bg-[#242526] rounded-xl shadow-sm overflow-hidden border border-zinc-200 dark:border-zinc-800 max-w-md">
-                                        <div className="aspect-[1.91/1] bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-300 relative">
-                                            {seoData.ogImage ? (
-                                                <img src={seoData.ogImage} alt="Preview" className="w-full h-full object-cover" />
-                                            ) : (
-                                                <Globe className="w-12 h-12 opacity-20" />
-                                            )}
-                                        </div>
-                                        <div className="p-4 bg-[#f0f2f5] dark:bg-[#3a3b3c]">
-                                            <div className="text-[12px] text-zinc-500 uppercase font-medium">bized.app</div>
-                                            <div className="text-[16px] font-bold text-zinc-900 dark:text-white line-clamp-1">
-                                                {seoData.title || "Your Business Name"}
-                                            </div>
-                                            <div className="text-[14px] text-zinc-600 dark:text-zinc-300 line-clamp-1">
-                                                {seoData.description || "Your business description."}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
                     )}
                 </div>
             </div>

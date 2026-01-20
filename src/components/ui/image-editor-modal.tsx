@@ -27,11 +27,15 @@ import {
     Maximize,
     Sparkles,
     Upload,
-    Loader2
+    Loader2,
+    Crop as CropIcon,
+    Scan
 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
+import ReactCrop, { type Crop, type PixelCrop } from 'react-image-crop'
+import 'react-image-crop/dist/ReactCrop.css'
 
 interface ImageEditorModalProps {
     isOpen: boolean
@@ -58,7 +62,7 @@ export function ImageEditorModal({
     onSave,
     businessId
 }: ImageEditorModalProps) {
-    const [activeTab, setActiveTab] = useState<"adjust" | "filters" | "transform">("adjust")
+    const [activeTab, setActiveTab] = useState<"adjust" | "filters" | "transform" | "crop">("adjust")
 
     // Adjustment State
     const [brightness, setBrightness] = useState(100)
@@ -71,11 +75,17 @@ export function ImageEditorModal({
     const [flipX, setFlipX] = useState(1)
     const [flipY, setFlipY] = useState(1)
 
+    // Crop State
+    const [crop, setCrop] = useState<Crop>()
+    const [completedCrop, setCompletedCrop] = useState<PixelCrop>()
+    const imgRef = useRef<HTMLImageElement>(null)
+
     // Active Preset
     const [activePreset, setActivePreset] = useState("Original")
 
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const [currentImage, setCurrentImage] = useState<string | undefined>(imageUrl)
+    const [originalImage, setOriginalImage] = useState<string | undefined>(imageUrl)
     const [isSaving, setIsSaving] = useState(false)
     const [isUploading, setIsUploading] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -84,6 +94,7 @@ export function ImageEditorModal({
     useEffect(() => {
         if (imageUrl) {
             setCurrentImage(imageUrl)
+            setOriginalImage(imageUrl)
         }
     }, [imageUrl])
 
@@ -95,7 +106,46 @@ export function ImageEditorModal({
         setRotation(0)
         setFlipX(1)
         setFlipY(1)
+        setCrop(undefined)
+        setCompletedCrop(undefined)
         setActivePreset("Original")
+        if (originalImage) setCurrentImage(originalImage)
+    }
+
+    const applyCrop = async () => {
+        if (!completedCrop || !imgRef.current) return
+
+        const img = imgRef.current
+        const scaleX = img.naturalWidth / img.width
+        const scaleY = img.naturalHeight / img.height
+
+        const canvas = document.createElement('canvas')
+        canvas.width = completedCrop.width * scaleX
+        canvas.height = completedCrop.height * scaleY
+        const ctx = canvas.getContext('2d')
+
+        if (!ctx) return
+
+        // Enforce high quality
+        ctx.imageSmoothingQuality = 'high'
+
+        ctx.drawImage(
+            img,
+            completedCrop.x * scaleX,
+            completedCrop.y * scaleY,
+            completedCrop.width * scaleX,
+            completedCrop.height * scaleY,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        )
+
+        const croppedDataUrl = canvas.toDataURL('image/webp')
+        setCurrentImage(croppedDataUrl)
+        setCrop(undefined)
+        setCompletedCrop(undefined)
+        toast.success("Crop applied!")
     }
 
     const handleSave = async () => {
@@ -123,10 +173,23 @@ export function ImageEditorModal({
 
             const img = await loadImage()
 
+            let sourceX = 0, sourceY = 0, sourceWidth = img.naturalWidth, sourceHeight = img.naturalHeight
+
+            if (completedCrop && imgRef.current) {
+                const scaleX = img.naturalWidth / imgRef.current.width
+                const scaleY = img.naturalHeight / imgRef.current.height
+
+                sourceX = completedCrop.x * scaleX
+                sourceY = completedCrop.y * scaleY
+                sourceWidth = completedCrop.width * scaleX
+                sourceHeight = completedCrop.height * scaleY
+            }
+
             // Setup canvas size based on rotation
             const isRotated = rotation % 180 !== 0
-            canvas.width = isRotated ? img.height : img.width
-            canvas.height = isRotated ? img.width : img.height
+
+            canvas.width = isRotated ? sourceHeight : sourceWidth
+            canvas.height = isRotated ? sourceWidth : sourceHeight
 
             ctx.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -135,13 +198,20 @@ export function ImageEditorModal({
             const presetFilter = PRESETS.find(p => p.name === activePreset)?.filter || ""
             ctx.filter = `${filterString} ${presetFilter}`.trim()
 
-            // Apply Transformations
+            // Apply Transformations context
             ctx.translate(canvas.width / 2, canvas.height / 2)
             ctx.rotate((rotation * Math.PI) / 180)
             ctx.scale(flipX, flipY)
 
-            // Draw
-            ctx.drawImage(img, -img.width / 2, -img.height / 2)
+            // Draw Image
+            const drawWidth = isRotated ? canvas.height : canvas.width
+            const drawHeight = isRotated ? canvas.width : canvas.height
+
+            ctx.drawImage(
+                img,
+                sourceX, sourceY, sourceWidth, sourceHeight,
+                -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight
+            )
 
             // Get data URL
             const dataUrl = canvas.toDataURL("image/webp", 0.9)
@@ -163,6 +233,8 @@ export function ImageEditorModal({
         transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
     }
 
+    const isCropping = activeTab === "crop"
+
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (!file) return
@@ -173,6 +245,7 @@ export function ImageEditorModal({
             reader.onload = (event) => {
                 const dataUrl = event.target?.result as string
                 setCurrentImage(dataUrl)
+                setOriginalImage(dataUrl)
                 resetAdjustments()
                 toast.success("Image loaded for editing!")
                 setIsUploading(false)
@@ -238,13 +311,30 @@ export function ImageEditorModal({
                     <div className="flex-1 bg-zinc-50 flex items-center justify-center p-8 relative overflow-hidden min-h-[300px]">
                         <div className="relative shadow-2xl rounded-lg overflow-hidden bg-white max-w-full max-h-full flex items-center justify-center min-w-[200px] min-h-[200px]">
                             {currentImage ? (
-                                <img
-                                    src={currentImage}
-                                    alt="Editing Preview"
-                                    className="max-w-full max-h-[50vh] object-contain select-none"
-                                    style={filterStyle}
-                                    crossOrigin="anonymous"
-                                />
+                                isCropping ? (
+                                    <ReactCrop
+                                        crop={crop}
+                                        onChange={(c) => setCrop(c)}
+                                        onComplete={(c) => setCompletedCrop(c)}
+                                        className="max-h-[50vh]"
+                                    >
+                                        <img
+                                            ref={imgRef}
+                                            src={currentImage}
+                                            alt="Crop Preview"
+                                            className="max-w-full max-h-[50vh] object-contain select-none"
+                                            crossOrigin="anonymous"
+                                        />
+                                    </ReactCrop>
+                                ) : (
+                                    <img
+                                        src={currentImage}
+                                        alt="Editing Preview"
+                                        className="max-w-full max-h-[50vh] object-contain select-none"
+                                        style={filterStyle}
+                                        crossOrigin="anonymous"
+                                    />
+                                )
                             ) : (
                                 <div
                                     className="w-full h-64 flex flex-col items-center justify-center gap-4 cursor-pointer hover:bg-zinc-50 transition-colors"
@@ -270,15 +360,23 @@ export function ImageEditorModal({
 
                         {/* Zoom/Resolution info */}
                         <div className="absolute bottom-4 left-4 px-2 py-1 bg-white/80 backdrop-blur-sm rounded border border-zinc-200 text-[10px] font-bold text-zinc-500 shadow-sm">
-                            HQ PREVIEW
+                            {isCropping ? 'CROP MODE' : 'HQ PREVIEW'}
                         </div>
+
+                        {/* Crop Reset Hint */}
+                        {isCropping && (
+                            <div className="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-black/75 backdrop-blur-sm rounded-full text-[10px] font-medium text-white shadow-lg z-10">
+                                Drag to crop. Transforms disabled while cropping.
+                            </div>
+                        )}
                     </div>
 
                     {/* Controls Sidebar */}
                     <div className="w-full md:w-80 border-t md:border-t-0 md:border-l border-zinc-100 flex flex-col bg-white overflow-y-auto">
-                        <div className="flex border-b border-zinc-100">
+                        <div className="flex border-b border-zinc-100 overflow-x-auto no-scrollbar">
                             {[
                                 { id: "adjust", icon: SlidersHorizontal, label: "Adjust" },
+                                { id: "crop", icon: CropIcon, label: "Crop" },
                                 { id: "filters", icon: Layers, label: "Filters" },
                                 { id: "transform", icon: Maximize, label: "Transform" },
                             ].map((tab) => (
@@ -286,7 +384,7 @@ export function ImageEditorModal({
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id as any)}
                                     className={cn(
-                                        "flex-1 py-3 text-[10px] font-bold flex flex-col items-center gap-1 transition-all border-b-2",
+                                        "flex-1 min-w-[70px] py-3 text-[10px] font-bold flex flex-col items-center gap-1 transition-all border-b-2",
                                         activeTab === tab.id
                                             ? "border-blue-500 text-blue-600 bg-blue-50/30"
                                             : "border-transparent text-zinc-400 hover:text-zinc-600 hover:bg-zinc-50"
@@ -336,6 +434,48 @@ export function ImageEditorModal({
                                                 </div>
                                             ))}
                                         </div>
+                                    </motion.div>
+                                )}
+
+                                {activeTab === "crop" && (
+                                    <motion.div
+                                        key="crop"
+                                        initial={{ opacity: 0, x: 10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -10 }}
+                                        className="space-y-4"
+                                    >
+                                        <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-100 text-center space-y-2">
+                                            <CropIcon className="w-6 h-6 text-zinc-300 mx-auto" />
+                                            <p className="text-xs font-medium text-zinc-600">Freeform Crop</p>
+                                            <p className="text-[10px] text-zinc-400">Drag handles on the image to crop.</p>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <Button
+                                                variant="outline"
+                                                className="h-10 text-[10px]"
+                                                onClick={() => setCrop(undefined)}
+                                            >
+                                                Reset Crop
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                className="h-10 text-[10px]"
+                                                onClick={() => setCrop({ unit: '%', width: 100, height: 100, x: 0, y: 0 })}
+                                            >
+                                                Select All
+                                            </Button>
+                                        </div>
+
+                                        <Button
+                                            className="w-full h-10 text-[10px] font-bold bg-zinc-900 text-white hover:bg-black"
+                                            onClick={applyCrop}
+                                            disabled={!completedCrop}
+                                        >
+                                            <Check className="w-3.5 h-3.5 mr-2" />
+                                            DONE
+                                        </Button>
                                     </motion.div>
                                 )}
 

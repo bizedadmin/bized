@@ -53,6 +53,7 @@ export async function POST(req: Request) {
         const business = await Business.create({
             ...body,
             owner: session.user.id,
+            isDraft: false,
             pages: [
                 { title: 'Storefront', slug: 'profile', type: 'profile', enabled: true },
                 { title: 'Bookings', slug: 'bookings', type: 'bookings', enabled: true },

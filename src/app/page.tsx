@@ -8,8 +8,6 @@ const { motion, AnimatePresence } = m
 import {
     Search,
     Compass,
-    Star,
-    ArrowUpRight,
     MapPin,
     ArrowRight,
     Sparkles,
@@ -25,25 +23,112 @@ import {
     Filter,
     Clock,
     Store,
-    X
+    X,
+    Utensils,
+    Hotel,
+    Coffee,
+    Music,
+    Dumbbell,
+    Palette,
+    ShoppingCart,
+    Shirt,
+    Fuel,
+    Stethoscope,
+    MoreHorizontal,
+    Pizza,
+    Beer,
+    Bike,
+    Trees as Tree,
+    Clapperboard,
+    Landmark,
+    MapPin as Attraction,
+    BookOpen as Library,
+    Martini,
+    Apple,
+    Monitor,
+    Home as HomeIcon,
+    Car,
+    Trophy,
+    Key,
+    Mail,
+    Plus,
+    PlayCircle,
+    PlayCircle as Parking,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import {
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@/components/ui/tabs"
+import { ResponsiveDrawer } from "@/components/ui/responsive-drawer"
 import ClientPortalShell from "@/components/portal/ClientPortalShell"
 
-const CATEGORIES = [
-    { name: "All", icon: Compass },
-    { name: "Beauty & Wellness", icon: Sparkles },
-    { name: "Barbers & Hair", icon: Users },
-    { name: "Retail", icon: ShoppingBag },
-    { name: "Education", icon: Target },
-    { name: "Food & Beverage", icon: Zap },
-    { name: "Professional Services", icon: Calendar },
-    { name: "Entertainment", icon: Star }
+const GROUPED_CATEGORIES = [
+    {
+        name: "Food & Drink",
+        items: [
+            { name: "Restaurants", icon: Utensils },
+            { name: "Takeout", icon: Pizza },
+            { name: "Bars", icon: Beer },
+            { name: "Delivery", icon: Bike },
+            { name: "Coffee", icon: Coffee }
+        ]
+    },
+    {
+        name: "Things to do",
+        items: [
+            { name: "Parks", icon: Tree },
+            { name: "Live music", icon: Music },
+            { name: "Gyms", icon: Dumbbell },
+            { name: "Movies", icon: Clapperboard },
+            { name: "Art", icon: Palette },
+            { name: "Museums", icon: Landmark },
+            { name: "Attractions", icon: Attraction },
+            { name: "Libraries", icon: Library },
+            { name: "Nightlife", icon: Martini }
+        ]
+    },
+    {
+        name: "Shopping",
+        items: [
+            { name: "Groceries", icon: Apple },
+            { name: "Shopping centers", icon: Store },
+            { name: "Beauty supplies", icon: Sparkles },
+            { name: "Electronics", icon: Monitor },
+            { name: "Car dealers", icon: Car },
+            { name: "Sporting goods", icon: Trophy },
+            { name: "Home & garden", icon: HomeIcon },
+            { name: "Convenience stores", icon: Store },
+            { name: "Apparel", icon: Shirt }
+        ]
+    },
+    {
+        name: "Services",
+        items: [
+            { name: "Hotels", icon: Hotel },
+            { name: "Gas", icon: Fuel },
+            { name: "ATMs", icon: Library }, // Using library icon as filler for ATM if Banknote not imported
+            { name: "Hospitals & clinics", icon: Stethoscope },
+            { name: "Beauty salons", icon: Sparkles },
+            { name: "Libraries", icon: Library },
+            { name: "Car rental", icon: Key },
+            { name: "Mail & shipping", icon: Mail },
+            { name: "Car wash", icon: Zap },
+            { name: "Parking", icon: Parking },
+            { name: "Dry cleaning", icon: Shirt },
+            { name: "Pharmacies", icon: Plus },
+            { name: "Charging stations", icon: Zap }
+        ]
+    }
 ]
+
+const CATEGORIES = GROUPED_CATEGORIES.flatMap(g => g.items)
 
 const POPULAR_SERVICES = [
     "Male Haircut", "Haircut & Beard", "Kid's Haircut",
@@ -62,8 +147,8 @@ function MarketplaceContent() {
     const searchParams = useSearchParams()
     const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || "")
     const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || "All")
+    const [location, setLocation] = useState("")
     const [businesses, setBusinesses] = useState<any[]>([])
-    const [isLoading, setIsLoading] = useState(true)
     const [isSearchFocused, setIsSearchFocused] = useState(false)
     const [showStickySearch, setShowStickySearch] = useState(false)
     // Removed searchContainerRef for scroll logic, kept for click outside logic if needed
@@ -72,10 +157,10 @@ function MarketplaceContent() {
 
     const fetchBusinesses = async () => {
         try {
-            setIsLoading(true)
             const params = new URLSearchParams()
             if (searchQuery) params.set('q', searchQuery)
             if (selectedCategory && selectedCategory !== 'All') params.set('category', selectedCategory)
+            // Note: We don't filter by location in the dropdown preview for now, or we could if we want
 
             const res = await fetch(`/api/marketplace/search?${params.toString()}`)
             if (res.ok) {
@@ -84,9 +169,16 @@ function MarketplaceContent() {
             }
         } catch (error) {
             console.error("Error fetching marketplace data:", error)
-        } finally {
-            setIsLoading(false)
         }
+    }
+
+    const handleSearch = () => {
+        const params = new URLSearchParams()
+        if (searchQuery) params.set('q', searchQuery)
+        if (selectedCategory && selectedCategory !== 'All') params.set('category', selectedCategory)
+        if (location) params.set('location', location)
+
+        router.push(`/marketplace/search?${params.toString()}`)
     }
 
     useEffect(() => {
@@ -133,6 +225,7 @@ function MarketplaceContent() {
                     className="w-full h-10 pl-10 pr-4 rounded-full bg-gray-100 dark:bg-zinc-800 border-none outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium text-sm"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                     onFocus={() => {
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                         setTimeout(() => {
@@ -147,9 +240,12 @@ function MarketplaceContent() {
                 <input
                     placeholder="Location"
                     className="w-full h-10 pl-10 pr-4 rounded-full bg-gray-100 dark:bg-zinc-800 border-none outline-none font-medium text-sm"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 />
             </div>
-            <Button size="sm" className="rounded-full px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold">
+            <Button size="sm" className="rounded-full px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold" onClick={handleSearch}>
                 Search
             </Button>
         </div>
@@ -194,6 +290,7 @@ function MarketplaceContent() {
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     // onFocus={() => setIsSearchFocused(true)}
                                     onMouseDown={() => setIsSearchFocused(true)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                     autoComplete="off"
                                 />
 
@@ -291,56 +388,171 @@ function MarketplaceContent() {
                             <div className="flex-1 relative group z-10">
                                 <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
                                 <input
-                                    placeholder="Current Location"
+                                    placeholder="Location (e.g. Nairobi)"
                                     className="w-full h-12 pl-12 pr-4 rounded-xl bg-transparent font-medium border-none outline-none focus:bg-gray-50 dark:focus:bg-zinc-700 transition-colors placeholder:text-gray-400 text-lg"
+                                    value={location}
+                                    onChange={(e) => setLocation(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                 />
                             </div>
-                            <Button className="h-12 px-8 rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 z-10">
+                            <Button
+                                className="h-12 px-8 rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/20 z-10"
+                                onClick={handleSearch}
+                            >
                                 Search
                             </Button>
+                        </div>
+
+                        {/* Quick Category Buttons */}
+                        <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
+                            {GROUPED_CATEGORIES.map((group) => {
+                                const item = group.items[0];
+                                return (
+                                    <Button
+                                        key={item.name}
+                                        variant="outline"
+                                        size="lg"
+                                        onClick={() => {
+                                            setSelectedCategory(item.name);
+                                            setSearchQuery("");
+                                            setIsSearchFocused(false);
+                                        }}
+                                        className="h-10 md:h-14 px-4 md:px-8 rounded-full bg-white dark:bg-zinc-800 border-gray-100 dark:border-zinc-700 shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 group flex items-center gap-2 md:gap-3"
+                                    >
+                                        <item.icon className="w-4 h-4 md:w-6 h-6 text-gray-900 dark:text-white" />
+                                        <span className="font-bold text-gray-900 dark:text-white text-sm md:text-lg">{item.name}</span>
+                                    </Button>
+                                );
+                            })}
+
+                            <ResponsiveDrawer
+                                title="More Categories"
+                                trigger={
+                                    <Button
+                                        variant="outline"
+                                        size="lg"
+                                        className="h-10 md:h-14 px-4 md:px-8 rounded-full bg-white dark:bg-zinc-800 border-gray-100 dark:border-zinc-700 shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 group flex items-center gap-2 md:gap-3"
+                                    >
+                                        <div className="w-4 h-4 md:w-6 h-6 rounded-full bg-gray-100 dark:bg-zinc-700 flex items-center justify-center">
+                                            <MoreHorizontal className="w-3 h-3 md:w-4 h-4 text-gray-600 dark:text-gray-300" />
+                                        </div>
+                                        <span className="font-bold text-gray-900 dark:text-white text-sm md:text-lg">More</span>
+                                    </Button>
+                                }
+                            >
+                                {(setOpen) => (
+                                    <Tabs defaultValue={GROUPED_CATEGORIES[0].name} className="w-full">
+                                        <div className="px-6 py-4 overflow-x-auto no-scrollbar border-b border-gray-100 dark:border-zinc-800">
+                                            <TabsList className="bg-transparent h-auto p-0 flex justify-start gap-2">
+                                                {GROUPED_CATEGORIES.map(group => (
+                                                    <TabsTrigger
+                                                        key={group.name}
+                                                        value={group.name}
+                                                        className="px-6 py-2 rounded-full data-[state=active]:bg-gray-200 dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white font-bold text-gray-500 transition-all border border-transparent data-[state=active]:border-gray-300 dark:data-[state=active]:border-zinc-600"
+                                                    >
+                                                        {group.name}
+                                                    </TabsTrigger>
+                                                ))}
+                                            </TabsList>
+                                        </div>
+
+                                        <div className="p-6 max-h-[60vh] md:max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                            {GROUPED_CATEGORIES.map(group => (
+                                                <TabsContent key={group.name} value={group.name} className="mt-0 outline-none">
+                                                    <div className="space-y-8">
+                                                        <section>
+                                                            <h3 className="text-xl font-black mb-6 text-gray-900 dark:text-white px-2">{group.name}</h3>
+                                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                                {group.items.map(item => (
+                                                                    <Button
+                                                                        key={item.name}
+                                                                        variant="ghost"
+                                                                        className="justify-start h-14 px-4 rounded-2xl bg-blue-50/50 dark:bg-blue-900/10 hover:bg-blue-100 dark:hover:bg-blue-900/20 text-blue-900 dark:text-blue-100 border border-blue-100/50 dark:border-blue-900/30 group transition-all"
+                                                                        onClick={() => {
+                                                                            setSelectedCategory(item.name);
+                                                                            setSearchQuery("");
+                                                                            setIsSearchFocused(false);
+                                                                            setOpen(false);
+                                                                        }}
+                                                                    >
+                                                                        <item.icon className="w-5 h-5 mr-3 shrink-0" />
+                                                                        <span className="font-bold text-base">{item.name}</span>
+                                                                    </Button>
+                                                                ))}
+                                                            </div>
+                                                        </section>
+                                                    </div>
+                                                </TabsContent>
+                                            ))}
+                                        </div>
+                                    </Tabs>
+                                )}
+                            </ResponsiveDrawer>
                         </div>
                     </div>
                 </section>
 
-                {/* Dual CTA Section - Customer vs Business */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Customer Card */}
-                    <div className="relative overflow-hidden rounded-[32px] bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 p-8 md:p-10 flex flex-col items-start justify-center group h-[400px]">
+                {/* Triple CTA Section - Booking, Shopping, Business */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Booking Card */}
+                    <div className="relative overflow-hidden rounded-[32px] bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 p-8 flex flex-col items-start justify-center group h-[400px]">
                         <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Sparkles className="w-48 h-48 text-blue-600 rotate-12" />
+                            <Calendar className="w-32 h-32 text-blue-600 rotate-12" />
                         </div>
                         <div className="z-10 bg-white dark:bg-zinc-800 p-3 rounded-2xl mb-6 shadow-sm ring-1 ring-black/5">
-                            <Search className="w-8 h-8 text-blue-600" />
+                            <Calendar className="w-6 h-6 text-blue-600" />
                         </div>
-                        <h2 className="z-10 text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">
-                            Book your next<br />appointment
+                        <h2 className="z-10 text-3xl font-black text-gray-900 dark:text-white mb-3 tracking-tight">
+                            Book<br />Services
                         </h2>
-                        <p className="z-10 text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-sm text-lg leading-relaxed">
-                            Discover local professionals, read reviews, and book instantly.
+                        <p className="z-10 text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-xs text-base leading-relaxed">
+                            Discover favorites and book appointments instantly.
                         </p>
-                        <Button className="z-10 h-14 px-8 rounded-2xl font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xl shadow-blue-600/20 w-auto text-lg transition-all hover:scale-105" onClick={() => {
+                        <Button className="z-10 h-12 px-6 rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xl shadow-blue-600/20 w-auto transition-all hover:scale-105" onClick={() => {
                             document.getElementById('search-input')?.focus();
                             setIsSearchFocused(true);
                         }}>
-                            Explore Marketplace
+                            Book Now
+                        </Button>
+                    </div>
+
+                    {/* Shopping Card */}
+                    <div className="relative overflow-hidden rounded-[32px] bg-purple-50/50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900/30 p-8 flex flex-col items-start justify-center group h-[400px]">
+                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <ShoppingBag className="w-32 h-32 text-purple-600 -rotate-12" />
+                        </div>
+                        <div className="z-10 bg-white dark:bg-zinc-800 p-3 rounded-2xl mb-6 shadow-sm ring-1 ring-black/5">
+                            <ShoppingBag className="w-6 h-6 text-purple-600" />
+                        </div>
+                        <h2 className="z-10 text-3xl font-black text-gray-900 dark:text-white mb-3 tracking-tight">
+                            Shop<br />Products
+                        </h2>
+                        <p className="z-10 text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-xs text-base leading-relaxed">
+                            Buy products directly from your favorite local shops.
+                        </p>
+                        <Button className="z-10 h-12 px-6 rounded-xl font-bold bg-purple-600 hover:bg-purple-700 text-white shadow-xl shadow-purple-600/20 w-auto transition-all hover:scale-105" onClick={() => {
+                            document.getElementById('search-input')?.focus();
+                            setIsSearchFocused(true);
+                        }}>
+                            Shop Now
                         </Button>
                     </div>
 
                     {/* Business Card */}
-                    <div className="relative overflow-hidden rounded-[32px] bg-zinc-100 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 p-8 md:p-10 flex flex-col items-start justify-center group h-[400px]">
+                    <div className="relative overflow-hidden rounded-[32px] bg-zinc-100 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 p-8 flex flex-col items-start justify-center group h-[400px]">
                         <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                            <TrendingUp className="w-56 h-56 text-zinc-900 dark:text-white -rotate-12" />
+                            <TrendingUp className="w-32 h-32 text-zinc-900 dark:text-white -rotate-12" />
                         </div>
                         <div className="z-10 bg-zinc-900 dark:bg-white p-3 rounded-2xl mb-6 shadow-sm ring-1 ring-white/10">
-                            <Store className="w-8 h-8 text-white dark:text-black" />
+                            <Store className="w-6 h-6 text-white dark:text-black" />
                         </div>
-                        <h2 className="z-10 text-3xl md:text-5xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">
-                            Bized for your<br />business
+                        <h2 className="z-10 text-3xl font-black text-gray-900 dark:text-white mb-3 tracking-tight">
+                            Grow your<br />Business
                         </h2>
-                        <p className="z-10 text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-sm text-lg leading-relaxed">
+                        <p className="z-10 text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-xs text-base leading-relaxed">
                             Calendar, Marketing, and Payments all in one place.
                         </p>
-                        <Button className="z-10 h-14 px-8 rounded-2xl font-bold bg-zinc-900 hover:bg-black dark:bg-white dark:hover:bg-gray-100 dark:text-black text-white shadow-xl w-auto text-lg transition-all hover:scale-105" asChild>
+                        <Button className="z-10 h-12 px-6 rounded-xl font-bold bg-zinc-900 hover:bg-black dark:bg-white dark:hover:bg-gray-100 dark:text-black text-white shadow-xl w-auto transition-all hover:scale-105" asChild>
                             <Link href="/create-business">
                                 Grow My Business
                             </Link>
@@ -348,97 +560,7 @@ function MarketplaceContent() {
                     </div>
                 </div>
 
-                {/* Filters Row */}
-                <div className="flex items-center justify-between overflow-x-auto no-scrollbar gap-4 py-4">
-                    <div className="flex gap-2">
-                        <Button variant="outline" className="rounded-full h-10 px-5 text-sm font-bold border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300">
-                            <Filter className="w-4 h-4 mr-2" /> Filters
-                        </Button>
-                        <Button variant="outline" className="rounded-full h-10 px-5 text-sm font-bold border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300">
-                            Mobile Services
-                        </Button>
-                        <Button variant="outline" className="rounded-full h-10 px-5 text-sm font-bold border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300">
-                            Top Rated
-                        </Button>
-                    </div>
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-widest hidden sm:block">
-                        {businesses.length} spots near you
-                    </div>
-                </div>
 
-                {/* Listing Grid - Fresha/Booksy Inspired */}
-                {isLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {[1, 2, 3, 4, 5, 6].map(i => (
-                            <div key={i} className="h-80 rounded-[32px] bg-gray-100 dark:bg-zinc-900 animate-pulse border border-gray-200 dark:border-zinc-800" />
-                        ))}
-                    </div>
-                ) : businesses.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {businesses.map((biz, idx) => (
-                            <motion.div
-                                key={biz._id}
-                                initial={{ opacity: 0, y: 10 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: idx * 0.05 }}
-                            >
-                                <Link href={`/${biz.slug}`} className="block h-full">
-                                    <div className="group h-full bg-transparent hover:-translate-y-2 transition-transform duration-300">
-                                        <Card className="h-full border-none bg-transparent shadow-none">
-                                            {/* Image Card */}
-                                            <div className="aspect-[4/3] rounded-[32px] overflow-hidden bg-gray-100 dark:bg-zinc-800 relative mb-4 shadow-sm border border-gray-100 dark:border-zinc-800 group-hover:shadow-2xl transition-all duration-300">
-                                                {biz.image ? (
-                                                    <img src={biz.image} alt={biz.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-4xl font-black text-gray-200 dark:text-zinc-700 uppercase">
-                                                        {biz.name.substring(0, 2)}
-                                                    </div>
-                                                )}
-
-                                                <div className="absolute top-4 left-4">
-                                                    <div className="bg-white/90 backdrop-blur-xl rounded-full px-3 py-1.5 flex items-center gap-1.5 shadow-sm border border-white/20">
-                                                        <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                                                        <span className="text-xs font-bold text-gray-900">5.0</span>
-                                                        <span className="text-[10px] text-gray-400 font-semibold">(128)</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="absolute bottom-4 right-4 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                                                    <div className="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center shadow-xl">
-                                                        <ArrowUpRight className="w-5 h-5" />
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Info */}
-                                            <div className="space-y-1">
-                                                <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight group-hover:text-blue-600 transition-colors">
-                                                    {biz.name}
-                                                </h3>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
-                                                    {biz.description || "Premium styling & wellness services"}
-                                                </p>
-                                                <div className="flex items-center gap-2 text-xs font-semibold text-gray-400 pt-1">
-                                                    <MapPin className="w-3.5 h-3.5" />
-                                                    <span>0.8 miles • {biz.industry || "General"}</span>
-                                                </div>
-                                            </div>
-                                        </Card>
-                                    </div>
-                                </Link>
-                            </motion.div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-32 bg-gray-50 dark:bg-zinc-900 rounded-[32px] border-2 border-dashed border-gray-200 dark:border-zinc-800 col-span-full">
-                        <div className="w-16 h-16 rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center mx-auto mb-4 border border-gray-100 dark:border-zinc-700">
-                            <Search className="w-6 h-6 text-gray-400" />
-                        </div>
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">No results found</h3>
-                        <p className="text-sm text-gray-500">Simplify your search or try new keywords.</p>
-                    </div>
-                )}
             </div>
         </ClientPortalShell>
     )

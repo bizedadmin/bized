@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
+import { QRCodeSVG } from "qrcode.react"
 import * as m from "framer-motion"
 const { motion, AnimatePresence } = m
 import {
@@ -23,7 +24,9 @@ import {
     TrendingUp,
     Globe,
     Filter,
-    Clock
+    Clock,
+    Apple,
+    PlayCircle
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -236,6 +239,63 @@ function MarketplaceContent() {
                         <p className="text-sm text-gray-500">Simplify your search or try new keywords.</p>
                     </div>
                 )}
+
+                {/* App Download Section */}
+                <div className="mt-24 mb-12 relative overflow-hidden rounded-[48px] bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 p-8 md:p-16 flex flex-col md:flex-row items-center gap-12 group">
+                    <div className="flex-1 space-y-8 z-10 text-left">
+                        <div className="flex items-center gap-4 text-gray-400 font-bold text-sm tracking-widest uppercase">
+                            <span>Available on</span>
+                            <div className="flex items-center gap-2 text-gray-900 dark:text-white">
+                                <Apple className="w-5 h-5" />
+                                <PlayCircle className="w-5 h-5 text-blue-600" />
+                            </div>
+                        </div>
+
+                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tight">
+                            Download the<br />Bized app
+                        </h2>
+
+                        <p className="text-gray-500 dark:text-gray-400 text-lg font-medium max-w-md leading-relaxed">
+                            Book unforgettable experiences and manage your business from anywhere with the Bized mobile app.
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row items-center gap-8 pt-4">
+                            <div className="p-4 bg-white rounded-3xl shadow-xl ring-1 ring-black/5 flex flex-col items-center gap-3 group/qr">
+                                <QRCodeSVG value="https://bized.app/download" size={120} level="H" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover/qr:text-blue-600 transition-colors">Scan to download</span>
+                            </div>
+                            <div className="flex flex-col gap-3">
+                                <Button variant="outline" className="h-14 px-6 rounded-2xl border-gray-200 dark:border-zinc-700 font-bold flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all">
+                                    <Apple className="w-6 h-6" />
+                                    <div className="text-left">
+                                        <div className="text-[10px] uppercase tracking-tighter opacity-50">Download on the</div>
+                                        <div className="text-base leading-none">App Store</div>
+                                    </div>
+                                </Button>
+                                <Button variant="outline" className="h-14 px-6 rounded-2xl border-gray-200 dark:border-zinc-700 font-bold flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all">
+                                    <PlayCircle className="w-6 h-6 text-blue-600" />
+                                    <div className="text-left">
+                                        <div className="text-[10px] uppercase tracking-tighter opacity-50">Get it on</div>
+                                        <div className="text-base leading-none">Google Play</div>
+                                    </div>
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 relative w-full aspect-square md:aspect-auto md:h-[450px] flex items-center justify-center pointer-events-none overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent dark:from-blue-900/10 opacity-50 rounded-full blur-3xl" />
+                        <img
+                            src="/images/app-mockup.png"
+                            alt="Bized App Mockup"
+                            className="relative z-10 w-full h-full object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700"
+                        />
+                    </div>
+
+                    {/* Decorative elements */}
+                    <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-100/20 dark:bg-blue-900/10 rounded-full blur-3xl" />
+                    <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-amber-100/20 dark:bg-amber-900/10 rounded-full blur-3xl" />
+                </div>
             </div>
         </ClientPortalShell>
     )

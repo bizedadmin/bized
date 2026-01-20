@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Palette, Type, Smartphone, Check, Layout, Sparkles, Image as ImageIcon, Wand2 } from "lucide-react"
+import { Palette, Type, Smartphone, Check, Layout, Sparkles, Image as ImageIcon, Wand2, Globe, Eye, Share2, Search } from "lucide-react"
 import { useState, useEffect } from "react"
 import { BusinessProfile } from "@/components/business/business-profile"
 import { cn } from "@/lib/utils"
@@ -138,6 +138,7 @@ export default function StylePage() {
     const router = useRouter()
     const [isDirty, setIsDirty] = useState(false)
     const [showExitDialog, setShowExitDialog] = useState(false)
+    const [previewMode, setPreviewMode] = useState<"mobile" | "seo">("mobile")
 
     useEffect(() => {
         const stored = localStorage.getItem("selectedBusiness")
@@ -490,44 +491,112 @@ export default function StylePage() {
             <div className="hidden md:flex flex-1 bg-zinc-50 dark:bg-zinc-950 items-center justify-center p-8 overflow-hidden relative">
                 <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#000_1px,transparent_1px)] dark:bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
 
-                <div className="relative">
-                    <div className="absolute -top-12 left-0 right-0 text-center">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white dark:bg-zinc-900 rounded-full shadow-sm text-[10px] font-bold uppercase tracking-widest text-zinc-500 border border-zinc-200 dark:border-zinc-800">
-                            <Smartphone className="w-3 h-3" /> Real-time Brand Preview
+                <div className="relative w-full h-full flex flex-col items-center">
+                    <div className="mb-12">
+                        <div className="inline-flex items-center p-1 bg-white dark:bg-zinc-900 rounded-full shadow-sm border border-zinc-200 dark:border-zinc-800">
+                            <button
+                                onClick={() => setPreviewMode("mobile")}
+                                className={cn(
+                                    "flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all",
+                                    previewMode === "mobile"
+                                        ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-md"
+                                        : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                                )}
+                            >
+                                <Smartphone className="w-3 h-3" /> Mobile App
+                            </button>
+                            <button
+                                onClick={() => setPreviewMode("seo")}
+                                className={cn(
+                                    "flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all",
+                                    previewMode === "seo"
+                                        ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-md"
+                                        : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                                )}
+                            >
+                                <Search className="w-3 h-3" /> SEO & Social
+                            </button>
                         </div>
                     </div>
 
-                    {/* Device Frame */}
-                    <div className="w-[320px] h-[680px] bg-white dark:bg-zinc-900 rounded-[45px] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border-[10px] border-zinc-900 dark:border-zinc-800 overflow-hidden relative group box-content">
-                        {/* Dynamic Island */}
-                        <div className="absolute top-[15px] left-1/2 -translate-x-1/2 w-[90px] h-[28px] bg-zinc-900 dark:bg-zinc-800 rounded-[14px] z-[101] pointer-events-none"></div>
+                    {previewMode === "mobile" ? (
+                        <div className="relative">
+                            {/* Device Frame */}
+                            <div className="w-[320px] h-[680px] bg-white dark:bg-zinc-900 rounded-[45px] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] border-[10px] border-zinc-900 dark:border-zinc-800 overflow-hidden relative group box-content">
+                                {/* Dynamic Island */}
+                                <div className="absolute top-[15px] left-1/2 -translate-x-1/2 w-[90px] h-[28px] bg-zinc-900 dark:bg-zinc-800 rounded-[14px] z-[101] pointer-events-none"></div>
 
-                        <div className="h-full w-full overflow-y-auto scrollbar-none">
-                            {businessData && (
-                                <BusinessProfile
-                                    business={businessData}
-                                    products={products}
-                                    services={services}
-                                    pageType="profile"
-                                    isPreview={true}
-                                />
-                            )}
+                                <div className="h-full w-full overflow-y-auto scrollbar-none">
+                                    {businessData && (
+                                        <BusinessProfile
+                                            business={businessData}
+                                            products={products}
+                                            services={services}
+                                            pageType="profile"
+                                            isPreview={true}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Floating Indicators */}
+                            <div className="absolute -right-24 top-1/4 space-y-4">
+                                <Card className="p-3 w-40 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-zinc-200 dark:border-zinc-800 shadow-xl animate-bounce-slow">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                                        <span className="text-[10px] font-bold uppercase text-zinc-500">Active Theme</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-6 h-6 rounded-full" style={{ backgroundColor: businessData?.themeColor || '#1f2937' }}></div>
+                                        <span className="text-xs font-semibold">{businessData?.themeColor || '#1f2937'}</span>
+                                    </div>
+                                </Card>
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="w-full max-w-2xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div className="space-y-4">
+                                <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500 text-center">Google Search Result</h3>
+                                <div className="bg-white dark:bg-zinc-900 p-8 rounded-2xl shadow-xl border border-zinc-100 dark:border-zinc-800 space-y-1">
+                                    <div className="text-[14px] text-zinc-500 dark:text-zinc-400 mb-1 flex items-center gap-1">
+                                        bized.app/{businessData?.slug || "your-slug"} <span className="text-[10px]">▼</span>
+                                    </div>
+                                    <div className="text-[20px] text-[#1a0dab] dark:text-[#8ab4f8] hover:underline cursor-pointer leading-tight mb-1 font-medium">
+                                        {businessData?.configuration?.seo?.title || businessData?.name || "Your Business Title"}
+                                    </div>
+                                    <div className="text-[14px] text-zinc-600 dark:text-zinc-300 leading-normal line-clamp-2">
+                                        {businessData?.configuration?.seo?.description || businessData?.description || "Your business description will appear here in search results."}
+                                    </div>
+                                </div>
+                            </div>
 
-                    {/* Floating Indicators */}
-                    <div className="absolute -right-24 top-1/4 space-y-4">
-                        <Card className="p-3 w-40 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-zinc-200 dark:border-zinc-800 shadow-xl animate-bounce-slow">
-                            <div className="flex items-center gap-2 mb-2">
-                                <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                                <span className="text-[10px] font-bold uppercase text-zinc-500">Active Theme</span>
+                            <div className="space-y-4">
+                                <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500 text-center">Social Media Share</h3>
+                                <div className="bg-white dark:bg-[#242526] rounded-2xl shadow-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 mx-auto max-w-md">
+                                    <div className="aspect-[1.91/1] bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-300 relative">
+                                        {(businessData?.configuration?.seo?.ogImage || businessData?.logo || businessData?.image) ? (
+                                            <img
+                                                src={businessData?.configuration?.seo?.ogImage || businessData?.logo || businessData?.image}
+                                                alt="Preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <Globe className="w-12 h-12 opacity-20" />
+                                        )}
+                                    </div>
+                                    <div className="p-4 bg-[#f0f2f5] dark:bg-[#3a3b3c]">
+                                        <div className="text-[12px] text-zinc-500 uppercase font-medium">bized.app</div>
+                                        <div className="text-[16px] font-bold text-zinc-900 dark:text-white line-clamp-1">
+                                            {businessData?.configuration?.seo?.title || businessData?.name || "Your Business Name"}
+                                        </div>
+                                        <div className="text-[14px] text-zinc-600 dark:text-zinc-300 line-clamp-1">
+                                            {businessData?.configuration?.seo?.description || businessData?.description || "Your business description."}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 rounded-full" style={{ backgroundColor: businessData?.themeColor || '#1f2937' }}></div>
-                                <span className="text-xs font-semibold">{businessData?.themeColor || '#1f2937'}</span>
-                            </div>
-                        </Card>
-                    </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

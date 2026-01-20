@@ -165,7 +165,7 @@ const BusinessSchema = new mongoose.Schema({
     },
     isDraft: {
         type: Boolean,
-        default: true,
+        default: false,
     },
     pages: [{
         title: String,

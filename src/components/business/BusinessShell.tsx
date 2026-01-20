@@ -39,6 +39,9 @@ import {
     Tags,
     FileStack,
     MapPin,
+    ShoppingBag,
+    Star,
+    Wallet,
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -89,7 +92,6 @@ const businessMenu = {
     label: "Business",
     href: "#",
     children: [
-        { label: "Profile", href: "/business/profile" },
         { label: "Stores/Locations", href: "/business/locations" },
         { label: "Analytics", href: "/business/analytics" },
         { label: "Settings", href: "/business/settings" },
@@ -143,9 +145,32 @@ const salesChannels = [
             { label: "Analytics", href: "/business/analytics" },
         ]
     },
+    {
+        icon: ShoppingBag,
+        label: "Marketplace",
+        href: "#",
+        children: [
+            { label: "Listing Profile", href: "/business/marketplace/profile" },
+            { label: "Service availability", href: "/business/marketplace/services" },
+            { label: "Product Visibility", href: "/business/marketplace/products" },
+            { label: "Discovery Settings", href: "/business/marketplace/discovery" },
+            { label: "Reviews & Ratings", href: "/business/marketplace/reviews" },
+            { label: "Analytics", href: "/business/marketplace/analytics" },
+            { label: "Promotions", href: "/business/marketplace/promotions" },
+            { label: "Payouts", href: "/business/marketplace/payouts" },
+        ]
+    },
     { icon: MessageCircle, label: "WhatsApp", href: "/business/whatsapp" },
     { icon: Instagram, label: "Instagram", href: "/business/instagram", badge: "NEW" },
-    { icon: Chrome, label: "Google", href: "/business/google", badge: "NEW" },
+    {
+        icon: Chrome,
+        label: "Google",
+        href: "#",
+        badge: "NEW",
+        children: [
+            { label: "Profile", href: "/business/google/profile" },
+        ]
+    },
     { icon: Store, label: "Point of Sale", href: "/business/pos", badge: "BETA" },
 ]
 
@@ -587,33 +612,50 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                                         {channel.children ? (
                                             <>
                                                 <button
-                                                    onClick={() => toggleSection('website')}
+                                                    onClick={() => {
+                                                        const target =
+                                                            channel.label === "Marketplace" ? "marketplace" :
+                                                                channel.label === "Google" ? "google" :
+                                                                    "website";
+                                                        toggleSection(target);
+                                                    }}
                                                     className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         <channel.icon className="w-5 h-5" />
                                                         <span>{channel.label}</span>
                                                     </div>
-                                                    <ChevronDown className={cn("w-4 h-4 transition-transform", expandedSection === 'website' && "rotate-180")} />
+                                                    <ChevronDown className={cn(
+                                                        "w-4 h-4 transition-transform",
+                                                        expandedSection === (
+                                                            channel.label === "Marketplace" ? "marketplace" :
+                                                                channel.label === "Google" ? "google" :
+                                                                    "website"
+                                                        ) && "rotate-180"
+                                                    )} />
                                                 </button>
-                                                {expandedSection === 'website' && (
-                                                    <div className="ml-9 space-y-1">
-                                                        {channel.children.map((child) => (
-                                                            <Link
-                                                                key={child.label}
-                                                                href={child.href}
-                                                                className={cn(
-                                                                    "block px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                                                                    pathname === child.href
-                                                                        ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
-                                                                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
-                                                                )}
-                                                            >
-                                                                {child.label}
-                                                            </Link>
-                                                        ))}
-                                                    </div>
-                                                )}
+                                                {expandedSection === (
+                                                    channel.label === "Marketplace" ? "marketplace" :
+                                                        channel.label === "Google" ? "google" :
+                                                            "website"
+                                                ) && (
+                                                        <div className="ml-9 space-y-1">
+                                                            {channel.children.map((child) => (
+                                                                <Link
+                                                                    key={child.label}
+                                                                    href={child.href}
+                                                                    className={cn(
+                                                                        "block px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                                                                        pathname === child.href
+                                                                            ? "bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white"
+                                                                            : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
+                                                                    )}
+                                                                >
+                                                                    {child.label}
+                                                                </Link>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                             </>
                                         ) : (
                                             <Link
