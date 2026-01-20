@@ -46,7 +46,8 @@ import {
     Youtube,
     Github,
     Globe,
-    Mail
+    Mail,
+    User
 } from "lucide-react"
 import {
     TextalignJustifycenter,
@@ -68,7 +69,7 @@ import { ProfileData, Block, Page } from "@/types/profile"
 
 interface ReusablePageBuilderProps {
     initialData: ProfileData
-    pageType: 'profile' | 'bookings' | 'shop' | 'quote' | 'storefront'
+    pageType: 'profile' | 'bookings' | 'shop' | 'quote' | 'storefront' | 'my-profile'
     onSave: (data: ProfileData) => Promise<void>
     onBack?: () => void
     products?: any[]
@@ -100,10 +101,12 @@ export function ReusablePageBuilder({
         setIsDirty(true)
     }
 
+    const normalizedPageType = pageType === 'my-profile' ? 'profile' : pageType;
+
     const updatePageSetting = (settingKey: string, value: any) => {
         setFormData((prev: any) => {
             const pages = [...(prev.pages || [])]
-            const pageIndex = pages.findIndex((p: any) => p.type === pageType)
+            const pageIndex = pages.findIndex((p: any) => p.type === normalizedPageType)
             if (pageIndex > -1) {
                 pages[pageIndex] = {
                     ...pages[pageIndex],
@@ -114,9 +117,9 @@ export function ReusablePageBuilder({
                 }
             } else {
                 pages.push({
-                    title: pageType.charAt(0).toUpperCase() + pageType.slice(1),
-                    slug: pageType,
-                    type: pageType,
+                    title: normalizedPageType.charAt(0).toUpperCase() + normalizedPageType.slice(1),
+                    slug: normalizedPageType,
+                    type: normalizedPageType,
                     enabled: true,
                     settings: { [settingKey]: value }
                 })
@@ -126,9 +129,11 @@ export function ReusablePageBuilder({
         setIsDirty(true)
     }
 
-    const currentPage = formData.pages?.find((p: any) => p.type === pageType) || { settings: { blocks: [] } } as any
+    const currentPage = formData.pages?.find((p: any) => p.type === normalizedPageType) || { settings: { blocks: [] } } as any
     const blocks = currentPage.settings?.blocks || []
     const editingBlock = blocks.find((b: any) => b.id === editingBlockId)
+
+    const isAdded = (type: string) => blocks.some((b: any) => b.type === type);
 
     const onDragEnd = (result: DropResult) => {
         if (!result.destination) return
@@ -139,7 +144,7 @@ export function ReusablePageBuilder({
     }
 
     const addBlock = (type: string) => {
-        const singleInstanceBlocks = ['opening_hours', 'contact_info', 'location', 'facilities', 'about', 'social_networks', 'services', 'products'];
+        const singleInstanceBlocks = ['opening_hours', 'contact_info', 'my_contacts', 'location', 'facilities', 'about', 'social_networks', 'services', 'products'];
         if (singleInstanceBlocks.includes(type) && blocks.some((b: any) => b.type === type)) {
             toast.error(`${type.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} block already exists`);
             return;
@@ -180,6 +185,15 @@ export function ReusablePageBuilder({
                 newBlock = {
                     ...newBlock,
                     fullName: formData.name || '',
+                    phone: formData.phone?.number || '',
+                    email: formData.email || '',
+                    website: formData.website || formData.url || ''
+                }
+                break
+            case 'my_contacts':
+                newBlock = {
+                    ...newBlock,
+                    title: 'My Contacts',
                     phone: formData.phone?.number || '',
                     email: formData.email || '',
                     website: formData.website || formData.url || ''
@@ -413,7 +427,7 @@ export function ReusablePageBuilder({
                                     business={formData}
                                     products={products}
                                     services={services}
-                                    pageType={pageType as any}
+                                    pageType={normalizedPageType as any}
                                     isPreview={true}
                                 />
                             </div>
@@ -452,30 +466,33 @@ export function ReusablePageBuilder({
                             </TabsContent>
 
                             <TabsContent value="business" className="mt-0 grid grid-cols-2 gap-3">
-                                <button onClick={() => addBlock('opening_hours')} className="p-3 border rounded-lg hover:bg-zinc-50 flex items-center gap-3">
-                                    <Clock size={18} /> <div><div className="font-medium text-xs">Hours</div><div className="text-[10px] text-gray-500">Opening schedule</div></div>
-                                </button>
-                                <button onClick={() => addBlock('contact_info')} className="p-3 border rounded-lg hover:bg-zinc-50 flex items-center gap-3">
-                                    <Phone size={18} /> <div><div className="font-medium text-xs">Contact</div><div className="text-[10px] text-gray-500">Phones & email</div></div>
-                                </button>
-                                <button onClick={() => addBlock('location')} className="p-3 border rounded-lg hover:bg-zinc-50 flex items-center gap-3">
-                                    <MapPin size={18} /> <div><div className="font-medium text-xs">Location</div><div className="text-[10px] text-gray-500">Address & map</div></div>
-                                </button>
-                                <button onClick={() => addBlock('facilities')} className="p-3 border rounded-lg hover:bg-zinc-50 flex items-center gap-3">
-                                    <CheckCircle2 size={18} /> <div><div className="font-medium text-xs">Facilities</div><div className="text-[10px] text-gray-500">Amenities</div></div>
-                                </button>
-                                <button onClick={() => addBlock('about')} className="p-3 border rounded-lg hover:bg-zinc-50 flex items-center gap-3">
-                                    <Info size={18} /> <div><div className="font-medium text-xs">About</div><div className="text-[10px] text-gray-500">Summary</div></div>
-                                </button>
-                                <button onClick={() => addBlock('social_networks')} className="p-3 border rounded-lg hover:bg-zinc-50 flex items-center gap-3">
-                                    <Share2 size={18} /> <div><div className="font-medium text-xs">Social</div><div className="text-[10px] text-gray-500">Social networks</div></div>
-                                </button>
-                                <button onClick={() => addBlock('services')} className="p-3 border rounded-lg hover:bg-zinc-50 flex items-center gap-3">
-                                    <Zap size={18} /> <div><div className="font-medium text-xs">Services</div><div className="text-[10px] text-gray-500">Services list</div></div>
-                                </button>
-                                <button onClick={() => addBlock('products')} className="p-3 border rounded-lg hover:bg-zinc-50 flex items-center gap-3">
-                                    <ShoppingBag size={18} /> <div><div className="font-medium text-xs">Products</div><div className="text-[10px] text-gray-500">Product catalog</div></div>
-                                </button>
+                                {[
+                                    { id: 'opening_hours', icon: Clock, label: 'Hours', desc: 'Opening schedule' },
+                                    { id: 'contact_info', icon: Phone, label: 'Contact', desc: 'Phones & email' },
+                                    { id: 'location', icon: MapPin, label: 'Location', desc: 'Address & map' },
+                                    { id: 'my_contacts', icon: User, label: 'My Contacts', desc: 'Personal card' },
+                                    { id: 'facilities', icon: CheckCircle2, label: 'Facilities', desc: 'Amenities' },
+                                    { id: 'about', icon: Info, label: 'About', desc: 'Summary' },
+                                    { id: 'social_networks', icon: Share2, label: 'Social', desc: 'Social networks' },
+                                    { id: 'services', icon: Zap, label: 'Services', desc: 'Services list' },
+                                    { id: 'products', icon: ShoppingBag, label: 'Products', desc: 'Product catalog' },
+                                ].map((item) => {
+                                    const added = isAdded(item.id);
+                                    return (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => addBlock(item.id)}
+                                            className={`p-3 border rounded-lg hover:bg-zinc-50 flex items-center gap-3 transition-all relative ${added ? 'bg-zinc-50 opacity-60' : ''}`}
+                                        >
+                                            <item.icon size={18} className={added ? 'text-zinc-400' : ''} />
+                                            <div className="flex-1 text-left">
+                                                <div className="font-medium text-xs">{item.label}</div>
+                                                <div className="text-[10px] text-gray-500">{item.desc}</div>
+                                            </div>
+                                            {added && <Check size={14} className="text-zinc-400" />}
+                                        </button>
+                                    );
+                                })}
                             </TabsContent>
                         </div>
                     </Tabs>
@@ -550,6 +567,23 @@ export function ReusablePageBuilder({
                                 <div className="space-y-4">
                                     <div className="space-y-1.5"><Label className="text-xs font-semibold">Full Name</Label>
                                         <Input value={editingBlock.fullName} onChange={(e) => updateBlock(editingBlock.id, { fullName: e.target.value })} />
+                                    </div>
+                                    <div className="space-y-1.5"><Label className="text-xs font-semibold">Phone</Label>
+                                        <Input value={editingBlock.phone} onChange={(e) => updateBlock(editingBlock.id, { phone: e.target.value })} />
+                                    </div>
+                                    <div className="space-y-1.5"><Label className="text-xs font-semibold">Email</Label>
+                                        <Input value={editingBlock.email} onChange={(e) => updateBlock(editingBlock.id, { email: e.target.value })} />
+                                    </div>
+                                    <div className="space-y-1.5"><Label className="text-xs font-semibold">Website</Label>
+                                        <Input value={editingBlock.website} onChange={(e) => updateBlock(editingBlock.id, { website: e.target.value })} />
+                                    </div>
+                                </div>
+                            )}
+
+                            {editingBlock.type === 'my_contacts' && (
+                                <div className="space-y-4">
+                                    <div className="space-y-1.5"><Label className="text-xs font-semibold">Title</Label>
+                                        <Input value={editingBlock.title} onChange={(e) => updateBlock(editingBlock.id, { title: e.target.value })} />
                                     </div>
                                     <div className="space-y-1.5"><Label className="text-xs font-semibold">Phone</Label>
                                         <Input value={editingBlock.phone} onChange={(e) => updateBlock(editingBlock.id, { phone: e.target.value })} />

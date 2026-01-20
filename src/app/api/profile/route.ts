@@ -48,7 +48,11 @@ export async function PUT(req: Request) {
         }
 
         const body = await req.json();
-        const { name, jobTitle, bio, website, image, phone } = body;
+        const {
+            name, jobTitle, bio, website, image, phone,
+            themeColor, secondaryColor, buttonColor, fontFamily, glassmorphism, borderRadius,
+            pages
+        } = body;
 
         await dbConnect();
 
@@ -60,7 +64,14 @@ export async function PUT(req: Request) {
                 bio,
                 website,
                 image,
-                phone
+                phone,
+                themeColor,
+                secondaryColor,
+                buttonColor,
+                fontFamily,
+                glassmorphism,
+                borderRadius,
+                pages
             },
             { new: true, runValidators: true }
         ).select('-password');

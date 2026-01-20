@@ -19,17 +19,22 @@ function BusinessPageBuilderContent({ pageType }: { pageType: string }) {
     const [services, setServices] = useState<any[]>([])
 
     useEffect(() => {
-        if (!businessId) return
         const fetchData = async () => {
             try {
-                const [bRes, pRes, sRes] = await Promise.all([
-                    fetch(`/api/businesses/${businessId}`),
-                    fetch(`/api/products?businessId=${businessId}`),
-                    fetch(`/api/services?businessId=${businessId}`)
-                ])
-                if (bRes.ok) setBusiness(await bRes.json())
-                if (pRes.ok) setProducts((await pRes.json()).products || [])
-                if (sRes.ok) setServices((await sRes.json()).services || [])
+                if (businessId) {
+                    const [bRes, pRes, sRes] = await Promise.all([
+                        fetch(`/api/businesses/${businessId}`),
+                        fetch(`/api/products?businessId=${businessId}`),
+                        fetch(`/api/services?businessId=${businessId}`)
+                    ])
+                    if (bRes.ok) setBusiness(await bRes.json())
+                    if (pRes.ok) setProducts((await pRes.json()).products || [])
+                    if (sRes.ok) setServices((await sRes.json()).services || [])
+                } else {
+                    // Fetch Personal Profile
+                    const res = await fetch('/api/profile')
+                    if (res.ok) setBusiness(await res.json())
+                }
             } catch (err) {
                 console.error("Error fetching business data:", err)
             } finally {
@@ -42,19 +47,21 @@ function BusinessPageBuilderContent({ pageType }: { pageType: string }) {
     const handleSave = async (updatedData: ProfileData) => {
         setSaving(true)
         try {
-            const res = await fetch(`/api/businesses/${businessId}`, {
-                method: "PUT",
+            const url = businessId ? `/api/businesses/${businessId}` : '/api/profile'
+            const method = businessId ? "PUT" : "PUT" // Both use PUT now
+            const res = await fetch(url, {
+                method,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(updatedData)
             })
             if (res.ok) {
-                toast.success("Business profile saved!")
+                toast.success(businessId ? "Business profile saved!" : "Personal profile saved!")
                 setBusiness(updatedData)
             } else {
                 toast.error("Failed to save changes")
             }
         } catch (error) {
-            console.error("Error saving business:", error)
+            console.error("Error saving profile:", error)
             toast.error("An error occurred while saving")
         } finally {
             setSaving(false)

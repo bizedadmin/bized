@@ -90,11 +90,11 @@ export function BusinessProfile({ business, products, services = [], pageType = 
 
     const getFontFamily = () => {
         switch (business.fontFamily) {
-            case 'inter': return 'Inter, sans-serif'
+            case 'inter': return 'var(--font-inter), sans-serif'
             case 'serif': return 'Georgia, serif'
-            case 'mono': return 'Courier New, monospace'
-            case 'system': return '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
-            default: return 'inherit'
+            case 'mono': return 'var(--font-geist-mono), monospace'
+            case 'system': return 'var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
+            default: return 'var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
         }
     }
     const [isCartOpen, setIsCartOpen] = useState(false)
@@ -126,8 +126,8 @@ export function BusinessProfile({ business, products, services = [], pageType = 
     const radiusClasses: Record<string, string> = {
         none: "rounded-none",
         md: "rounded-md",
-        xl: "rounded-2xl",
-        full: "rounded-[40px]"
+        xl: "rounded-xl",
+        full: "rounded-3xl"
     }
     const br = radiusClasses[business.borderRadius || 'xl']
     const isGlass = business.glassmorphism
@@ -208,11 +208,8 @@ export function BusinessProfile({ business, products, services = [], pageType = 
         } else if (pageType === 'quote') {
             blocks = [{ id: 'default-quote', type: 'text', title: 'Request a Quote', content: 'Tell us what you need and we will get back to you with a personalized estimate.' }]
         } else if (pageType === 'profile' || pageType === 'storefront') {
-            // For profile, if empty, show a welcome and my contacts
-            blocks = [
-                { id: 'default-welcome', type: 'text', title: `About ${business.name}`, content: business.description || `Welcome to ${business.name}. We are happy to have you here.` },
-                { id: 'default-contacts', type: 'my_contacts', title: 'My Contacts' }
-            ]
+            // For profile, if empty, show nothing by default
+            blocks = []
         }
     }
 
@@ -385,7 +382,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
         const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
 
         return (
-            <div className="min-h-full bg-zinc-50 dark:bg-zinc-950 px-4 py-8 pointer-events-auto overflow-y-auto font-sans" style={{ fontFamily: getFontFamily() }}>
+            <div className="min-h-full bg-zinc-50 dark:bg-zinc-950 px-4 py-8 pointer-events-auto overflow-y-auto" style={{ fontFamily: getFontFamily() }}>
                 {/* 1. Header Navigation */}
                 <div className="max-w-4xl mx-auto mb-6">
                     <button
@@ -633,7 +630,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
         }
 
         return (
-            <div className="min-h-full bg-slate-50 dark:bg-zinc-950 px-4 py-12 pointer-events-auto overflow-y-auto font-sans flex items-center justify-center" style={{ fontFamily: getFontFamily() }}>
+            <div className="min-h-full bg-slate-50 dark:bg-zinc-950 px-4 py-12 pointer-events-auto overflow-y-auto flex items-center justify-center" style={{ fontFamily: getFontFamily() }}>
                 <div className="max-w-md w-full bg-white dark:bg-zinc-900 rounded-[32px] p-8 text-center shadow-sm border border-zinc-100 dark:border-zinc-800">
                     {/* Success Icon */}
                     <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 animate-[check-zoom_0.5s_cubic-bezier(0.16,1,0.3,1)_forwards]">
@@ -838,7 +835,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                 return (
                     <div key={block.id} className="space-y-1">
                         {block.title && <h2 className="text-[18px] font-medium leading-[26px] text-[#0A0909] dark:text-white font-rubik">{block.title}</h2>}
-                        {block.content && <p className="text-[10px] font-normal leading-[15.2px] text-[#0A0909] dark:text-gray-300 font-noto-sans whitespace-pre-wrap">{block.content}</p>}
+                        {block.content && <p className="text-[10px] font-normal leading-[15.2px] text-[#0A0909] dark:text-gray-300 whitespace-pre-wrap">{block.content}</p>}
                     </div>
                 )
             case 'page_link':
@@ -919,14 +916,14 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                                     <div className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
                                         <Clock className="w-5 h-5 text-[#0A0909] dark:text-white" />
                                     </div>
-                                    <div className="text-left text-[14px] font-medium text-[#0A0909] dark:text-white font-noto-sans">Opening Hours</div>
+                                    <div className="text-left text-[14px] font-medium text-[#0A0909] dark:text-white">Opening Hours</div>
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="pb-4">
                                 {block.isOpen247 ? (
-                                    <div className="text-center py-2 text-[10px] font-normal text-[#0A0909] dark:text-white font-noto-sans">Open 24 / 7</div>
+                                    <div className="text-center py-2 text-[10px] font-normal text-[#0A0909] dark:text-white">Open 24 / 7</div>
                                 ) : (
-                                    <div className="space-y-2 pt-1 font-noto-sans">
+                                    <div className="space-y-2 pt-1">
                                         {((business.businessHours?.length ?? 0) > 0 ? business.businessHours : block.days)?.map((day: any, idx: number) => (
                                             <div key={idx} className="flex justify-between items-center text-[10px]">
                                                 <span className={cn("font-normal", day.isOpen ? "text-[#0A0909] dark:text-white" : "text-[#CDD0DB]")}>{day.day}</span>
@@ -954,10 +951,10 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                                     <div className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
                                         <Phone className="w-5 h-5 text-[#0A0909] dark:text-white" />
                                     </div>
-                                    <div className="text-left text-[14px] font-medium text-[#0A0909] dark:text-white font-noto-sans">Contact Us</div>
+                                    <div className="text-left text-[14px] font-medium text-[#0A0909] dark:text-white">Contact Us</div>
                                 </div>
                             </AccordionTrigger>
-                            <AccordionContent className="pb-4 space-y-3 font-noto-sans">
+                            <AccordionContent className="pb-4 space-y-3">
                                 {(business.name || block.fullName) && <div className="text-[12px] font-medium text-[#0A0909] dark:text-white mb-2">{business.name || block.fullName}</div>}
                                 <div className="grid gap-2">
                                     {(business.phone || block.phone) && (
@@ -984,38 +981,42 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                     </Accordion>
                 )
             case 'my_contacts':
+                const myPhone = block.phone || (typeof business.phone === 'string' ? business.phone : business.phone?.code ? `${business.phone.code}${business.phone.number}` : '');
+                const myEmail = block.email || business.email;
+                const myWebsite = block.website || business.url || business.website;
+
                 return (
                     <div key={block.id} className={cn(
                         "p-5 border border-[#CDD0DB]/60 bg-white dark:bg-zinc-900 shadow-sm space-y-4",
                         isGlass && "bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md",
                         br
                     )}>
-                        {block.title && <h2 className="text-[16px] font-medium text-[#0A0909] dark:text-white font-noto-sans">{block.title}</h2>}
+                        {block.title && <h2 className="text-[16px] font-medium text-[#0A0909] dark:text-white">{block.title}</h2>}
                         <div className="space-y-3">
-                            {(business.phone || block.phone) && (
-                                <a href={`tel:${typeof business.phone === 'string' ? business.phone : business.phone?.code ? `${business.phone.code}${business.phone.number}` : block.phone}`} className="flex items-center gap-3 text-sm text-[#3F3E3E] hover:text-[#0A0909] dark:text-gray-300 dark:hover:text-white transition-colors group">
+                            {myPhone && (
+                                <a href={`tel:${myPhone.replace(/\s+/g, '')}`} className="flex items-center gap-3 text-sm text-[#3F3E3E] hover:text-[#0A0909] dark:text-gray-300 dark:hover:text-white transition-colors group">
                                     <div className="w-8 h-8 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-100 dark:group-hover:bg-zinc-700 transition-colors">
                                         <Phone className="w-4 h-4" />
                                     </div>
-                                    <span className="font-medium font-noto-sans">
-                                        {typeof business.phone === 'string' ? business.phone : business.phone?.code ? `${business.phone.code} ${business.phone.number}` : block.phone}
+                                    <span className="font-medium">
+                                        {myPhone}
                                     </span>
                                 </a>
                             )}
-                            {(business.email || block.email) && (
-                                <a href={`mailto:${business.email || block.email}`} className="flex items-center gap-3 text-sm text-[#3F3E3E] hover:text-[#0A0909] dark:text-gray-300 dark:hover:text-white transition-colors group">
+                            {myEmail && (
+                                <a href={`mailto:${myEmail}`} className="flex items-center gap-3 text-sm text-[#3F3E3E] hover:text-[#0A0909] dark:text-gray-300 dark:hover:text-white transition-colors group">
                                     <div className="w-8 h-8 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-100 dark:group-hover:bg-zinc-700 transition-colors">
                                         <Mail className="w-4 h-4" />
                                     </div>
-                                    <span className="font-medium font-noto-sans">{business.email || block.email}</span>
+                                    <span className="font-medium">{myEmail}</span>
                                 </a>
                             )}
-                            {(business.url || business.website || block.website) && (
-                                <a href={business.url || business.website || block.website} target="_blank" className="flex items-center gap-3 text-sm text-[#3F3E3E] hover:text-[#0A0909] dark:text-gray-300 dark:hover:text-white transition-colors group">
+                            {myWebsite && (
+                                <a href={myWebsite} target="_blank" className="flex items-center gap-3 text-sm text-[#3F3E3E] hover:text-[#0A0909] dark:text-gray-300 dark:hover:text-white transition-colors group">
                                     <div className="w-8 h-8 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-100 dark:group-hover:bg-zinc-700 transition-colors">
                                         <Globe className="w-4 h-4" />
                                     </div>
-                                    <span className="font-medium font-noto-sans">Visit Website</span>
+                                    <span className="font-medium">Visit Website</span>
                                 </a>
                             )}
                             {business.address && (
@@ -1027,7 +1028,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                                     <div className="w-8 h-8 rounded-full bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-100 dark:group-hover:bg-zinc-700 transition-colors">
                                         <MapPin className="w-4 h-4" />
                                     </div>
-                                    <span className="font-medium font-noto-sans whitespace-pre-wrap">
+                                    <span className="font-medium whitespace-pre-wrap">
                                         {typeof business.address === 'string' ? business.address :
                                             [business.address.streetAddress, business.address.addressLocality, business.address.addressRegion, business.address.postalCode].filter(Boolean).join(', ')}
                                     </span>
@@ -1050,10 +1051,10 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                                     <div className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
                                         <MapPin className="w-5 h-5 text-[#0A0909] dark:text-white" />
                                     </div>
-                                    <div className="text-left text-[14px] font-medium text-[#0A0909] dark:text-white font-noto-sans">Location</div>
+                                    <div className="text-left text-[14px] font-medium text-[#0A0909] dark:text-white">Location</div>
                                 </div>
                             </AccordionTrigger>
-                            <AccordionContent className="pb-4 space-y-3 font-noto-sans">
+                            <AccordionContent className="pb-4 space-y-3">
                                 {block.locationType === 'manual' || business.address ? (
                                     <>
                                         <p className="text-[10px] text-[#3F3E3E] dark:text-gray-400">
@@ -1104,7 +1105,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                                     <div className="p-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
                                         <CheckCircle2 className="w-5 h-5 text-[#0A0909] dark:text-white" />
                                     </div>
-                                    <div className="text-left text-[14px] font-medium text-[#0A0909] dark:text-white font-noto-sans">Facilities</div>
+                                    <div className="text-left text-[14px] font-medium text-[#0A0909] dark:text-white">Facilities</div>
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="pb-4">
@@ -1112,7 +1113,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                                     {facilitiesList.filter(f => (business.selectedFacilities || block.selectedFacilities)?.includes(f.id)).map((facility) => (
                                         <div key={facility.id} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700">
                                             <div className="text-zinc-600 dark:text-zinc-400">{facility.icon}</div>
-                                            <span className="text-[10px] font-medium text-zinc-900 dark:text-white font-noto-sans text-center">{facility.label}</span>
+                                            <span className="text-[10px] font-medium text-zinc-900 dark:text-white text-center">{facility.label}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -1128,7 +1129,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                     <div key={block.id} className="space-y-6">
                         <div className="space-y-1">
                             {block.title && <h2 className="text-[18px] font-medium leading-[26px] text-[#0A0909] dark:text-white font-rubik">{block.title}</h2>}
-                            {block.description && <p className="text-[10px] font-normal leading-[15.2px] text-[#3F3E3E] dark:text-gray-400 font-noto-sans whitespace-pre-wrap">{block.description}</p>}
+                            {block.description && <p className="text-[10px] font-normal leading-[15.2px] text-[#3F3E3E] dark:text-gray-400 whitespace-pre-wrap">{block.description}</p>}
                         </div>
                         <div className="space-y-4">
                             {servs.map((service: any) => (
@@ -1157,7 +1158,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                                                 {service.name}
                                             </div>
                                             {service.description && (
-                                                <p className="text-[11px] text-[#3F3E3E] line-clamp-2 font-noto-sans leading-relaxed opacity-80">
+                                                <p className="text-[11px] text-[#3F3E3E] line-clamp-2 leading-relaxed opacity-80">
                                                     {service.description}
                                                 </p>
                                             )}
@@ -1215,7 +1216,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                     <div key={block.id} className="space-y-6">
                         <div className="space-y-1">
                             {block.title && <h2 className="text-[18px] font-medium leading-[26px] text-[#0A0909] dark:text-white font-rubik">{block.title}</h2>}
-                            {block.description && <p className="text-[10px] font-normal leading-[15.2px] text-[#3F3E3E] dark:text-gray-400 font-noto-sans whitespace-pre-wrap">{block.description}</p>}
+                            {block.description && <p className="text-[10px] font-normal leading-[15.2px] text-[#3F3E3E] dark:text-gray-400 whitespace-pre-wrap">{block.description}</p>}
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             {prodList.map((product: any) => (
@@ -1251,7 +1252,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                                                 {product.name}
                                             </div>
                                             {product.description && (
-                                                <p className="text-[10px] text-[#3F3E3E] dark:text-gray-400 line-clamp-1 font-noto-sans mt-0.5 opacity-70">
+                                                <p className="text-[10px] text-[#3F3E3E] dark:text-gray-400 line-clamp-1 mt-0.5 opacity-70">
                                                     {product.description}
                                                 </p>
                                             )}
@@ -1276,8 +1277,8 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                         isGlass && "bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md",
                         br
                     )}>
-                        <label className="text-[16px] font-semibold text-[#0A0909] dark:text-white font-noto-sans mb-2 block">Summary</label>
-                        <p className="text-[10px] font-normal leading-[15.2px] text-[#0A0909] dark:text-gray-300 font-noto-sans whitespace-pre-wrap">
+                        <label className="text-[16px] font-semibold text-[#0A0909] dark:text-white mb-2 block">Summary</label>
+                        <p className="text-[10px] font-normal leading-[15.2px] text-[#0A0909] dark:text-gray-300 whitespace-pre-wrap">
                             {business.description || block.summary}
                         </p>
                     </div>
@@ -1341,19 +1342,27 @@ export function BusinessProfile({ business, products, services = [], pageType = 
     }
 
     const handleShare = async () => {
+        const origin = typeof window !== 'undefined' ? window.location.origin : '';
+        const page = business.pages?.find((p: any) => p.type === pageType || (pageType === 'profile' && p.type === 'storefront'));
+        const pageSlug = page?.slug || pageType;
+        const isMainPage = pageType === 'profile' || pageType === 'storefront';
+        const shareUrl = isMainPage
+            ? `${origin}/${business.slug}`
+            : `${origin}/${business.slug}/${pageSlug}`;
+
         if (navigator.share) {
             try {
                 await navigator.share({
                     title: business.name,
                     text: business.description || `Check out ${business.name} on Bized!`,
-                    url: window.location.href,
+                    url: shareUrl,
                 })
             } catch (error) {
                 // console.log('Error sharing:', error)
             }
         } else {
-            navigator.clipboard.writeText(window.location.href)
-            alert("Link copied to clipboard!")
+            navigator.clipboard.writeText(shareUrl)
+            toast.success("Link copied to clipboard!")
         }
     }
 
@@ -1395,7 +1404,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                 <div className="relative">
                     {/* Banner with secondary color */}
                     <div
-                        className="h-32 w-full sm:rounded-b-[40px] relative overflow-hidden bg-cover bg-center"
+                        className="h-32 w-full rounded-b-xl relative overflow-hidden bg-cover bg-center"
                         style={{
                             backgroundColor: business.secondaryColor || "#f3f4f6",
                             backgroundImage: business.image ? `url(${business.image})` : undefined
@@ -1416,7 +1425,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                         {/* Logo Avatar - positioned to overlap banner */}
                         <div className="-mt-12 mb-4 flex justify-between items-end">
                             <div
-                                className="w-20 h-20 rounded-[28px] flex items-center justify-center text-white text-3xl font-black shadow-2xl ring-4 ring-white dark:ring-zinc-950 transform hover:scale-105 transition-transform overflow-hidden bg-cover bg-center"
+                                className="w-20 h-20 rounded-full flex items-center justify-center text-white text-3xl font-black shadow-2xl ring-4 ring-white dark:ring-zinc-950 transform hover:scale-105 transition-transform overflow-hidden bg-cover bg-center"
                                 style={{
                                     backgroundColor: business.themeColor || "#1f2937",
                                     backgroundImage: business.logo ? `url(${business.logo})` : undefined
@@ -1430,17 +1439,13 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                             <h1 className="text-[18px] font-medium leading-[26px] text-[#0A0909] dark:text-white font-rubik">
                                 {business.name}
                             </h1>
-                            <p className="text-[10px] font-normal leading-[18px] text-[#3F3E3E] font-noto-sans">@{business.slug}</p>
+                            <p className="text-[10px] font-normal leading-[18px] text-[#3F3E3E]">@{business.slug}</p>
                         </div>
 
-                        {business.description && (
-                            <p className="mt-2 text-[10px] font-normal leading-[15.2px] text-[#0A0909] dark:text-gray-300 font-noto-sans text-center px-4">
-                                {business.description}
-                            </p>
-                        )}
+
 
                         {/* Quick Contact Info */}
-                        <div className="flex justify-center gap-4 mt-4 text-[10px] text-[#3F3E3E] font-normal font-noto-sans">
+                        <div className="flex justify-center gap-4 mt-4 text-[10px] text-[#3F3E3E] font-normal">
                             {business.phone && (
                                 <div className="flex items-center gap-1">
                                     <Phone className="w-3 h-3" />

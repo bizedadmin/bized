@@ -71,12 +71,22 @@ const FileUploader = ({ label, onImageSelected, currentImage }: { label: string,
 const DESIGN_OPTIONS = [
     {
         id: "profile",
-        label: "Profile",
+        label: "Storefront",
         description: "Main profile page for your business",
         icon: Store,
         color: "text-orange-600",
         bg: "bg-orange-100 dark:bg-orange-900/20",
         borderHover: "hover:border-orange-500",
+    },
+    {
+        id: "my-profile",
+        label: "My Profile",
+        description: "Your personal professional profile",
+        icon: User,
+        color: "text-green-600",
+        bg: "bg-green-100 dark:bg-green-900/20",
+        borderHover: "hover:border-green-500",
+        isUser: true,
     },
     {
         id: "bookings",
@@ -150,6 +160,7 @@ export default function DesignPage() {
     const [businessData, setBusinessData] = useState<any>(null)
     const [products, setProducts] = useState<any[]>([])
     const [services, setServices] = useState<any[]>([])
+    const [userData, setUserData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
     // Fetch business data for preview
@@ -193,6 +204,13 @@ export default function DesignPage() {
                     const sData = await sRes.json()
                     setServices(sData)
                 }
+            }
+
+            // Fetch User Profile
+            const uRes = await fetch(`/api/profile`, { cache: 'no-store' })
+            if (uRes.ok) {
+                const user = await uRes.json()
+                setUserData(user)
             }
         } catch (error) {
             console.error("Failed to fetch data for preview", error)
@@ -247,7 +265,7 @@ export default function DesignPage() {
 
                                         {/* Edit Button for Pages (not Style) */}
                                         {option.id !== 'style' && (
-                                            <Link href={`/business/design/page-builder/${option.id}?businessId=${businessData?._id}`}>
+                                            <Link href={`/business/design/page-builder/${option.id}${option.isUser ? '' : `?businessId=${businessData?._id}`}`}>
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
@@ -298,12 +316,12 @@ export default function DesignPage() {
                                 </div>
                             )}
 
-                            {!loading && businessData && (
+                            {!loading && (businessData || userData) && (
                                 <BusinessProfile
-                                    business={businessData}
-                                    products={products}
-                                    services={services}
-                                    pageType={selectedType === 'profile' ? 'profile' : selectedType as any}
+                                    business={selectedType === 'my-profile' ? userData : businessData}
+                                    products={selectedType === 'my-profile' ? [] : products}
+                                    services={selectedType === 'my-profile' ? [] : services}
+                                    pageType={selectedType === 'my-profile' ? 'profile' : (selectedType === 'profile' ? 'profile' : selectedType as any)}
                                     isPreview={true}
                                 />
                             )}

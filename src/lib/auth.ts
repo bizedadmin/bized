@@ -43,7 +43,7 @@ export const authOptions: NextAuthOptions = {
                             role: email === 'admin@bized.app' ? 'admin' : 'user',
                             provider: 'firebase',
                             pages: [
-                                { title: 'Profile', slug: 'profile', type: 'profile', enabled: true },
+                                { title: 'My Profile', slug: 'profile', type: 'profile', enabled: true },
                                 { title: 'Bookings', slug: 'bookings', type: 'bookings', enabled: true },
                                 { title: 'Shop', slug: 'shop', type: 'shop', enabled: true },
                                 { title: 'Quote', slug: 'quote', type: 'quote', enabled: true },
@@ -126,7 +126,7 @@ export const authOptions: NextAuthOptions = {
                     // Migration: Generate pages if missing
                     if (!dbUser.pages || dbUser.pages.length === 0) {
                         dbUser.pages = [
-                            { title: 'Profile', slug: 'profile', type: 'profile', enabled: true },
+                            { title: 'My Profile', slug: 'profile', type: 'profile', enabled: true },
                             { title: 'Bookings', slug: 'bookings', type: 'bookings', enabled: true },
                             { title: 'Shop', slug: 'shop', type: 'shop', enabled: true },
                             { title: 'Quote', slug: 'quote', type: 'quote', enabled: true },

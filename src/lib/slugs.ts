@@ -1,9 +1,11 @@
 import User from "@/models/User";
+import Business from "@/models/Business";
 import dbConnect from "./db";
 
 /**
- * Generates a unique slug for a user based on their name.
- * @param name The user's name
+ * Generates a unique slug for a user or business based on their name.
+ * It checks both User and Business collections to prevent collisions.
+ * @param name The name to slugify
  * @returns A unique slug string
  */
 export async function generateUniqueUserSlug(name: string): Promise<string> {
@@ -19,14 +21,18 @@ export async function generateUniqueUserSlug(name: string): Promise<string> {
         baseSlug = 'user';
     }
 
-    // 2. Check for collisions
+    // 2. Check for collisions in BOTH collections
     let slug = baseSlug;
     let counter = 1;
     let exists = true;
 
     while (exists) {
-        const user = await User.findOne({ slug });
-        if (!user) {
+        const [user, business] = await Promise.all([
+            User.findOne({ slug }),
+            Business.findOne({ slug })
+        ]);
+
+        if (!user && !business) {
             exists = false;
         } else {
             slug = `${baseSlug}-${counter}`;

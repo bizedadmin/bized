@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import {
     ChevronLeft
 } from "lucide-react"
@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button"
 import { CustomerForm } from "@/modules/customers/CustomerForm"
 import { toast } from "sonner"
 
-export default function EditCustomerPage({ params }: { params: { customerId: string } }) {
+export default function EditCustomerPage({ params }: { params: Promise<{ customerId: string }> }) {
+    const { customerId } = use(params)
     const router = useRouter()
     const [customer, setCustomer] = useState<any>(null)
     const [loading, setLoading] = useState(true)
@@ -17,7 +18,7 @@ export default function EditCustomerPage({ params }: { params: { customerId: str
     useEffect(() => {
         const fetchCustomer = async () => {
             try {
-                const res = await fetch(`/api/business/customers/${params.customerId}`)
+                const res = await fetch(`/api/business/customers/${customerId}`)
                 if (res.ok) {
                     const data = await res.json()
                     setCustomer(data)
@@ -33,7 +34,7 @@ export default function EditCustomerPage({ params }: { params: { customerId: str
             }
         }
         fetchCustomer()
-    }, [params.customerId, router])
+    }, [customerId, router])
 
     if (loading) {
         return <div className="flex h-96 items-center justify-center">Loading...</div>

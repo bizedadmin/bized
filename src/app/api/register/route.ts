@@ -41,7 +41,13 @@ export async function POST(req: Request) {
             email,
             password: hashedPassword,
             slug,
-            role: role
+            role: role,
+            pages: [
+                { title: 'My Profile', slug: 'profile', type: 'profile', enabled: true },
+                { title: 'Bookings', slug: 'bookings', type: 'bookings', enabled: true },
+                { title: 'Shop', slug: 'shop', type: 'shop', enabled: true },
+                { title: 'Quote', slug: 'quote', type: 'quote', enabled: true },
+            ]
         });
 
         return NextResponse.json(

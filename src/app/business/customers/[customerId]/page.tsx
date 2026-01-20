@@ -1,13 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import { useRouter } from "next/navigation"
 import { CustomerDetail } from "@/modules/customers/CustomerDetail"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft } from "lucide-react"
 
-export default function CustomerDetailPage({ params }: { params: { customerId: string } }) {
+export default function CustomerDetailPage({ params }: { params: Promise<{ customerId: string }> }) {
+    const { customerId } = use(params)
     const router = useRouter()
     const [customer, setCustomer] = useState<any>(null)
     const [loading, setLoading] = useState(true)
@@ -15,7 +16,7 @@ export default function CustomerDetailPage({ params }: { params: { customerId: s
     useEffect(() => {
         const fetchCustomer = async () => {
             try {
-                const res = await fetch(`/api/business/customers/${params.customerId}`)
+                const res = await fetch(`/api/business/customers/${customerId}`)
                 if (res.ok) {
                     const data = await res.json()
                     setCustomer(data)
@@ -31,7 +32,7 @@ export default function CustomerDetailPage({ params }: { params: { customerId: s
             }
         }
         fetchCustomer()
-    }, [params.customerId, router])
+    }, [customerId, router])
 
     if (loading) {
         return <div className="flex h-96 items-center justify-center">Loading...</div>
