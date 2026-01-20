@@ -68,7 +68,9 @@ function PortalContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const tabParam = searchParams.get('tab')
+    const tabParam = searchParams.get('tab')
     const searchQuery = searchParams.get('q')?.toLowerCase() || ""
+    const bizIdParam = searchParams.get('bizId')
 
     // State
     const [isLoading, setIsLoading] = useState(true)
@@ -93,7 +95,8 @@ function PortalContent() {
     const fetchInitialData = async () => {
         try {
             setIsLoading(true)
-            const bizRes = await fetch("/api/business/bized")
+            const endpoint = bizIdParam ? `/api/businesses/${bizIdParam}` : "/api/business/bized"
+            const bizRes = await fetch(endpoint)
             if (bizRes.ok) {
                 const data = await bizRes.json()
                 setBusiness(data)
@@ -102,7 +105,11 @@ function PortalContent() {
             const bookingsRes = await fetch("/api/account/bookings")
             if (bookingsRes.ok) {
                 const data = await bookingsRes.json()
-                setBookings(data)
+                // If viewing a specific business portal, only show bookings for that business
+                const filteredBookings = bizIdParam
+                    ? data.filter((b: any) => b.businessId?._id === bizIdParam)
+                    : data
+                setBookings(filteredBookings)
             }
         } catch (error) {
             console.error("Error fetching client data:", error)
