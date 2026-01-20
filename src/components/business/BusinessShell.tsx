@@ -165,14 +165,12 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
     const [business, setBusiness] = useState<Business | null>(null)
     const [loading, setLoading] = useState(true)
     const [sidebarOpen, setSidebarOpen] = useState(false)
-    const [websiteExpanded, setWebsiteExpanded] = useState(false)
-    const [storeExpanded, setStoreExpanded] = useState(false)
-    const [quotesExpanded, setQuotesExpanded] = useState(false)
-    const [servicesExpanded, setServicesExpanded] = useState(false)
-    const [ordersExpanded, setOrdersExpanded] = useState(false)
-    const [bookingsExpanded, setBookingsExpanded] = useState(false)
-    const [businessExpanded, setBusinessExpanded] = useState(false)
+    const [expandedSection, setExpandedSection] = useState<string | null>(null)
     const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false)
+
+    const toggleSection = (section: string) => {
+        setExpandedSection(prev => prev === section ? null : section)
+    }
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -358,16 +356,16 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
 
                             {/* Business */}
                             <button
-                                onClick={() => setBusinessExpanded(!businessExpanded)}
+                                onClick={() => toggleSection('business')}
                                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                             >
                                 <div className="flex items-center gap-3">
                                     <businessMenu.icon className="w-5 h-5" />
                                     <span>{businessMenu.label}</span>
                                 </div>
-                                <ChevronDown className={cn("w-4 h-4 transition-transform", businessExpanded && "rotate-180")} />
+                                <ChevronDown className={cn("w-4 h-4 transition-transform", expandedSection === 'business' && "rotate-180")} />
                             </button>
-                            {businessExpanded && (
+                            {expandedSection === 'business' && (
                                 <div className="ml-9 space-y-1">
                                     {businessMenu.children.map((child) => (
                                         <Link
@@ -388,16 +386,16 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
 
                             {/* Bookings */}
                             <button
-                                onClick={() => setBookingsExpanded(!bookingsExpanded)}
+                                onClick={() => toggleSection('bookings')}
                                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                             >
                                 <div className="flex items-center gap-3">
                                     <bookings.icon className="w-5 h-5" />
                                     <span>{bookings.label}</span>
                                 </div>
-                                <ChevronDown className={cn("w-4 h-4 transition-transform", bookingsExpanded && "rotate-180")} />
+                                <ChevronDown className={cn("w-4 h-4 transition-transform", expandedSection === 'bookings' && "rotate-180")} />
                             </button>
-                            {bookingsExpanded && (
+                            {expandedSection === 'bookings' && (
                                 <div className="ml-9 space-y-1">
                                     {bookings.children.map((child) => (
                                         <Link
@@ -418,16 +416,16 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
 
                             {/* Orders */}
                             <button
-                                onClick={() => setOrdersExpanded(!ordersExpanded)}
+                                onClick={() => toggleSection('orders')}
                                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                             >
                                 <div className="flex items-center gap-3">
                                     <ordersMenu.icon className="w-5 h-5" />
                                     <span>{ordersMenu.label}</span>
                                 </div>
-                                <ChevronDown className={cn("w-4 h-4 transition-transform", ordersExpanded && "rotate-180")} />
+                                <ChevronDown className={cn("w-4 h-4 transition-transform", expandedSection === 'orders' && "rotate-180")} />
                             </button>
-                            {ordersExpanded && (
+                            {expandedSection === 'orders' && (
                                 <div className="ml-9 space-y-1">
                                     {ordersMenu.children.map((child) => (
                                         <Link
@@ -464,16 +462,16 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
 
                             {/* Services */}
                             <button
-                                onClick={() => setServicesExpanded(!servicesExpanded)}
+                                onClick={() => toggleSection('services')}
                                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                             >
                                 <div className="flex items-center gap-3">
                                     <servicesMenu.icon className="w-5 h-5" />
                                     <span>Services</span>
                                 </div>
-                                <ChevronDown className={cn("w-4 h-4 transition-transform", servicesExpanded && "rotate-180")} />
+                                <ChevronDown className={cn("w-4 h-4 transition-transform", expandedSection === 'services' && "rotate-180")} />
                             </button>
-                            {servicesExpanded && (
+                            {expandedSection === 'services' && (
                                 <div className="ml-9 space-y-1">
                                     {servicesMenu.children.map((child) => (
                                         <Link
@@ -494,16 +492,16 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
 
                             {/* Products & Store */}
                             <button
-                                onClick={() => setStoreExpanded(!storeExpanded)}
+                                onClick={() => toggleSection('store')}
                                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                             >
                                 <div className="flex items-center gap-3">
                                     <productsAndStore.icon className="w-5 h-5" />
                                     <span>{productsAndStore.label}</span>
                                 </div>
-                                <ChevronDown className={cn("w-4 h-4 transition-transform", storeExpanded && "rotate-180")} />
+                                <ChevronDown className={cn("w-4 h-4 transition-transform", expandedSection === 'store' && "rotate-180")} />
                             </button>
-                            {storeExpanded && (
+                            {expandedSection === 'store' && (
                                 <div className="ml-9 space-y-1">
                                     {productsAndStore.children.map((child) => (
                                         <Link
@@ -524,16 +522,16 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
 
                             {/* Quotes (New) */}
                             <button
-                                onClick={() => setQuotesExpanded(!quotesExpanded)}
+                                onClick={() => toggleSection('quotes')}
                                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                             >
                                 <div className="flex items-center gap-3">
                                     <quotesMenu.icon className="w-5 h-5" />
                                     <span>{quotesMenu.label}</span>
                                 </div>
-                                <ChevronDown className={cn("w-4 h-4 transition-transform", quotesExpanded && "rotate-180")} />
+                                <ChevronDown className={cn("w-4 h-4 transition-transform", expandedSection === 'quotes' && "rotate-180")} />
                             </button>
-                            {quotesExpanded && (
+                            {expandedSection === 'quotes' && (
                                 <div className="ml-9 space-y-1">
                                     {quotesMenu.children.map((child) => (
                                         <Link
@@ -589,16 +587,16 @@ export default function BusinessShell({ children }: { children: React.ReactNode 
                                         {channel.children ? (
                                             <>
                                                 <button
-                                                    onClick={() => setWebsiteExpanded(!websiteExpanded)}
+                                                    onClick={() => toggleSection('website')}
                                                     className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white transition-colors"
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         <channel.icon className="w-5 h-5" />
                                                         <span>{channel.label}</span>
                                                     </div>
-                                                    <ChevronDown className={cn("w-4 h-4 transition-transform", websiteExpanded && "rotate-180")} />
+                                                    <ChevronDown className={cn("w-4 h-4 transition-transform", expandedSection === 'website' && "rotate-180")} />
                                                 </button>
-                                                {websiteExpanded && (
+                                                {expandedSection === 'website' && (
                                                     <div className="ml-9 space-y-1">
                                                         {channel.children.map((child) => (
                                                             <Link
