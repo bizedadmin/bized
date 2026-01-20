@@ -6,6 +6,7 @@ import User from '@/models/User'
 import Product from '@/models/Product'
 import Service from '@/models/Service'
 import { BusinessProfile } from '@/components/business/business-profile'
+import { PublicPortalContent } from '@/components/portal/PublicPortalContent'
 
 interface PageProps {
     params: Promise<{ slug: string }>
@@ -36,6 +37,11 @@ export default async function SlugPage({ params }: PageProps) {
     const plainProfile = JSON.parse(JSON.stringify(profileData))
     const plainProducts = JSON.parse(JSON.stringify(products))
     const plainServices = JSON.parse(JSON.stringify(services))
+
+    // If it's a business, render the new Public Portal
+    if (profileData && profileData.pages) {
+        return <PublicPortalContent business={plainProfile} products={plainProducts} services={plainServices} />
+    }
 
     return <BusinessProfile business={plainProfile} products={plainProducts} services={plainServices} />
 }
