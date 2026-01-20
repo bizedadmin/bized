@@ -88,6 +88,9 @@ export function BusinessProfile({ business, products, services = [], pageType = 
     const [searchQuery, setSearchQuery] = useState("")
     const [cart, setCart] = useState<any[]>([])
 
+    const currentPage = business.pages?.find(p => p.type === pageType) || { settings: { blocks: [] } } as any;
+    const pageBranding = currentPage.settings || {};
+
     const getFontFamily = () => {
         switch (business.fontFamily) {
             case 'nunito': return 'var(--font-nunito), sans-serif'
@@ -1409,7 +1412,7 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                             className="h-32 w-full rounded-b-xl relative overflow-hidden bg-cover bg-center"
                             style={{
                                 backgroundColor: business.secondaryColor || "#f3f4f6",
-                                backgroundImage: business.image ? `url(${business.image})` : undefined
+                                backgroundImage: (pageBranding.banner || business.image) ? `url(${pageBranding.banner || business.image})` : undefined
                             }}
                         >
                             {/* Abstract background decorative elements - only show if no image */}
@@ -1430,18 +1433,24 @@ export function BusinessProfile({ business, products, services = [], pageType = 
                                     className="w-20 h-20 rounded-full flex items-center justify-center text-white text-3xl font-black shadow-2xl ring-4 ring-white dark:ring-zinc-950 transform hover:scale-105 transition-transform overflow-hidden bg-cover bg-center"
                                     style={{
                                         backgroundColor: business.themeColor || "#1f2937",
-                                        backgroundImage: business.logo ? `url(${business.logo})` : undefined
+                                        backgroundImage: (pageBranding.logo || business.logo) ? `url(${pageBranding.logo || business.logo})` : undefined
                                     }}
                                 >
-                                    {!business.logo && business.name.substring(0, 1).toUpperCase()}
+                                    {!(pageBranding.logo || business.logo) && (pageBranding.headline || business.name).substring(0, 1).toUpperCase()}
                                 </div>
                             </div>
 
-                            <div className="space-y-1 text-center mt-4">
-                                <h1 className="text-[18px] font-medium leading-[26px] text-[#0A0909] dark:text-white font-rubik">
-                                    {business.name}
+                            <div className="space-y-1 text-center mt-4 px-4">
+                                <h1 className="text-[18px] font-medium swallow:font-bold leading-[26px] text-[#0A0909] dark:text-white font-rubik break-words">
+                                    {pageBranding.headline || business.name}
                                 </h1>
-                                <p className="text-[10px] font-normal leading-[18px] text-[#3F3E3E]">@{business.slug}</p>
+                                {pageBranding.pageDescription ? (
+                                    <p className="text-[12px] font-normal leading-[20px] text-[#3F3E3E] dark:text-gray-300 mt-2 line-clamp-3">
+                                        {pageBranding.pageDescription}
+                                    </p>
+                                ) : (
+                                    <p className="text-[10px] font-normal leading-[18px] text-[#3F3E3E]">@{business.slug}</p>
+                                )}
                             </div>
 
 

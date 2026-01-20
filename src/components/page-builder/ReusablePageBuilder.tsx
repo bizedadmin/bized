@@ -334,6 +334,7 @@ export function ReusablePageBuilder({
                     <Tabs defaultValue="content" className="w-full h-full flex flex-col">
                         <TabsList className="w-full bg-zinc-100 p-1 mb-6 shrink-0">
                             <TabsTrigger value="content" className="flex-1 text-[12px]">Content</TabsTrigger>
+                            <TabsTrigger value="branding" className="flex-1 text-[12px]">Branding</TabsTrigger>
                             <TabsTrigger value="seo" className="flex-1 text-[12px]">SEO</TabsTrigger>
                         </TabsList>
 
@@ -393,21 +394,99 @@ export function ReusablePageBuilder({
                             </section>
                         </TabsContent>
 
+                        <TabsContent value="branding" className="mt-0 space-y-6">
+                            <div className="space-y-6">
+                                {/* Visual Identity */}
+                                <div className="space-y-4">
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-semibold">Page Title (Visual)</Label>
+                                        <Input
+                                            value={currentPage.settings?.headline || ""}
+                                            onChange={(e) => updatePageSetting('headline', e.target.value)}
+                                            placeholder={formData.name}
+                                        />
+                                        <p className="text-[10px] text-zinc-500">Overrides the business name for this page.</p>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label className="text-xs font-semibold">Page Description (Visual)</Label>
+                                        <Textarea
+                                            value={currentPage.settings?.pageDescription || ""}
+                                            onChange={(e) => updatePageSetting('pageDescription', e.target.value)}
+                                            placeholder={formData.description}
+                                        />
+                                        <p className="text-[10px] text-zinc-500">Overrides the business description for this page.</p>
+                                    </div>
+                                </div>
+
+                                {/* Per-page Logo/Banner */}
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-semibold">Page Logo (Optional)</Label>
+                                        <div className="flex items-center gap-4 p-3 border rounded-lg border-dashed">
+                                            <div className="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center shrink-0 overflow-hidden">
+                                                {currentPage.settings?.logo ? (
+                                                    <img src={currentPage.settings.logo} className="w-full h-full object-cover" />
+                                                ) : <User className="w-5 h-5 text-zinc-400" />}
+                                            </div>
+                                            <Button variant="outline" size="sm" className="h-8 text-[11px]">Upload Overlap</Button>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-semibold">Page Banner (Optional)</Label>
+                                        <div className="aspect-[3/1] rounded-lg bg-zinc-100 flex flex-col items-center justify-center p-4 border border-dashed relative overflow-hidden">
+                                            {currentPage.settings?.banner ? (
+                                                <img src={currentPage.settings.banner} className="absolute inset-0 w-full h-full object-cover" />
+                                            ) : (
+                                                <>
+                                                    <Palette className="w-6 h-6 text-zinc-400 mb-2" />
+                                                    <Button variant="outline" size="sm" className="h-8 text-[11px] relative z-10">Upload Banner</Button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </TabsContent>
+
                         <TabsContent value="seo" className="mt-0 space-y-4">
                             <div className="space-y-4">
                                 <div className="space-y-1.5">
-                                    <Label className="text-xs font-semibold">Page Title</Label>
+                                    <Label className="text-xs font-semibold">Meta Title</Label>
                                     <Input
-                                        value={currentPage.settings?.headline || ""}
-                                        onChange={(e) => updatePageSetting('headline', e.target.value)}
+                                        value={currentPage.settings?.metaTitle || ""}
+                                        onChange={(e) => updatePageSetting('metaTitle', e.target.value)}
+                                        placeholder={`${formData.name} - ${normalizedPageType}`}
                                     />
+                                    <p className="text-[10px] text-zinc-500">The title shown in browser tabs and search results.</p>
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label className="text-xs font-semibold">Meta Description</Label>
                                     <Textarea
-                                        value={currentPage.settings?.description || ""}
-                                        onChange={(e) => updatePageSetting('description', e.target.value)}
+                                        value={currentPage.settings?.metaDescription || ""}
+                                        onChange={(e) => updatePageSetting('metaDescription', e.target.value)}
+                                        placeholder={formData.description}
                                     />
+                                    <p className="text-[10px] text-zinc-500">The description shown in search engine results.</p>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs font-semibold">Page Slug</Label>
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-xs text-zinc-400">/{formData.slug}/</span>
+                                        <Input
+                                            value={currentPage.slug || ""}
+                                            onChange={(e) => {
+                                                const nextPages = [...(formData.pages || [])]
+                                                const idx = nextPages.findIndex(p => p.type === normalizedPageType)
+                                                if (idx > -1) {
+                                                    nextPages[idx] = { ...nextPages[idx], slug: e.target.value }
+                                                    setFormData(prev => ({ ...prev, pages: nextPages }))
+                                                    setIsDirty(true)
+                                                }
+                                            }}
+                                            className="h-8 py-1"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </TabsContent>
