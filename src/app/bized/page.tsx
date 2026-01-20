@@ -68,7 +68,6 @@ function PortalContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const tabParam = searchParams.get('tab')
-    const tabParam = searchParams.get('tab')
     const searchQuery = searchParams.get('q')?.toLowerCase() || ""
     const bizIdParam = searchParams.get('bizId')
 
