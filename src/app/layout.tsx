@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Rubik, Noto_Sans, Inter } from "next/font/google";
+import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
