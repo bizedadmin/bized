@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import { Loader2, Search, Globe, Share2, ChevronRight, Eye } from "lucide-react"
+import { Loader2, Search, Globe, Share2, ChevronRight, Eye, Smartphone, Image as ImageIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
@@ -28,12 +28,15 @@ export default function SeoSettingsPage() {
         description: "",
         keywords: "",
         ogImage: "",
+        favicon: "",
+        appIcon: "",
     })
     const [originalSeoData, setOriginalSeoData] = useState<any>(null)
     const [businessSlug, setBusinessSlug] = useState("your-slug")
 
     const navItems = [
         { id: "search", label: "Search Listing", icon: Search },
+        { id: "branding", label: "Branding & Icons", icon: ImageIcon },
         { id: "social", label: "Social Preview", icon: Share2 },
         { id: "preview", label: "Live Preview", icon: Eye },
     ]
@@ -55,6 +58,8 @@ export default function SeoSettingsPage() {
                         description: biz.configuration?.seo?.description || biz.description || "",
                         keywords: biz.configuration?.seo?.keywords || "",
                         ogImage: biz.configuration?.seo?.ogImage || biz.logo || "",
+                        favicon: biz.configuration?.seo?.favicon || biz.logo || "",
+                        appIcon: biz.configuration?.seo?.appIcon || biz.logo || "",
                     }
                     setSeoData(loadedSeo)
                     setOriginalSeoData(loadedSeo)
@@ -200,6 +205,69 @@ export default function SeoSettingsPage() {
                                 </AccordionContent>
                             </AccordionItem>
                         </Accordion>
+                    )}
+
+                    {activeSection === "branding" && (
+                        <div className="space-y-6">
+                            <Accordion type="multiple" defaultValue={["favicon", "app-icon"]} className="space-y-4">
+                                <AccordionItem value="favicon" className="border rounded-lg bg-card text-card-foreground shadow-sm px-6">
+                                    <AccordionTrigger className="hover:no-underline py-4">
+                                        <div className="flex flex-col items-start gap-1 text-left">
+                                            <span className="text-lg font-semibold">Favicon</span>
+                                            <span className="text-sm text-muted-foreground font-normal">The small icon displayed in the browser tab.</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="pb-6">
+                                        <div className="flex flex-col sm:flex-row items-center gap-6 pt-2">
+                                            <div className="w-16 h-16 rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 shrink-0 overflow-hidden">
+                                                {seoData.favicon ? (
+                                                    <img src={seoData.favicon} alt="Favicon" className="w-8 h-8 object-contain" />
+                                                ) : (
+                                                    <Globe className="w-6 h-6 text-zinc-400" />
+                                                )}
+                                            </div>
+                                            <div className="flex-1 space-y-2 text-center sm:text-left">
+                                                <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                                                    <Button variant="outline" size="sm">Upload Favicon</Button>
+                                                    {seoData.favicon && <Button variant="ghost" size="sm" className="text-red-500" onClick={() => setSeoData(p => ({ ...p, favicon: "" }))}>Remove</Button>}
+                                                </div>
+                                                <p className="text-[11px] text-zinc-500">Recommended size: 32x32px or 48x48px (PNG/ICO/SVG).</p>
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                <AccordionItem value="app-icon" className="border rounded-lg bg-card text-card-foreground shadow-sm px-6">
+                                    <AccordionTrigger className="hover:no-underline py-4">
+                                        <div className="flex flex-col items-start gap-1 text-left">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-lg font-semibold">App Icon</span>
+                                                <div className="px-1.5 py-0.5 rounded-md bg-orange-100 text-orange-600 text-[10px] font-bold uppercase tracking-wider">PWA</div>
+                                            </div>
+                                            <span className="text-sm text-muted-foreground font-normal">Displayed when your page is added to the home screen (iOS/Android).</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="pb-6">
+                                        <div className="flex flex-col sm:flex-row items-center gap-6 pt-2">
+                                            <div className="w-24 h-24 rounded-[22%] border-2 border-dashed border-zinc-200 dark:border-zinc-800 flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 shrink-0 overflow-hidden shadow-sm">
+                                                {seoData.appIcon ? (
+                                                    <img src={seoData.appIcon} alt="App Icon" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <Smartphone className="w-8 h-8 text-zinc-400" />
+                                                )}
+                                            </div>
+                                            <div className="flex-1 space-y-2 text-center sm:text-left">
+                                                <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                                                    <Button variant="outline" size="sm">Upload App Icon</Button>
+                                                    {seoData.appIcon && <Button variant="ghost" size="sm" className="text-red-500" onClick={() => setSeoData(p => ({ ...p, appIcon: "" }))}>Remove</Button>}
+                                                </div>
+                                                <p className="text-[11px] text-zinc-500">Recommended size: 512x512px (High resolution PNG). Uses Apple-style squircle mask.</p>
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
+                        </div>
                     )}
 
                     {activeSection === "social" && (
