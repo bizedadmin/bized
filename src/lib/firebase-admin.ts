@@ -29,7 +29,7 @@ if (!admin.apps.length) {
             }
         ]).catch(err => console.error('Error setting Firebase CORS:', err));
 
-        console.log('Firebase Admin: Initialization successful');
+        // console.log('Firebase Admin: Initialization successful');
     } catch (error) {
         console.error('Firebase Admin: Initialization error:', error);
     }

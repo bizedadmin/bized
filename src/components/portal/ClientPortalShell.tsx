@@ -103,7 +103,7 @@ export default function ClientPortalShell({
         )
     }
 
-    if (!session) return null
+    // if (!session) return null // Allow public access
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex transition-colors duration-300">
@@ -204,39 +204,45 @@ export default function ClientPortalShell({
                             <Bell className="w-5 h-5" />
                             <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-zinc-900" />
                         </Button>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-10 px-2 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
-                                    <Avatar className="h-8 w-8 ring-2 ring-gray-100 dark:ring-zinc-800">
-                                        <AvatarImage src={session.user?.image || ""} alt={session.user?.name || ""} />
-                                        <AvatarFallback className="bg-gray-100 text-gray-700">
-                                            {session.user?.email?.substring(0, 1).toUpperCase()}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <span className="ml-2 mr-1 text-sm font-medium hidden sm:block">{session.user?.name?.split(' ')[0]}</span>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56 mt-2" align="end">
-                                <div className="p-4 border-b border-gray-100 dark:border-zinc-800">
-                                    <p className="text-sm font-semibold">{session.user?.name}</p>
-                                    <p className="text-xs text-gray-500 truncate">{session.user?.email}</p>
-                                </div>
-                                <DropdownMenuItem asChild>
-                                    <Link href="/account" className="cursor-pointer py-2 px-3">
-                                        <User className="mr-3 h-4 w-4 text-gray-400" />
-                                        Profile Settings
-                                    </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                    onClick={() => signOut({ callbackUrl: '/login' })}
-                                    className="text-red-600 focus:text-red-600 cursor-pointer py-2 px-3"
-                                >
-                                    <LogOut className="mr-3 h-4 w-4" />
-                                    Log Out
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        {session ? (
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="h-10 px-2 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
+                                        <Avatar className="h-8 w-8 ring-2 ring-gray-100 dark:ring-zinc-800">
+                                            <AvatarImage src={session.user?.image || ""} alt={session.user?.name || ""} />
+                                            <AvatarFallback className="bg-gray-100 text-gray-700">
+                                                {session.user?.email?.substring(0, 1).toUpperCase()}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <span className="ml-2 mr-1 text-sm font-medium hidden sm:block">{session.user?.name?.split(' ')[0]}</span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-56 mt-2" align="end">
+                                    <div className="p-4 border-b border-gray-100 dark:border-zinc-800">
+                                        <p className="text-sm font-semibold">{session.user?.name}</p>
+                                        <p className="text-xs text-gray-500 truncate">{session.user?.email}</p>
+                                    </div>
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/account" className="cursor-pointer py-2 px-3">
+                                            <User className="mr-3 h-4 w-4 text-gray-400" />
+                                            Profile Settings
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        onClick={() => signOut({ callbackUrl: '/login' })}
+                                        className="text-red-600 focus:text-red-600 cursor-pointer py-2 px-3"
+                                    >
+                                        <LogOut className="mr-3 h-4 w-4" />
+                                        Log Out
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        ) : (
+                            <Button className="rounded-full font-bold" onClick={() => router.push('/login')}>
+                                Log In
+                            </Button>
+                        )}
                     </div>
                 </header>
 
