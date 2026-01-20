@@ -140,6 +140,7 @@ const salesChannels = [
             { label: "Design", href: "/business/design" },
             { label: "Style", href: "/business/style" },
             { label: "Seo/Meta", href: "/business/seo" },
+            { label: "Analytics", href: "/business/analytics" },
         ]
     },
     { icon: MessageCircle, label: "WhatsApp", href: "/business/whatsapp" },
