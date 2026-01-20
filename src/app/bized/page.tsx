@@ -22,9 +22,10 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import { Card, CardTitle, CardDescription, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import ClientPortalShell from "@/components/portal/ClientPortalShell"
+import { Phone, MessageCircle, MapPin, Mail, Share2, Star } from "lucide-react"
 
 // Types
 interface BusinessPage {
@@ -170,49 +171,131 @@ function PortalContent() {
                         exit={{ opacity: 0, scale: 0.98, y: -10 }}
                         transition={{ duration: 0.3, ease: "easeOut" }}
                     >
-                        {/* Public Pages Content */}
+                        {/* Public Pages Content - Now transformed into a Business Dashboard */}
                         {activeTab === "pages" && business && (
-                            <div className="space-y-8">
+                            <div className="space-y-10">
+                                {/* Featured Business Card */}
+                                <Card className="border-none bg-white dark:bg-zinc-900 shadow-[0_20px_50px_rgba(0,0,0,0.05)] rounded-[32px] overflow-hidden lg:flex">
+                                    <div
+                                        className="lg:w-1/3 aspect-[4/3] lg:aspect-auto bg-cover bg-center relative"
+                                        style={{
+                                            backgroundImage: business.logo ? `url(${business.logo})` : 'none',
+                                            backgroundColor: `${themeColor}10`
+                                        }}
+                                    >
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent lg:hidden" />
+                                        <div className="absolute bottom-6 left-6 lg:hidden">
+                                            <h2 className="text-white text-2xl font-bold">{business.name}</h2>
+                                            <p className="text-white/80 text-sm">Official Platform</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex-1 p-8 lg:p-12 space-y-6">
+                                        <div className="hidden lg:block">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                                                <span className="text-xs font-bold text-amber-600 uppercase tracking-widest">Featured Partner</span>
+                                            </div>
+                                            <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight leading-none mb-4">
+                                                {business.name}
+                                            </h2>
+                                            <p className="text-gray-500 dark:text-gray-400 text-lg leading-relaxed max-w-xl">
+                                                {business.description || `Welcome to your official portal for ${business.name}. Here you can manage your bookings, orders, and support requests directly with us.`}
+                                            </p>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 lg:pt-0">
+                                            <Button variant="outline" className="h-20 rounded-2xl flex-col gap-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 dark:border-zinc-800 dark:hover:bg-zinc-800 transition-all group">
+                                                <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                    <MessageCircle className="w-4 h-4 text-green-600" />
+                                                </div>
+                                                <span className="text-[10px] font-bold uppercase tracking-tight">WhatsApp</span>
+                                            </Button>
+                                            <Button variant="outline" className="h-20 rounded-2xl flex-col gap-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 dark:border-zinc-800 dark:hover:bg-zinc-800 transition-all group">
+                                                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                    <Phone className="w-4 h-4 text-blue-600" />
+                                                </div>
+                                                <span className="text-[10px] font-bold uppercase tracking-tight">Call Us</span>
+                                            </Button>
+                                            <Button variant="outline" className="h-20 rounded-2xl flex-col gap-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 dark:border-zinc-800 dark:hover:bg-zinc-800 transition-all group">
+                                                <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                    <MapPin className="w-4 h-4 text-amber-600" />
+                                                </div>
+                                                <span className="text-[10px] font-bold uppercase tracking-tight">Location</span>
+                                            </Button>
+                                            <Button variant="outline" className="h-20 rounded-2xl flex-col gap-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 dark:border-zinc-800 dark:hover:bg-zinc-800 transition-all group">
+                                                <div className="w-8 h-8 rounded-full bg-zinc-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                    <Share2 className="w-4 h-4 text-gray-600" />
+                                                </div>
+                                                <span className="text-[10px] font-bold uppercase tracking-tight">Share</span>
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </Card>
+
                                 <section>
                                     <div className="flex items-center justify-between mb-8">
-                                        <h2 className="text-2xl font-bold flex items-center gap-3">
-                                            <Layout className="w-6 h-6" style={{ color: themeColor }} />
-                                            Business Sections
+                                        <h2 className="text-2xl font-black tracking-tight flex items-center gap-3 italic uppercase">
+                                            <div className="w-1.5 h-8 rounded-full" style={{ backgroundColor: themeColor }} />
+                                            Explore Services
                                         </h2>
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
                                         {business.pages.filter(p => p.enabled).map((page, idx) => {
                                             const PageIcon = getIconForPageType(page.type);
                                             return (
-                                                <Card key={idx} className="group border-none shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden bg-white dark:bg-zinc-900 flex flex-col p-2">
-                                                    <div className="p-6 flex flex-col items-center text-center">
+                                                <Card key={idx} className="group border-none shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 overflow-hidden bg-white dark:bg-zinc-900 p-1 rounded-3xl">
+                                                    <div className="p-6 flex flex-col">
                                                         <div
-                                                            className="w-16 h-16 rounded-3xl flex items-center justify-center mb-4 transition-all duration-500"
+                                                            className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500 group-hover:scale-110 shadow-sm"
                                                             style={{ backgroundColor: `${themeColor}10` }}
                                                         >
-                                                            <PageIcon className="w-8 h-8 transition-colors" style={{ color: themeColor }} />
+                                                            <PageIcon className="w-6 h-6 transition-colors" style={{ color: themeColor }} />
                                                         </div>
-                                                        <CardTitle className="text-lg mb-1">{page.title}</CardTitle>
-                                                        <CardDescription className="text-[10px] uppercase tracking-widest font-bold opacity-50">
-                                                            {page.type}
+                                                        <CardTitle className="text-xl font-bold mb-1 tracking-tight">{page.title}</CardTitle>
+                                                        <CardDescription className="text-xs font-medium text-gray-500 mb-6">
+                                                            Manage your {page.type} preferences.
                                                         </CardDescription>
-                                                    </div>
-                                                    <CardFooter className="pt-2 pb-4 px-4">
+
                                                         <Button
-                                                            className="w-full bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 text-gray-900 dark:text-white border-none shadow-none h-10 rounded-2xl group/btn transition-all duration-300"
+                                                            className="w-full bg-gray-50 dark:bg-zinc-800 hover:bg-zinc-900 hover:text-white dark:hover:bg-zinc-700 text-gray-900 dark:text-white border-none shadow-none h-11 rounded-xl group/btn transition-all duration-300 font-bold"
                                                             asChild
                                                         >
                                                             <Link href={page.type === 'storefront' ? `/${business.slug}` : `/${business.slug}/${page.slug}`}>
-                                                                Open Page
-                                                                <ArrowUpRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                                                                Launch Section
+                                                                <ArrowUpRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
                                                             </Link>
                                                         </Button>
-                                                    </CardFooter>
+                                                    </div>
                                                 </Card>
                                             )
                                         })}
                                     </div>
                                 </section>
+
+                                {/* Bottom Info Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <Card className="p-6 border-none bg-zinc-900 text-white rounded-[24px]">
+                                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-4">
+                                            <Clock className="w-5 h-5 text-white" />
+                                        </div>
+                                        <h3 className="font-bold text-lg mb-1">Business Hours</h3>
+                                        <p className="text-white/60 text-sm italic">Mon - Fri: 09:00 - 18:00</p>
+                                    </Card>
+                                    <Card className="p-6 border-none bg-white dark:bg-zinc-900 rounded-[24px] shadow-sm">
+                                        <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                                            <Mail className="w-5 h-5 text-gray-400" />
+                                        </div>
+                                        <h3 className="font-bold text-lg mb-1">Need help?</h3>
+                                        <p className="text-gray-500 text-sm">contact@{business.slug}.com</p>
+                                    </Card>
+                                    <Card className="p-6 border-none bg-white dark:bg-zinc-900 rounded-[24px] shadow-sm">
+                                        <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                                            <Globe className="w-5 h-5 text-gray-400" />
+                                        </div>
+                                        <h3 className="font-bold text-lg mb-1">Main Website</h3>
+                                        <p className="text-gray-500 text-sm truncate">www.{business.slug}.com</p>
+                                    </Card>
+                                </div>
                             </div>
                         )}
 
@@ -231,40 +314,40 @@ function PortalContent() {
                                 </div>
                                 <div className="grid gap-4">
                                     {bookings.length > 0 ? bookings.map((booking) => (
-                                        <Card key={booking._id} className="border-none shadow-sm hover:shadow-md transition-all overflow-hidden bg-white dark:bg-zinc-900 group">
-                                            <div className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                                <div className="flex items-center gap-5">
+                                        <Card key={booking._id} className="border-none shadow-[0_4px_15px_rgba(0,0,0,0.02)] hover:shadow-[0_15px_30px_rgba(0,0,0,0.06)] transition-all duration-500 overflow-hidden bg-white dark:bg-zinc-900 group rounded-[24px]">
+                                            <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                                <div className="flex items-center gap-6">
                                                     <div
-                                                        className="w-14 h-14 rounded-2xl flex flex-col items-center justify-center"
-                                                        style={{ backgroundColor: `${themeColor}10`, color: themeColor }}
+                                                        className="w-16 h-16 rounded-[20px] flex flex-col items-center justify-center shrink-0 shadow-inner"
+                                                        style={{ backgroundColor: `${themeColor}08`, border: `1px solid ${themeColor}15` }}
                                                     >
-                                                        <span className="text-[10px] font-bold uppercase">{new Date(booking.date).toLocaleDateString('en-US', { month: 'short' })}</span>
-                                                        <span className="text-lg font-bold">{new Date(booking.date).getDate()}</span>
+                                                        <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: themeColor }}>{new Date(booking.date).toLocaleDateString('en-US', { month: 'short' })}</span>
+                                                        <span className="text-2xl font-black italic -mt-1" style={{ color: themeColor }}>{new Date(booking.date).getDate()}</span>
                                                     </div>
                                                     <div>
-                                                        <h3 className="font-bold text-gray-900 dark:text-white text-lg transition-colors group-hover:text-blue-600">
+                                                        <h3 className="font-black text-gray-900 dark:text-white text-xl tracking-tight leading-none mb-2 group-hover:italic transition-all">
                                                             {booking.serviceId?.name || "Service Appointment"}
                                                         </h3>
-                                                        <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
-                                                            <span className="flex items-center gap-1 font-medium"><Building2 className="w-3.5 h-3.5" /> {booking.businessId?.name}</span>
-                                                            <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                                                            <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {booking.startTime}</span>
+                                                        <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs font-bold text-gray-400 uppercase tracking-tighter">
+                                                            <span className="flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5" /> {booking.businessId?.name}</span>
+                                                            <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {booking.startTime}</span>
+                                                            <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> On-site</span>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-6 justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0">
+                                                <div className="flex items-center gap-4 justify-between md:justify-end">
                                                     <Badge
-                                                        className="rounded-full px-4 py-1 text-xs font-bold border-none"
+                                                        className="rounded-xl px-4 py-1.5 text-[10px] font-black tracking-widest border-none uppercase italic"
                                                         style={{
-                                                            backgroundColor: booking.status === 'confirmed' ? `${themeColor}20` : '#fef3c7',
+                                                            backgroundColor: booking.status === 'confirmed' ? `${themeColor}15` : '#fef3c7',
                                                             color: booking.status === 'confirmed' ? themeColor : '#b45309'
                                                         }}
                                                     >
-                                                        {booking.status.toUpperCase()}
+                                                        {booking.status}
                                                     </Badge>
-                                                    <Button variant="ghost" className="rounded-xl h-10 group-hover:bg-gray-100 dark:group-hover:bg-zinc-800" asChild>
+                                                    <Button variant="outline" className="rounded-xl h-11 px-6 border-gray-100 hover:bg-zinc-900 hover:text-white transition-all font-bold text-xs" asChild>
                                                         <Link href={`/bized/bookings/${booking._id}`}>
-                                                            Details <ChevronRight className="w-4 h-4 ml-1" />
+                                                            Manage
                                                         </Link>
                                                     </Button>
                                                 </div>

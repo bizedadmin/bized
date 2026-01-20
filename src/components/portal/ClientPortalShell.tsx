@@ -92,25 +92,28 @@ export default function ClientPortalShell({
         <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex transition-colors duration-300">
             {/* Desktop Sidebar */}
             <aside className="hidden lg:flex w-72 flex-col bg-white dark:bg-zinc-900 border-r border-gray-200 dark:border-zinc-800 fixed h-full z-20">
-                <div className="p-6 border-b border-gray-200 dark:border-zinc-800">
-                    <Link href="/bized" className="flex items-center gap-3">
+                <div className="p-6">
+                    <Link href="/bized" className="flex items-center gap-4 group">
                         <div
-                            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
+                            className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-105"
                             style={{ backgroundColor: themeColor, boxShadow: `${themeColor}33 0px 8px 16px` }}
                         >
                             {business?.logo ? (
-                                <Image src={business.logo} alt={business.name} width={24} height={24} className="rounded-lg object-contain brightness-0 invert" />
+                                <Image src={business.logo} alt={business.name} width={28} height={28} className="rounded-lg object-contain brightness-0 invert" />
                             ) : (
-                                <Image src="/logo-light-mode.png" alt="B" width={24} height={24} className="brightness-0 invert" />
+                                <Image src="/logo-light-mode.png" alt="B" width={28} height={28} className="brightness-0 invert" />
                             )}
                         </div>
-                        <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white truncate">
-                            {business?.name || "Client Portal"}
-                        </span>
+                        <div className="flex flex-col min-w-0">
+                            <span className="text-lg font-black tracking-tight text-gray-900 dark:text-white truncate uppercase italic">
+                                {business?.name || "Client Portal"}
+                            </span>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Workspace</span>
+                        </div>
                     </Link>
                 </div>
 
-                <nav className="flex-1 p-4 space-y-1">
+                <nav className="flex-1 px-4 py-8 space-y-2">
                     {navItems.map((item) => {
                         const isActive = propActiveTab === item.id
 
@@ -125,18 +128,25 @@ export default function ClientPortalShell({
                                     }
                                 }}
                                 className={cn(
-                                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group text-left",
+                                    "w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 group text-left relative",
                                     isActive
-                                        ? "font-semibold bg-gray-50 dark:bg-zinc-800"
-                                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white"
+                                        ? "font-bold bg-gray-50 dark:bg-zinc-800 shadow-sm"
+                                        : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-gray-900 dark:hover:text-white"
                                 )}
                                 style={{ color: isActive ? themeColor : undefined }}
                             >
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="sidebar-active"
+                                        className="absolute left-0 w-1.5 h-6 rounded-r-full"
+                                        style={{ backgroundColor: themeColor }}
+                                    />
+                                )}
                                 <item.icon className={cn(
-                                    "w-5 h-5 transition-colors",
+                                    "w-5 h-5 transition-transform duration-300 group-hover:scale-110",
                                     isActive ? "" : "text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200"
                                 )} style={{ color: isActive ? themeColor : undefined }} />
-                                <span>{item.label}</span>
+                                <span className="text-sm tracking-tight">{item.label}</span>
                             </button>
                         )
                     })}
