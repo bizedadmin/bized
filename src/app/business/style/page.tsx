@@ -97,6 +97,12 @@ const THEME_COLORS = [
 
 const FONT_OPTIONS = [
     {
+        id: "nunito",
+        name: "Nunito (Calday Style)",
+        description: "Rounded, friendly, and modern",
+        style: { fontFamily: 'var(--font-nunito), sans-serif' }
+    },
+    {
         id: "system",
         name: "Instagram Classic",
         description: "Clean, native, and familiar",

@@ -90,11 +90,12 @@ export function BusinessProfile({ business, products, services = [], pageType = 
 
     const getFontFamily = () => {
         switch (business.fontFamily) {
+            case 'nunito': return 'var(--font-nunito), sans-serif'
             case 'inter': return 'var(--font-inter), sans-serif'
             case 'serif': return 'Georgia, serif'
             case 'mono': return 'var(--font-geist-mono), monospace'
             case 'system': return 'var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
-            default: return 'var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
+            default: return 'var(--font-nunito), sans-serif'
         }
     }
     const [isCartOpen, setIsCartOpen] = useState(false)
