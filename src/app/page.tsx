@@ -492,72 +492,88 @@ function MarketplaceContent() {
                     </div>
                 </section>
 
-                {/* Triple CTA Section - Booking, Shopping, Business */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Booking Card */}
-                    <div className="relative overflow-hidden rounded-[32px] bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 p-8 flex flex-col items-start justify-center group h-[400px]">
-                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Calendar className="w-32 h-32 text-blue-600 rotate-12" />
-                        </div>
-                        <div className="z-10 bg-white dark:bg-zinc-800 p-3 rounded-2xl mb-6 shadow-sm ring-1 ring-black/5">
-                            <Calendar className="w-6 h-6 text-blue-600" />
-                        </div>
-                        <h2 className="z-10 text-3xl font-black text-gray-900 dark:text-white mb-3 tracking-tight">
-                            Book<br />Services
-                        </h2>
-                        <p className="z-10 text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-xs text-base leading-relaxed">
-                            Discover favorites and book appointments instantly.
-                        </p>
-                        <Button className="z-10 h-12 px-6 rounded-xl font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xl shadow-blue-600/20 w-auto transition-all hover:scale-105" onClick={() => {
-                            document.getElementById('search-input')?.focus();
-                            setIsSearchFocused(true);
-                        }}>
-                            Book Now
-                        </Button>
-                    </div>
+                {/* Creative Dual CTA Section - Services & Business */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
+                    {/* User Discovery Card */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                        className="relative overflow-hidden rounded-[40px] bg-[#FFF5EE] dark:bg-orange-950/20 p-10 md:p-14 flex flex-col justify-start h-[520px] group transition-all duration-500 hover:shadow-2xl hover:shadow-orange-100/50 dark:hover:shadow-none"
+                    >
+                        {/* Subtle Mesh Gradient Background */}
+                        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-orange-200/40 via-transparent to-transparent opacity-60 blur-3xl pointer-events-none" />
 
-                    {/* Shopping Card */}
-                    <div className="relative overflow-hidden rounded-[32px] bg-purple-50/50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-900/30 p-8 flex flex-col items-start justify-center group h-[400px]">
-                        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <ShoppingBag className="w-32 h-32 text-purple-600 -rotate-12" />
-                        </div>
-                        <div className="z-10 bg-white dark:bg-zinc-800 p-3 rounded-2xl mb-6 shadow-sm ring-1 ring-black/5">
-                            <ShoppingBag className="w-6 h-6 text-purple-600" />
-                        </div>
-                        <h2 className="z-10 text-3xl font-black text-gray-900 dark:text-white mb-3 tracking-tight">
-                            Shop<br />Products
-                        </h2>
-                        <p className="z-10 text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-xs text-base leading-relaxed">
-                            Buy products directly from your favorite local shops.
-                        </p>
-                        <Button className="z-10 h-12 px-6 rounded-xl font-bold bg-purple-600 hover:bg-purple-700 text-white shadow-xl shadow-purple-600/20 w-auto transition-all hover:scale-105" onClick={() => {
-                            document.getElementById('search-input')?.focus();
-                            setIsSearchFocused(true);
-                        }}>
-                            Shop Now
-                        </Button>
-                    </div>
+                        <div className="relative z-10 max-w-lg w-full">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 dark:bg-white/10 backdrop-blur-md border border-white/40 dark:border-white/5 text-[11px] font-bold tracking-[0.2em] text-orange-900/70 dark:text-orange-200 uppercase mb-6 shadow-sm">
+                                <Sparkles className="w-3 h-3 text-orange-500" />
+                                For You
+                            </div>
+                            <h2 className="text-5xl md:text-6xl font-[850] text-[#1A1A1A] dark:text-white mb-6 tracking-tighter leading-[0.9]">
+                                Explore <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">Local Gems.</span>
+                            </h2>
+                            <p className="text-[#4A4A4A] dark:text-gray-400 font-medium mb-10 text-xl leading-relaxed max-w-sm tracking-tight text-balance">
+                                Discover the best spots near you. From haircuts to hot meals, book it all in seconds.
+                            </p>
 
-                    {/* Business Card */}
-                    <div className="relative overflow-hidden rounded-[32px] bg-zinc-100 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 p-8 flex flex-col items-start justify-center group h-[400px]">
-                        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                            <TrendingUp className="w-32 h-32 text-zinc-900 dark:text-white -rotate-12" />
+                            <Button
+                                size="lg"
+                                className="h-16 px-10 rounded-full font-bold bg-[#1A1A1A] hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black shadow-2xl shadow-orange-900/10 hover:scale-105 active:scale-95 transition-all duration-300 group/btn"
+                                onClick={() => {
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    setTimeout(() => {
+                                        document.getElementById('search-input')?.focus();
+                                        setIsSearchFocused(true);
+                                    }, 500);
+                                }}
+                            >
+                                <span className="flex items-center gap-3 text-lg">
+                                    Start Exploring
+                                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                                        <ArrowRight className="w-4 h-4 text-white dark:text-black -rotate-45 group-hover/btn:rotate-0 transition-transform duration-300" />
+                                    </div>
+                                </span>
+                            </Button>
                         </div>
-                        <div className="z-10 bg-zinc-900 dark:bg-white p-3 rounded-2xl mb-6 shadow-sm ring-1 ring-white/10">
-                            <Store className="w-6 h-6 text-white dark:text-black" />
+                        <div className="absolute bottom-[-50px] right-[-50px] w-[90%] h-[90%] z-0 pointer-events-none transition-transform duration-700 ease-out group-hover:scale-[1.03] group-hover:translate-y-[-10px]">
+                            <img src="/people-connection.png" className="w-full h-full object-contain object-bottom-right drop-shadow-[0_20px_40px_rgba(0,0,0,0.1)]" alt="People connecting" />
                         </div>
-                        <h2 className="z-10 text-3xl font-black text-gray-900 dark:text-white mb-3 tracking-tight">
-                            Grow your<br />Business
-                        </h2>
-                        <p className="z-10 text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-xs text-base leading-relaxed">
-                            Calendar, Marketing, and Payments all in one place.
-                        </p>
-                        <Button className="z-10 h-12 px-6 rounded-xl font-bold bg-zinc-900 hover:bg-black dark:bg-white dark:hover:bg-gray-100 dark:text-black text-white shadow-xl w-auto transition-all hover:scale-105" asChild>
-                            <Link href="/create-business">
-                                Grow My Business
-                            </Link>
-                        </Button>
-                    </div>
+                    </motion.div>
+
+                    {/* Business Growth Card */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                        className="relative overflow-hidden rounded-[40px] bg-[#F0F7FF] dark:bg-blue-950/20 p-10 md:p-14 flex flex-col justify-start h-[520px] group transition-all duration-500 hover:shadow-2xl hover:shadow-blue-100/50 dark:hover:shadow-none"
+                    >
+                        {/* Subtle Mesh Gradient Background */}
+                        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-200/40 via-transparent to-transparent opacity-60 blur-3xl pointer-events-none" />
+
+                        <div className="relative z-10 max-w-lg">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 dark:bg-white/10 backdrop-blur-md border border-white/40 dark:border-white/5 text-[11px] font-bold tracking-[0.2em] text-blue-900/70 dark:text-blue-200 uppercase mb-6 shadow-sm">
+                                <TrendingUp className="w-3 h-3 text-blue-600" />
+                                For Business
+                            </div>
+                            <h2 className="text-5xl md:text-6xl font-[850] text-[#1A1A1A] dark:text-white mb-6 tracking-tighter leading-[0.9]">
+                                Power your <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Empire.</span>
+                            </h2>
+                            <p className="text-[#4A4A4A] dark:text-gray-400 font-medium mb-10 text-xl leading-relaxed max-w-sm tracking-tight text-balance">
+                                The all-in-one toolkit to manage clients, payments, and marketing effortlessly.
+                            </p>
+                            <Button size="lg" className="h-16 px-10 rounded-full font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-2xl shadow-blue-600/20 hover:scale-105 active:scale-95 transition-all duration-300 group/btn" asChild>
+                                <Link href="/create-business" className="flex items-center gap-3 text-lg">
+                                    Get Started
+                                    <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+                                </Link>
+                            </Button>
+                        </div>
+                        <div className="absolute bottom-[-40px] right-[-60px] w-[100%] h-[85%] z-0 pointer-events-none transition-transform duration-700 ease-out group-hover:scale-[1.02] group-hover:translate-x-[-10px]">
+                            <img src="/hero-dashboard.png" className="w-full h-full object-contain object-bottom-right drop-shadow-[0_25px_50px_rgba(0,0,0,0.15)]" alt="Business Dashboard" />
+                        </div>
+                    </motion.div>
                 </div>
 
 

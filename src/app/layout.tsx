@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Rubik, Noto_Sans, Inter, Nunito } from "next/font/google";
+import { Geist, Geist_Mono, Rubik, Noto_Sans, Inter, Nunito, Roboto } from "next/font/google";
 
 import "./globals.css";
 
@@ -12,6 +12,12 @@ const nunito = Nunito({
   variable: "--font-nunito",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800", "900"],
+});
+
+const roboto = Roboto({
+  variable: "--font-roboto",
+  subsets: ["latin"],
+  weight: ["100", "300", "400", "500", "700", "900"],
 });
 
 const geistSans = Geist({
@@ -70,8 +76,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${rubik.variable} ${notoSans.variable} ${inter.variable} ${nunito.variable} antialiased`}
-        style={{ fontFamily: "var(--font-nunito), sans-serif" }}
+        className={`${geistSans.variable} ${geistMono.variable} ${rubik.variable} ${notoSans.variable} ${inter.variable} ${nunito.variable} ${roboto.variable} antialiased`}
+        style={{ fontFamily: "var(--font-roboto), sans-serif" }}
       >
         <ThemeProvider
           attribute="class"
