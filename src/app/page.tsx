@@ -16,6 +16,7 @@ import {
     Target,
     Users,
     ChevronRight,
+    ChevronDown,
     Layout,
     Zap,
     TrendingUp,
@@ -61,6 +62,12 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
     Tabs,
     TabsContent,
     TabsList,
@@ -72,6 +79,7 @@ import ClientPortalShell from "@/components/portal/ClientPortalShell"
 const GROUPED_CATEGORIES = [
     {
         name: "Food & Drink",
+        icon: Utensils,
         items: [
             { name: "Restaurants", icon: Utensils },
             { name: "Takeout", icon: Pizza },
@@ -82,6 +90,7 @@ const GROUPED_CATEGORIES = [
     },
     {
         name: "Things to do",
+        icon: Compass,
         items: [
             { name: "Parks", icon: Tree },
             { name: "Live music", icon: Music },
@@ -96,6 +105,7 @@ const GROUPED_CATEGORIES = [
     },
     {
         name: "Shopping",
+        icon: ShoppingBag,
         items: [
             { name: "Groceries", icon: Apple },
             { name: "Shopping centers", icon: Store },
@@ -110,6 +120,7 @@ const GROUPED_CATEGORIES = [
     },
     {
         name: "Services",
+        icon: Sparkles,
         items: [
             { name: "Hotels", icon: Hotel },
             { name: "Gas", icon: Fuel },
@@ -202,6 +213,7 @@ function MarketplaceContent() {
         };
     }, [searchContainerRef]);
 
+
     // Sticky Search Scroll Listener
     useEffect(() => {
         const handleScroll = () => {
@@ -214,6 +226,28 @@ function MarketplaceContent() {
         handleScroll()
 
         return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
+
+    // Hover state text
+    const [hoveredCategory, setHoveredCategory] = useState<string | null>(null)
+    const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+    const handleCategoryEnter = (category: string) => {
+        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)
+        setHoveredCategory(category)
+    }
+
+    const handleCategoryLeave = (category: string) => {
+        hoverTimeoutRef.current = setTimeout(() => {
+            setHoveredCategory((prev) => (prev === category ? null : prev))
+        }, 300)
+    }
+
+    // Clear timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)
+        }
     }, [])
 
     const StickySearchBar = (
@@ -270,9 +304,9 @@ function MarketplaceContent() {
 
                     <div className="relative z-10 max-w-4xl mx-auto text-center space-y-8 w-full">
                         <div className="space-y-4">
-                            <h1 className="text-4xl md:text-7xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-                                Find local <span className="text-blue-600">favorites</span><br />
-                                <span className="opacity-40">Book & Shop Instantly.</span>
+                            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+                                Discover, Book, and Buy <br />
+                                <span className="text-blue-600">Every Essential Local Service</span> and Product Here
                             </h1>
                         </div>
 
@@ -405,176 +439,65 @@ function MarketplaceContent() {
 
                         {/* Quick Category Buttons */}
                         <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
-                            {GROUPED_CATEGORIES.map((group) => {
-                                const item = group.items[0];
-                                return (
+                            {GROUPED_CATEGORIES.map((group) => (
+                                <div
+                                    key={group.name}
+                                    className="relative"
+                                    onMouseEnter={() => handleCategoryEnter(group.name)}
+                                    onMouseLeave={() => handleCategoryLeave(group.name)}
+                                >
                                     <Button
-                                        key={item.name}
                                         variant="outline"
                                         size="lg"
+                                        className="h-10 md:h-14 px-4 md:px-8 rounded-full bg-white dark:bg-zinc-800 border-gray-100 dark:border-zinc-700 shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 group flex items-center gap-2 md:gap-3 relative z-[60]"
                                         onClick={() => {
-                                            setSelectedCategory(item.name);
-                                            setSearchQuery("");
-                                            setIsSearchFocused(false);
+                                            // Optional: Click toggles or opens
+                                            if (hoveredCategory === group.name) setHoveredCategory(null)
+                                            else handleCategoryEnter(group.name)
                                         }}
-                                        className="h-10 md:h-14 px-4 md:px-8 rounded-full bg-white dark:bg-zinc-800 border-gray-100 dark:border-zinc-700 shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 group flex items-center gap-2 md:gap-3"
                                     >
-                                        <item.icon className="w-4 h-4 md:w-6 h-6 text-gray-900 dark:text-white" />
-                                        <span className="font-bold text-gray-900 dark:text-white text-sm md:text-lg">{item.name}</span>
+                                        <group.icon className="w-4 h-4 md:w-6 h-6 text-gray-900 dark:text-white" />
+                                        <span className="font-bold text-gray-900 dark:text-white text-sm md:text-lg">{group.name}</span>
+                                        <ChevronDown className={`w-3 h-3 md:w-4 h-4 text-gray-500 ml-1 transition-transform duration-200 ${hoveredCategory === group.name ? 'rotate-180' : ''}`} />
                                     </Button>
-                                );
-                            })}
 
-                            <ResponsiveDrawer
-                                title="More Categories"
-                                trigger={
-                                    <Button
-                                        variant="outline"
-                                        size="lg"
-                                        className="h-10 md:h-14 px-4 md:px-8 rounded-full bg-white dark:bg-zinc-800 border-gray-100 dark:border-zinc-700 shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 group flex items-center gap-2 md:gap-3"
-                                    >
-                                        <div className="w-4 h-4 md:w-6 h-6 rounded-full bg-gray-100 dark:bg-zinc-700 flex items-center justify-center">
-                                            <MoreHorizontal className="w-3 h-3 md:w-4 h-4 text-gray-600 dark:text-gray-300" />
-                                        </div>
-                                        <span className="font-bold text-gray-900 dark:text-white text-sm md:text-lg">More</span>
-                                    </Button>
-                                }
-                            >
-                                {(setOpen) => (
-                                    <Tabs defaultValue={GROUPED_CATEGORIES[0].name} className="w-full">
-                                        <div className="px-6 py-4 overflow-x-auto no-scrollbar border-b border-gray-100 dark:border-zinc-800">
-                                            <TabsList className="bg-transparent h-auto p-0 flex justify-start gap-2">
-                                                {GROUPED_CATEGORIES.map(group => (
-                                                    <TabsTrigger
-                                                        key={group.name}
-                                                        value={group.name}
-                                                        className="px-6 py-2 rounded-full data-[state=active]:bg-gray-200 dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white font-bold text-gray-500 transition-all border border-transparent data-[state=active]:border-gray-300 dark:data-[state=active]:border-zinc-600"
-                                                    >
-                                                        {group.name}
-                                                    </TabsTrigger>
-                                                ))}
-                                            </TabsList>
-                                        </div>
+                                    <AnimatePresence>
+                                        {hoveredCategory === group.name && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[340px] p-3 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 shadow-xl z-50 origin-top"
+                                            >
+                                                {/* Arrow Pointer */}
+                                                <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white dark:bg-zinc-900 border-t border-l border-gray-100 dark:border-zinc-800 rotate-45" />
 
-                                        <div className="p-6 max-h-[60vh] md:max-h-[60vh] overflow-y-auto custom-scrollbar">
-                                            {GROUPED_CATEGORIES.map(group => (
-                                                <TabsContent key={group.name} value={group.name} className="mt-0 outline-none">
-                                                    <div className="space-y-8">
-                                                        <section>
-                                                            <h3 className="text-xl font-black mb-6 text-gray-900 dark:text-white px-2">{group.name}</h3>
-                                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                                {group.items.map(item => (
-                                                                    <Button
-                                                                        key={item.name}
-                                                                        variant="ghost"
-                                                                        className="justify-start h-14 px-4 rounded-2xl bg-blue-50/50 dark:bg-blue-900/10 hover:bg-blue-100 dark:hover:bg-blue-900/20 text-blue-900 dark:text-blue-100 border border-blue-100/50 dark:border-blue-900/30 group transition-all"
-                                                                        onClick={() => {
-                                                                            setSelectedCategory(item.name);
-                                                                            setSearchQuery("");
-                                                                            setIsSearchFocused(false);
-                                                                            setOpen(false);
-                                                                        }}
-                                                                    >
-                                                                        <item.icon className="w-5 h-5 mr-3 shrink-0" />
-                                                                        <span className="font-bold text-base">{item.name}</span>
-                                                                    </Button>
-                                                                ))}
-                                                            </div>
-                                                        </section>
-                                                    </div>
-                                                </TabsContent>
-                                            ))}
-                                        </div>
-                                    </Tabs>
-                                )}
-                            </ResponsiveDrawer>
+                                                <div className="relative z-10 grid grid-cols-2 gap-2">
+                                                    {group.items.map((item) => (
+                                                        <button
+                                                            key={item.name}
+                                                            className="flex items-center gap-2 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-800 text-left transition-colors group/item"
+                                                            onClick={() => {
+                                                                setSelectedCategory(item.name);
+                                                                setSearchQuery("");
+                                                                setIsSearchFocused(false);
+                                                                setHoveredCategory(null)
+                                                            }}
+                                                        >
+                                                            <item.icon className="w-4 h-4 text-blue-500 shrink-0 group-hover/item:text-blue-600" />
+                                                            <span className="font-medium text-gray-700 dark:text-gray-300 group-hover/item:text-gray-900 dark:group-hover/item:text-white truncate">{item.name}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </section>
-
-                {/* Creative Dual CTA Section - Services & Business */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
-                    {/* User Discovery Card */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                        className="relative overflow-hidden rounded-[40px] bg-[#FFF5EE] dark:bg-orange-950/20 p-10 md:p-14 flex flex-col justify-start h-[520px] group transition-all duration-500 hover:shadow-2xl hover:shadow-orange-100/50 dark:hover:shadow-none"
-                    >
-                        {/* Subtle Mesh Gradient Background */}
-                        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-orange-200/40 via-transparent to-transparent opacity-60 blur-3xl pointer-events-none" />
-
-                        <div className="relative z-10 max-w-lg w-full">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 dark:bg-white/10 backdrop-blur-md border border-white/40 dark:border-white/5 text-[11px] font-bold tracking-[0.2em] text-orange-900/70 dark:text-orange-200 uppercase mb-6 shadow-sm">
-                                <Sparkles className="w-3 h-3 text-orange-500" />
-                                For You
-                            </div>
-                            <h2 className="text-5xl md:text-6xl font-[850] text-[#1A1A1A] dark:text-white mb-6 tracking-tighter leading-[0.9]">
-                                Explore <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">Local Gems.</span>
-                            </h2>
-                            <p className="text-[#4A4A4A] dark:text-gray-400 font-medium mb-10 text-xl leading-relaxed max-w-sm tracking-tight text-balance">
-                                Discover the best spots near you. From haircuts to hot meals, book it all in seconds.
-                            </p>
-
-                            <Button
-                                size="lg"
-                                className="h-16 px-10 rounded-full font-bold bg-[#1A1A1A] hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black shadow-2xl shadow-orange-900/10 hover:scale-105 active:scale-95 transition-all duration-300 group/btn"
-                                onClick={() => {
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                    setTimeout(() => {
-                                        document.getElementById('search-input')?.focus();
-                                        setIsSearchFocused(true);
-                                    }, 500);
-                                }}
-                            >
-                                <span className="flex items-center gap-3 text-lg">
-                                    Start Exploring
-                                    <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                                        <ArrowRight className="w-4 h-4 text-white dark:text-black -rotate-45 group-hover/btn:rotate-0 transition-transform duration-300" />
-                                    </div>
-                                </span>
-                            </Button>
-                        </div>
-                        <div className="absolute bottom-[-50px] right-[-50px] w-[90%] h-[90%] z-0 pointer-events-none transition-transform duration-700 ease-out group-hover:scale-[1.03] group-hover:translate-y-[-10px]">
-                            <img src="/people-connection.png" className="w-full h-full object-contain object-bottom-right drop-shadow-[0_20px_40px_rgba(0,0,0,0.1)]" alt="People connecting" />
-                        </div>
-                    </motion.div>
-
-                    {/* Business Growth Card */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-                        className="relative overflow-hidden rounded-[40px] bg-[#F0F7FF] dark:bg-blue-950/20 p-10 md:p-14 flex flex-col justify-start h-[520px] group transition-all duration-500 hover:shadow-2xl hover:shadow-blue-100/50 dark:hover:shadow-none"
-                    >
-                        {/* Subtle Mesh Gradient Background */}
-                        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-200/40 via-transparent to-transparent opacity-60 blur-3xl pointer-events-none" />
-
-                        <div className="relative z-10 max-w-lg">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 dark:bg-white/10 backdrop-blur-md border border-white/40 dark:border-white/5 text-[11px] font-bold tracking-[0.2em] text-blue-900/70 dark:text-blue-200 uppercase mb-6 shadow-sm">
-                                <TrendingUp className="w-3 h-3 text-blue-600" />
-                                For Business
-                            </div>
-                            <h2 className="text-5xl md:text-6xl font-[850] text-[#1A1A1A] dark:text-white mb-6 tracking-tighter leading-[0.9]">
-                                Power your <br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Empire.</span>
-                            </h2>
-                            <p className="text-[#4A4A4A] dark:text-gray-400 font-medium mb-10 text-xl leading-relaxed max-w-sm tracking-tight text-balance">
-                                The all-in-one toolkit to manage clients, payments, and marketing effortlessly.
-                            </p>
-                            <Button size="lg" className="h-16 px-10 rounded-full font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-2xl shadow-blue-600/20 hover:scale-105 active:scale-95 transition-all duration-300 group/btn" asChild>
-                                <Link href="/create-business" className="flex items-center gap-3 text-lg">
-                                    Get Started
-                                    <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                                </Link>
-                            </Button>
-                        </div>
-                        <div className="absolute bottom-[-40px] right-[-60px] w-[100%] h-[85%] z-0 pointer-events-none transition-transform duration-700 ease-out group-hover:scale-[1.02] group-hover:translate-x-[-10px]">
-                            <img src="/hero-dashboard.png" className="w-full h-full object-contain object-bottom-right drop-shadow-[0_25px_50px_rgba(0,0,0,0.15)]" alt="Business Dashboard" />
-                        </div>
-                    </motion.div>
-                </div>
 
 
             </div>
