@@ -5,7 +5,7 @@ import Link from "next/link"
 import Image from "next/image" // Added Image
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { User, Calendar, LogOut, ShoppingBag, FileText, CreditCard, LayoutDashboard, Bell, UserCircle } from "lucide-react"
+import { User, Calendar, LogOut, ShoppingBag, FileText, CreditCard, LayoutDashboard, Bell, UserCircle, Store } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "next-themes" // Added useTheme
@@ -179,24 +179,46 @@ export default function AccountLayout({
                 </div>
             </aside>
 
-            {/* Mobile Bottom Navigation */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-800 pb-safe">
-                <div className="grid grid-cols-5 h-16">
-                    {sidebarItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className={cn(
-                                "flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors active:scale-95",
-                                pathname === item.href
-                                    ? "text-blue-600 dark:text-blue-400"
-                                    : "text-zinc-500 dark:text-zinc-400"
-                            )}
-                        >
-                            <item.icon className={cn("h-6 w-6", pathname === item.href ? "stroke-[2.5px]" : "stroke-[1.5px]")} />
-                            {item.title}
-                        </Link>
-                    ))}
+            {/* Mobile Bottom Navigation - Global */}
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-zinc-950 border-t border-gray-100 dark:border-zinc-800 pb-safe">
+                <div className="flex justify-between items-center px-8 py-2">
+                    {[
+                        { id: 'book', label: 'Book', icon: Calendar, href: '/' },
+                        { id: 'shop', label: 'Shop', icon: ShoppingBag, href: '/marketplace?filter=products' },
+                        { id: 'you', label: 'You', icon: User, href: '/account' },
+                        { id: 'business', label: 'Business', icon: Store, href: '/create-business' }
+                    ].map((item) => {
+                        let isActive = false;
+                        if (item.id === 'book') isActive = pathname === '/';
+                        else if (item.id === 'shop') isActive = pathname?.startsWith('/marketplace') || pathname?.startsWith('/shop');
+                        else if (item.id === 'you') isActive = pathname?.startsWith('/account');
+                        else if (item.id === 'business') isActive = pathname?.startsWith('/create-business') || pathname?.startsWith('/business');
+
+                        return (
+                            <button
+                                key={item.id}
+                                onClick={() => window.location.href = item.href} // Use simpler navigation or Link if possible, but button w/ onClick is consistent with Shell
+                                className="flex flex-col items-center gap-1 min-w-[64px] transition-all duration-300"
+                            >
+                                <div className={cn(
+                                    "px-5 py-1.5 rounded-full transition-colors duration-300",
+                                    isActive
+                                        ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                                        : "bg-transparent text-gray-500 dark:text-gray-400 group-hover:text-gray-700"
+                                )}>
+                                    <item.icon className={cn("w-6 h-6", isActive && "fill-current")} strokeWidth={isActive ? 2.5 : 2} />
+                                </div>
+                                <span className={cn(
+                                    "text-[11px] font-medium transition-colors duration-300",
+                                    isActive
+                                        ? "text-gray-900 dark:text-white font-bold"
+                                        : "text-gray-500 dark:text-gray-400"
+                                )}>
+                                    {item.label}
+                                </span>
+                            </button>
+                        )
+                    })}
                 </div>
             </nav>
 

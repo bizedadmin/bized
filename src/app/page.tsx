@@ -54,7 +54,7 @@ import {
     Mail,
     Plus,
     PlayCircle,
-    PlayCircle as Parking,
+    PlayCircle as Parking
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -279,8 +279,9 @@ function MarketplaceContent() {
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 />
             </div>
-            <Button size="sm" className="rounded-full px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold" onClick={handleSearch}>
-                Search
+            <Button size="sm" className="rounded-full px-3 sm:px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold" onClick={handleSearch}>
+                <Search className="sm:hidden w-4 h-4" />
+                <span className="hidden sm:inline">Search</span>
             </Button>
         </div>
     )
@@ -294,6 +295,24 @@ function MarketplaceContent() {
             <div className="p-4 sm:p-8 space-y-10 pb-32 max-w-7xl mx-auto">
                 {/* Hero Section - Clean, Books/Fresha Style */}
                 <section className="relative z-30 p-8 md:p-12 min-h-[500px] flex flex-col items-center justify-center">
+
+                    <div className="mt-8 w-full max-w-lg mx-auto">
+                        <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:justify-center">
+                            {GROUPED_CATEGORIES.map((category) => (
+                                <button
+                                    key={category.name}
+                                    onClick={() => {
+                                        handleSearch()
+                                        setSelectedCategory(category.name)
+                                    }}
+                                    className="flex items-center justify-center gap-2 bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm shadow-sm hover:shadow-md border border-gray-200/50 dark:border-zinc-700/50 rounded-full py-2.5 px-4 transition-all duration-300 group"
+                                >
+                                    <category.icon className="w-4 h-4 text-gray-500 group-hover:text-blue-500 transition-colors" />
+                                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-200 whitespace-nowrap">{category.name}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
 
                     {/* Abstract Background Decor */}
                     {/* Abstract Background Decor - Now handles the clipping/border */}
@@ -500,8 +519,8 @@ function MarketplaceContent() {
                 </section>
 
 
-            </div>
-        </ClientPortalShell>
+            </div >
+        </ClientPortalShell >
     )
 }
 

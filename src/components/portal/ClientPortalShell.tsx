@@ -17,7 +17,8 @@ import {
     Ticket,
     Search,
     Loader2,
-    Compass
+    Compass,
+    Store
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -264,34 +265,50 @@ export default function ClientPortalShell({
                 </main>
             </div>
 
-            {/* Mobile Nav Overlay */}
-            <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-3rem)] max-w-md">
-                <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-2xl border border-gray-200/50 dark:border-zinc-800/50 rounded-3xl shadow-2xl p-2.5 flex justify-between items-center px-6">
-                    {navItems.map((item) => {
-                        const isActive = propActiveTab === item.id
+            {/* Mobile Bottom Navigation */}
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-zinc-950 border-t border-gray-100 dark:border-zinc-800 pb-safe">
+                <div className="flex justify-between items-center px-8 py-2">
+                    {[
+                        { id: 'book', label: 'Book', icon: Calendar, href: '/' },
+                        { id: 'shop', label: 'Shop', icon: ShoppingBag, href: '/marketplace?filter=products' },
+                        { id: 'you', label: 'You', icon: User, href: '/account' },
+                        { id: 'business', label: 'Business', icon: Store, href: business?.slug ? `/${business.slug}` : '/create-business' }
+                    ].map((item) => {
+                        // Determine active state with precise path matching
+                        let isActive = false;
+                        if (item.id === 'book') {
+                            isActive = pathname === '/';
+                        } else if (item.id === 'shop') {
+                            isActive = pathname?.startsWith('/marketplace') || pathname?.startsWith('/shop');
+                        } else {
+                            isActive = (propActiveTab === item.id) || (!!item.href && (pathname?.startsWith(item.href) ?? false));
+                        }
 
                         return (
                             <button
                                 key={item.id}
                                 onClick={() => {
-                                    if (onTabChange) {
-                                        onTabChange(item.id)
-                                    } else {
-                                        router.push(item.href)
-                                    }
+                                    if (item.href) router.push(item.href)
+                                    else if (onTabChange) onTabChange(item.id)
                                 }}
-                                className={cn(
-                                    "flex flex-col items-center gap-1.5 p-3 rounded-2xl transition-all duration-300",
-                                    isActive
-                                        ? "text-white shadow-xl -translate-y-3 scale-110"
-                                        : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                                )}
-                                style={{
-                                    backgroundColor: isActive ? themeColor : undefined,
-                                    boxShadow: isActive ? `${themeColor}66 0px 10px 20px` : undefined
-                                }}
+                                className="flex flex-col items-center gap-1 min-w-[64px] transition-all duration-300"
                             >
-                                <item.icon className="w-6 h-6" />
+                                <div className={cn(
+                                    "px-5 py-1.5 rounded-full transition-colors duration-300",
+                                    isActive
+                                        ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                                        : "bg-transparent text-gray-500 dark:text-gray-400 group-hover:text-gray-700"
+                                )}>
+                                    <item.icon className={cn("w-6 h-6", isActive && "fill-current")} strokeWidth={isActive ? 2.5 : 2} />
+                                </div>
+                                <span className={cn(
+                                    "text-[11px] font-medium transition-colors duration-300",
+                                    isActive
+                                        ? "text-gray-900 dark:text-white font-bold"
+                                        : "text-gray-500 dark:text-gray-400"
+                                )}>
+                                    {item.label}
+                                </span>
                             </button>
                         )
                     })}
