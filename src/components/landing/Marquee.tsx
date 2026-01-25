@@ -17,7 +17,7 @@ export function Marquee({
     children?: React.ReactNode
     vertical?: boolean
     repeat?: number
-    [key: string]: any
+    [key: string]: unknown
 }) {
     return (
         <div

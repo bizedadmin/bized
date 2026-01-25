@@ -8,10 +8,7 @@ export function LandingFeatures() {
         <section className="py-24 px-4 sm:px-8 bg-gray-50 dark:bg-zinc-900/50">
             <div className="max-w-7xl mx-auto space-y-16">
                 <div className="text-center space-y-4 max-w-3xl mx-auto">
-                    <h2 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white tracking-tight">
-                        Run your entire business <br />
-                        <span className="text-blue-600">from your pocket.</span>
-                    </h2>
+                    <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-6">What&apos;s included?</h2>
                     <p className="text-lg text-gray-500 dark:text-gray-400">
                         Everything you need to sell online, manage customers, and grow your brand.
                     </p>
@@ -45,7 +42,7 @@ export function LandingFeatures() {
                                 transition={{ delay: 0.4 }}
                                 className="bg-green-600 text-white p-3 rounded-2xl rounded-tl-none shadow-md text-sm max-w-[220px]"
                             >
-                                Sure! Here's a secure payment link for your order #8821.
+                                Sure! Here&apos;s a secure payment link for your order #8821.
                             </motion.div>
                         </div>
                     </div>

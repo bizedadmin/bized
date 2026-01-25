@@ -1,10 +1,10 @@
 "use client";
 import React from "react";
-import Navbar from "@/components/landing/Navbar";
+import { Navbar } from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import Link from "next/link";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import Hero from "@/components/landing/Hero";
+import { Hero } from "@/components/landing/Hero";
 import FinalCTA from "@/components/landing/FinalCTA";
 
 export default function Home() {

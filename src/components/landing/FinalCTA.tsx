@@ -7,7 +7,12 @@ const FinalCTA = () => {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
+        // Enforce a small timeout to ensure it runs after mount paint if strictly needed, 
+        // or just accept it runs on mount. 
+        // The lint error warns about synchronous set state, which is valid for mount effects but can trigger re-renders.
+        // We can wrap in requestAnimationFrame or similar to decouple.
+        const timer = requestAnimationFrame(() => setMounted(true));
+        return () => cancelAnimationFrame(timer);
     }, []);
 
     // Prevent hydration mismatch and reference errors on mobile by only rendering animations after mount

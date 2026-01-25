@@ -1,0 +1,41 @@
+
+/Users/mac/bized/src/components/landing/Features.tsx
+  6:5  warning  'Banknote' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mac/bized/src/components/landing/Footer.tsx
+   7:10  warning  'cn' is defined but never used               @typescript-eslint/no-unused-vars
+  11:11  warning  'isDark' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mac/bized/src/components/landing/InvoiceMockup.tsx
+  33:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/mac/bized/src/components/landing/LandingFeatures.tsx
+  3:43  warning  'Smartphone' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mac/bized/src/components/landing/LeadCapture.tsx
+  27:18  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mac/bized/src/components/landing/Navbar.tsx
+  10:5   warning  'SheetTitle' is defined but never used                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  20:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  53:41  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/mac/bized/src/components/landing/OmnichannelAnimation.tsx
+  105:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/mac/bized/src/components/landing/Process.tsx
+  9:13  warning  't' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mac/bized/src/components/landing/TrustRow.tsx
+  1:8  warning  'Image' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/mac/bized/src/components/landing/TrustedBy.tsx
+  4:10  warning  'motion' is defined but never used              @typescript-eslint/no-unused-vars
+  6:7   warning  'companies' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/mac/bized/src/components/landing/WalletMockup.tsx
+  20:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  49:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+✖ 16 problems (0 errors, 16 warnings)
+
