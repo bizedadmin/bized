@@ -16,11 +16,11 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Bized.app - Get Discovered Online. Unified Chat. Total Control.",
+  title: "Bized.app | Digital Identity Ecosystem",
   description: "The Hybrid Commerce OS for small businesses. Sell products and book services across WhatsApp, Instagram, and Google with one link.",
   applicationName: "Bized",
   authors: [{ name: "Bized Team" }],
-  keywords: ["Hybrid Commerce", "WhatsApp Business API", "Online Store", "Appointment Scheduling", "Unified Inbox", "Small Business OS", "Discovery", "Click-to-chat"],
+  keywords: ["digital identity", "mini storefront", "whatsapp business automation", "google maps sync", "omnichannel business", "bized"],
   openGraph: {
     title: "Bized.app - Get Discovered Online.",
     description: "The Hybrid Commerce OS for small businesses.",
