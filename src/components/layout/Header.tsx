@@ -89,7 +89,7 @@ export function Header() {
                     <div className="h-full flex items-center px-4 md:px-6">
                         <Link href="/" className="flex items-center gap-2">
                             <Logo className="w-11 h-11" />
-                            <span className="text-xl font-bold text-[var(--color-primary)]">Bized</span>
+                            <span className="text-xl font-bold text-[var(--color-primary)]">Bized.app</span>
                         </Link>
                     </div>
                 )}
@@ -192,9 +192,6 @@ export function Header() {
                             <Link href="/#pricing" className="text-sm font-medium text-[var(--color-on-surface)]/80 hover:text-[var(--color-primary)] transition-colors">
                                 Pricing
                             </Link>
-                            <Link href="#" className="text-sm font-medium text-[var(--color-on-surface)]/80 hover:text-[var(--color-primary)] transition-colors">
-                                About
-                            </Link>
                         </nav>
                     )}
 
@@ -209,7 +206,7 @@ export function Header() {
                                         <Button variant="text" className="px-4">Log in</Button>
                                     </Link>
                                     <Link href="/signup">
-                                        <Button className="px-4">Get Started</Button>
+                                        <Button className="px-4">Start free</Button>
                                     </Link>
                                 </>
                             ) : (
