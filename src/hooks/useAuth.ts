@@ -24,7 +24,7 @@ export function useAuth() {
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
     const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get("callbackUrl") || "/admin/stores";
+    const callbackUrl = searchParams.get("callbackUrl") || "/businesses";
     const checkCalled = useRef(false);
 
     // Private helper to complete NextAuth sign-in

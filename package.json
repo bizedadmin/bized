@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "(lsof -ti:3000 | xargs kill -9 || true) && next dev -p 3000",
+    "dev": "kill-port 3000 && next dev -p 3000",
     "dev:ngrok": "concurrently \"npm run dev\" \"npm run share\"",
     "share": "(killall ngrok || true) && ngrok http --domain=josephina-tripodic-histographically.ngrok-free.dev 3000",
     "build": "next build",

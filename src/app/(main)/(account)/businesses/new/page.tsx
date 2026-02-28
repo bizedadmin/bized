@@ -51,7 +51,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function NewStoreWizard() {
+export default function NewBusinessWizard() {
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         name: "",
@@ -90,7 +90,7 @@ export default function NewStoreWizard() {
                 });
                 const data = await res.json();
                 if (!res.ok) {
-                    setError(data.error || "Failed to create store");
+                    setError(data.error || "Failed to create business");
                     return;
                 }
                 setShowSubscription(true);
@@ -218,7 +218,7 @@ export default function NewStoreWizard() {
                         </div>
 
                         <h1 className="text-3xl md:text-4xl font-black text-[var(--color-on-surface)] tracking-tight mb-3">
-                            Your store is ready! 🎉
+                            Your business is ready! 🎉
                         </h1>
                         <p className="text-base text-[var(--color-on-surface-variant)] opacity-70 mb-10 max-w-md">
                             Start with full access for just $1. Cancel anytime.
@@ -302,7 +302,7 @@ export default function NewStoreWizard() {
 
                         {/* CTA Button */}
                         <button
-                            onClick={() => router.push('/admin/stores')}
+                            onClick={() => router.push('/businesses')}
                             className="w-full max-w-lg h-16 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-lg shadow-xl shadow-[var(--color-primary)]/20 hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-3 mb-4"
                         >
                             Start for $1 <span className="text-[var(--color-on-primary)] opacity-50 line-through">$50/mo</span>
@@ -310,7 +310,7 @@ export default function NewStoreWizard() {
 
                         {/* Skip */}
                         <button
-                            onClick={() => router.push('/admin/stores')}
+                            onClick={() => router.push('/businesses')}
                             className="text-sm font-bold text-[var(--color-on-surface-variant)] opacity-50 hover:opacity-100 transition-opacity py-4"
                         >
                             Skip for now
@@ -374,7 +374,7 @@ export default function NewStoreWizard() {
 
                                         <div className="grid gap-6 sm:grid-cols-2">
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold text-[var(--color-on-surface-variant)] opacity-60 ml-1">Store name</label>
+                                                <label className="text-xs font-bold text-[var(--color-on-surface-variant)] opacity-60 ml-1">Business name</label>
                                                 <input
                                                     type="text"
                                                     value={formData.name}
@@ -384,7 +384,7 @@ export default function NewStoreWizard() {
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-xs font-bold text-[var(--color-on-surface-variant)] opacity-60 ml-1">Store link</label>
+                                                <label className="text-xs font-bold text-[var(--color-on-surface-variant)] opacity-60 ml-1">Business link</label>
                                                 <div className="relative">
                                                     <input
                                                         type="text"

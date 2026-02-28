@@ -110,7 +110,7 @@ export default function ProductsOverviewPage() {
                             ))}
                             {outOfStock.length > 3 && (
                                 <div className="text-center pt-2">
-                                    <Link href="/admin/products/inventory" className="text-xs font-bold text-[var(--color-primary)] hover:underline">
+                                    <Link href="/admin/inventory" className="text-xs font-bold text-[var(--color-primary)] hover:underline">
                                         + {outOfStock.length - 3} more items out of stock
                                     </Link>
                                 </div>

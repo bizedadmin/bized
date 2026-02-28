@@ -89,7 +89,7 @@ export function Sheet({ open, onClose, title, icon, children, footer }: SheetPro
                         </div>
 
                         {/* Scrollable Content */}
-                        <div className="flex-1 overflow-y-auto px-6 py-5">
+                        <div className="flex-1 overflow-y-auto px-6 pt-5 pb-12">
                             {children}
                         </div>
 

@@ -30,7 +30,15 @@ import {
     BarChart3,
     ChevronRight,
     Instagram,
-    Search
+    Search,
+    List,
+    ArrowRightLeft,
+    ScrollText,
+    TrendingDown,
+    Scale,
+    LineChart,
+    Calendar,
+    Truck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AiChatSheet } from "@/components/admin/AiChatSheet";
@@ -54,32 +62,40 @@ const subNavItems: Record<string, NavItem[]> = {
         { label: "Overview", href: "/admin/products", icon: LayoutDashboard },
         { label: "All Products", href: "/admin/products/all", icon: Package },
         { label: "Categories", href: "/admin/products/categories", icon: FileText },
-        { label: "Inventory", href: "/admin/products/inventory", icon: BarChart3 },
-    ],
-    "Tickets": [
-        { label: "Overview", href: "/admin/calendar", icon: LayoutDashboard },
-        { label: "Availability", href: "/admin/calendar/availability", icon: Clock },
-        { label: "History", href: "/admin/calendar/history", icon: History },
     ],
     "Orders": [
-        { label: "Overview", href: "/admin/orders", icon: LayoutDashboard },
-        { label: "Active", href: "/admin/orders/active", icon: ShoppingBag },
-        { label: "Completed", href: "/admin/orders/completed", icon: CheckCircle2 },
+        { label: "All", href: "/admin/orders", icon: List },
+        { label: "Payments", href: "/admin/orders/payments", icon: CreditCard },
+        { label: "Calendar", href: "/admin/orders/calendar", icon: Calendar },
+        { label: "Fulfillment", href: "/admin/orders/fulfillment", icon: Truck },
+        { label: "Invoices", href: "/admin/orders/invoices", icon: Receipt },
     ],
-    "Customers": [
-        { label: "Overview", href: "/admin/customers", icon: LayoutDashboard },
-        { label: "All Customers", href: "/admin/customers/all", icon: Users },
-        { label: "Groups", href: "/admin/customers/groups", icon: Tags },
+    "Inventory": [
+        { label: "Overview", href: "/admin/inventory", icon: LayoutDashboard },
+        { label: "Stock Levels", href: "/admin/inventory", icon: BarChart3 },
     ],
     "POS": [
         { label: "Register", href: "/admin/pos", icon: CreditCard },
-        { label: "History", href: "/admin/pos/history", icon: Receipt },
-        { label: "Sales", href: "/admin/pos/sales", icon: BarChartHorizontal },
+        { label: "Transactions", href: "/admin/pos/transactions", icon: ArrowRightLeft },
+        { label: "Sessions", href: "/admin/pos/sessions", icon: Clock },
+        { label: "Customers", href: "/admin/pos/customers", icon: Users },
+        { label: "Reports", href: "/admin/pos/reports", icon: BarChartHorizontal },
     ],
     "Finance": [
         { label: "Overview", href: "/admin/finance", icon: LayoutDashboard },
+        { label: "Chart of Accounts", href: "/admin/finance/accounts", icon: List },
+        { label: "Transactions", href: "/admin/finance/transactions", icon: ArrowRightLeft },
+        { label: "Invoices", href: "/admin/finance/invoices", icon: ScrollText },
+        { label: "Bills", href: "/admin/finance/bills", icon: FileText },
+        { label: "Expenses", href: "/admin/finance/expenses", icon: TrendingDown },
         { label: "Payouts", href: "/admin/finance/payouts", icon: Wallet },
+        { label: "Reconciliation", href: "/admin/finance/reconciliation", icon: Scale },
         { label: "Tax Reports", href: "/admin/finance/tax", icon: FilePieChart },
+        { label: "Financial Reports", href: "/admin/finance/reports", icon: LineChart },
+    ],
+    "Users": [
+        { label: "Team Directory", href: "/admin/users/team", icon: UserPlus },
+        { label: "Permissions", href: "/admin/users/permissions", icon: FileText },
     ],
 };
 
@@ -87,11 +103,11 @@ const railItems: NavItem[] = [
     { label: "Home", icon: LayoutDashboard, href: "/admin" },
     { label: "Store", icon: Store, href: "/admin/storefront" },
     { label: "Catalog", icon: Package, href: "/admin/products" },
-    { label: "Tickets", icon: Ticket, href: "/admin/calendar" },
     { label: "Orders", icon: ShoppingBag, href: "/admin/orders" },
-    { label: "Customers", icon: Users, href: "/admin/customers" },
+    { label: "Inventory", icon: BarChart3, href: "/admin/inventory" },
     { label: "POS", icon: CreditCard, href: "/admin/pos" },
     { label: "Finance", icon: Landmark, href: "/admin/finance" },
+    { label: "Users", icon: UserPlus, href: "/admin/users" },
 ];
 
 const NavigationRailItem = ({
@@ -191,7 +207,7 @@ export default function AdminLayout({
         pathname === item.href || (item.href !== "/admin" && pathname?.startsWith(item.href))
     )?.label || (pathname?.startsWith("/admin/storefront") ? "Store" : pathname?.startsWith("/admin/products") ? "Catalog" : "Home");
 
-    const activePersistentSection = (activeRailItemLabel === "Store" || activeRailItemLabel === "Catalog") ? activeRailItemLabel : null;
+    const activePersistentSection = (activeRailItemLabel === "Store" || activeRailItemLabel === "Catalog" || activeRailItemLabel === "Users" || activeRailItemLabel === "Finance" || activeRailItemLabel === "Orders" || activeRailItemLabel === "POS") ? activeRailItemLabel : null;
 
     return (
         <HelpCenterProvider>
@@ -336,7 +352,7 @@ export default function AdminLayout({
                             exit={{ opacity: 0, x: -10 }}
                             onMouseEnter={handleFlyoutMouseEnter}
                             onMouseLeave={handleFlyoutMouseLeave}
-                            className="fixed left-20 top-16 h-[calc(100vh-64px)] w-64 bg-[var(--color-surface-container)] border-r border-[var(--color-outline-variant)]/10 shadow-2xl z-[110] flex flex-col overflow-hidden rounded-r-[2rem]"
+                            className="fixed left-20 top-16 h-[calc(100vh-64px)] w-64 bg-[var(--color-surface-container)] border-r border-[var(--color-outline-variant)]/10 shadow-2xl z-[110] flex flex-col overflow-hidden"
                         >
                             <div className="p-6 pb-2">
                                 <span className="text-[10px] font-black text-[var(--color-primary)] uppercase tracking-widest opacity-60">

@@ -15,7 +15,7 @@ export default function DashboardLayout({
     // Redirect if no business selected
     useEffect(() => {
         if (!isLoading && !currentBusiness) {
-            router.push("/admin/stores");
+            router.push("/businesses");
         }
     }, [currentBusiness, isLoading, router]);
 

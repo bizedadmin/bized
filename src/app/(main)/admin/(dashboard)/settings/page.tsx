@@ -980,7 +980,7 @@ export default function SettingsPage() {
 
                                             <div className="space-y-3">
                                                 <div className="flex items-center justify-between ml-1">
-                                                    <label className="text-sm font-black text-[var(--color-on-surface-variant)] opacity-60">Sales agent instructions (system prompt)</label>
+                                                    <label className="text-sm font-black text-[var(--color-on-surface-variant)] opacity-60">AI Assistant instructions (system prompt)</label>
                                                 </div>
 
                                                 {/* Prompt Templates */}
@@ -1014,7 +1014,7 @@ export default function SettingsPage() {
                                                     className="w-full min-h-[160px] p-5 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/20 focus:border-[var(--color-primary)] outline-none transition-all font-medium resize-none text-sm"
                                                     placeholder="e.g. You are a helpful sales assistant for Bized. Your goal is to help customers find products and answer questions about the store..."
                                                 />
-                                                <p className="text-[10px] text-[var(--color-on-surface-variant)] ml-1 italic opacity-40">Choose a template above or define how your AI agent should behave manually.</p>
+                                                <p className="text-[10px] text-[var(--color-on-surface-variant)] ml-1 italic opacity-40">Choose a template above or define how your AI Assistant should behave manually.</p>
                                             </div>
                                         </div>
                                     </div>

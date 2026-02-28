@@ -94,12 +94,25 @@ export async function POST(req: NextRequest) {
         };
 
         const result = await stores.insertOne(store);
+        const storeId = result.insertedId.toString();
+
+        // Seed default Chart of Accounts with standard codes immediately
+        const defaultAccounts = [
+            { storeId, code: "1000", name: "Cash on Hand", type: "Asset", category: "Current Asset", status: "active", "@type": "BankAccount" },
+            { storeId, code: "1200", name: "Accounts Receivable", type: "Asset", category: "Current Asset", status: "active", "@type": "AccountingService" },
+            { storeId, code: "2000", name: "Accounts Payable", type: "Liability", category: "Current Liability", status: "active", "@type": "AccountingService" },
+            { storeId, code: "4000", name: "Sales Revenue", type: "Revenue", category: "Operating Revenue", status: "active", "@type": "AccountingService" },
+            { storeId, code: "5000", name: "Cost of Goods Sold", type: "Expense", category: "Cost of Sales", status: "active", "@type": "AccountingService" },
+            { storeId, code: "3000", name: "Owner's Equity", type: "Equity", category: "Equity", status: "active", "@type": "AccountingService" }
+        ].map(acc => ({ ...acc, createdAt: new Date(), updatedAt: new Date() }));
+
+        await db.collection("finance_accounts").insertMany(defaultAccounts);
 
         return NextResponse.json(
             {
-                id: result.insertedId.toString(),
+                id: storeId,
                 slug: sanitizedSlug,
-                message: "Store created successfully"
+                message: "Store created successfully with default ledger accounts"
             },
             { status: 201 }
         );

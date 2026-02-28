@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
@@ -21,6 +21,9 @@ import {
     Bot,
     Bell,
     MessageSquare,
+    Compass,
+    Inbox,
+    ArrowLeft,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -28,6 +31,7 @@ import { useBusiness } from "@/contexts/BusinessContext";
 import { useAi } from "@/contexts/AiContext";
 
 export function Header() {
+    const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
 
@@ -80,12 +84,14 @@ export function Header() {
     const { currentBusiness } = useBusiness();
     const { setIsChatOpen } = useAi();
     const isAdmin = pathname?.startsWith("/admin");
+    const isStoresPage = pathname?.startsWith("/businesses");
+    const isAccountPage = ["/explore", "/you", "/inbox", "/businesses"].some(route => pathname?.startsWith(route));
 
     return (
         <header className="sticky top-0 z-50 w-full bg-[var(--color-surface-container-low)]/80 backdrop-blur-md border-b border-[var(--color-outline-variant)]/10">
             <div className="w-full h-16 flex items-center">
-                {/* Logo Area - Hidden in Admin as it's in the Rail */}
-                {!isAdmin && (
+                {/* Logo Area */}
+                {(!isAdmin || isStoresPage) && (
                     <div className="h-full flex items-center px-4 md:px-6">
                         <Link href="/" className="flex items-center gap-2">
                             <Logo className="w-11 h-11" />
@@ -96,56 +102,83 @@ export function Header() {
 
                 <div className={cn(
                     "flex-1 h-full flex items-center justify-between px-4 md:px-6",
-                    isAdmin && "md:pl-20" // Fixed legacy rail width offset
+                    (isAdmin && !isStoresPage) && "md:pl-20" // Fixed legacy rail width offset
                 )}>
                     <div className="flex items-center gap-4 lg:gap-6">
                         {/* Store Selector & Breadcrumbs */}
-                        {isAdmin && (
-                            <div className="flex items-center gap-3">
-                                {/* Store Selector */}
-                                <Link href="/admin/stores" className="flex items-center gap-2 p-1.5 pr-3 rounded-xl hover:bg-[var(--color-surface-container-high)] transition-colors group border border-transparent hover:border-[var(--color-outline-variant)]/10">
-                                    <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)] flex items-center justify-center text-[var(--color-on-primary)] shadow-sm">
-                                        {currentBusiness?.logoUrl ? (
-                                            <img src={currentBusiness.logoUrl} alt={currentBusiness.name} className="w-8 h-8 rounded-lg object-cover" />
-                                        ) : (
-                                            <Store size={16} />
-                                        )}
-                                    </div>
-                                    <div className="hidden md:flex flex-col">
-                                        <span className="text-sm font-bold text-[var(--color-on-surface)] leading-none max-w-[150px] truncate">{currentBusiness?.name || "Select Store"}</span>
-                                        <span className="text-[10px] text-[var(--color-on-surface-variant)] opacity-60 leading-none mt-1">switch store</span>
-                                    </div>
-                                    <ChevronDown size={14} className="text-[var(--color-on-surface-variant)] opacity-50 group-hover:opacity-100 transition-opacity ml-1" />
-                                </Link>
-
-                                {/* Breadcrumbs */}
-                                {pathname && pathname.split('/').filter(Boolean).length > 1 && (
-                                    <>
-                                        <Slash size={16} className="text-[var(--color-on-surface-variant)]/20 -rotate-12" />
-                                        <div className="flex items-center gap-2">
-                                            {pathname.split('/').filter(Boolean).slice(1).map((segment, index, array) => {
-                                                const isLast = index === array.length - 1;
-                                                return (
-                                                    <div key={index} className="flex items-center gap-2">
-                                                        <span className={cn(
-                                                            "text-sm font-medium capitalize",
-                                                            isLast ? "text-[var(--color-on-surface)]" : "text-[var(--color-on-surface-variant)]"
-                                                        )}>
-                                                            {segment.replace(/-/g, ' ')}
-                                                        </span>
-                                                        {!isLast && <span className="text-[var(--color-on-surface-variant)]/40">/</span>}
-                                                    </div>
-                                                );
-                                            })}
+                        {(isAdmin && !isStoresPage) && (
+                            <div className="flex items-center h-full">
+                                {/* Company Switch Block - Fixed width to align with sub-nav (256px) */}
+                                <div className="md:w-64 flex items-center pr-4">
+                                    <Link href="/businesses" className="flex items-center gap-2 p-1.5 pr-3 rounded-xl hover:bg-[var(--color-surface-container-high)] transition-colors group border border-transparent hover:border-[var(--color-outline-variant)]/10">
+                                        <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)] flex items-center justify-center text-[var(--color-on-primary)] shadow-sm">
+                                            {currentBusiness?.logoUrl ? (
+                                                <img src={currentBusiness.logoUrl} alt={currentBusiness.name} className="w-8 h-8 rounded-lg object-cover" />
+                                            ) : (
+                                                <Store size={16} />
+                                            )}
                                         </div>
-                                    </>
-                                )}
+                                        <div className="hidden md:flex flex-col">
+                                            <span className="text-sm font-bold text-[var(--color-on-surface)] leading-none max-w-[150px] truncate">{currentBusiness?.name || "Select Store"}</span>
+                                            <span className="text-[10px] text-[var(--color-on-surface-variant)] opacity-60 leading-none mt-1">switch store</span>
+                                        </div>
+                                        <ChevronDown size={14} className="text-[var(--color-on-surface-variant)] opacity-50 group-hover:opacity-100 transition-opacity ml-1" />
+                                    </Link>
+                                </div>
+
+                                {/* Main Separator - Aligned with the sub-nav menu border */}
+                                <div className="hidden md:block h-10 w-[1px] bg-[var(--color-outline-variant)]/20 shadow-sm" />
+
+                                {/* Action & Breadcrumb Area */}
+                                <div className="flex items-center gap-4 pl-6">
+                                    {pathname === "/admin/pos" ? (
+                                        <div className="flex items-center gap-4">
+                                            <Button
+                                                variant="ghost"
+                                                onClick={() => router.push("/admin/pos/transactions")}
+                                                className="h-10 w-10 p-0 rounded-xl hover:bg-[var(--color-surface-container-high)] border border-transparent hover:border-[var(--color-outline-variant)]/10"
+                                            >
+                                                <ArrowLeft size={20} />
+                                            </Button>
+                                            <div className="flex flex-col">
+                                                <h1 className="text-sm font-black text-[var(--color-on-surface)] uppercase tracking-tight">New Order</h1>
+                                                <div className="flex items-center gap-1.5 opacity-40">
+                                                    <span className="text-[10px] font-bold uppercase tracking-widest">Pos</span>
+                                                    <ChevronRight size={10} />
+                                                    <span className="text-[10px] font-bold uppercase tracking-widest">Register</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {/* Standard Breadcrumbs for other pages */}
+                                            {pathname && pathname.split('/').filter(Boolean).length > 1 && (
+                                                <div className="flex items-center gap-2">
+                                                    {pathname.split('/').filter(Boolean).slice(1).map((segment, index, array) => {
+                                                        const isLast = index === array.length - 1;
+                                                        return (
+                                                            <div key={index} className="flex items-center gap-2">
+                                                                <span className={cn(
+                                                                    "text-xs font-black uppercase tracking-widest transition-opacity",
+                                                                    isLast ? "text-[var(--color-on-surface)]" : "text-[var(--color-on-surface-variant)] opacity-40"
+                                                                )}>
+                                                                    {segment.replace(/-/g, ' ')}
+                                                                </span>
+                                                                {!isLast && <ChevronRight size={14} className="text-[var(--color-on-surface-variant)]/20" />}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>
 
-                    {/* Desktop Navigation - Hidden in Admin */}
-                    {!isAdmin && (
+                    {/* Desktop Navigation - Hidden in Admin and Account */}
+                    {(!isAdmin && !isAccountPage) && (
                         <nav className="hidden md:flex items-center gap-8">
                             {/* Features Dropdown */}
                             <div
@@ -198,6 +231,35 @@ export function Header() {
                         </nav>
                     )}
 
+                    {/* Desktop Account Navigation - Visible only on Account pages */}
+                    {(!isAdmin && isAccountPage) && (
+                        <nav className="hidden md:flex flex-1 justify-center items-center gap-2 px-4 h-full">
+                            {[
+                                { label: "Explore", icon: <Compass className="w-5 h-5" />, href: "/explore" },
+                                { label: "You", icon: <User className="w-5 h-5" />, href: "/you" },
+                                { label: "Inbox", icon: <Inbox className="w-5 h-5" />, href: "/inbox" },
+                                { label: "Business", icon: <Store className="w-5 h-5" />, href: "/businesses" },
+                            ].map((item) => {
+                                const isActive = pathname?.startsWith(item.href);
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        className={cn(
+                                            "flex items-center gap-2 px-5 py-2.5 rounded-full font-bold transition-all whitespace-nowrap text-sm",
+                                            isActive
+                                                ? "bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-md shadow-[var(--color-primary)]/20"
+                                                : "text-[var(--color-on-surface-variant)] hover:bg-[var(--color-surface-container-high)] hover:text-[var(--color-on-surface)]"
+                                        )}
+                                    >
+                                        <span className={isActive ? "" : "opacity-70"}>{item.icon}</span>
+                                        <span>{item.label}</span>
+                                    </Link>
+                                );
+                            })}
+                        </nav>
+                    )}
+
 
 
                     {/* Desktop Auth/Session Buttons - Hidden in Admin as they moved to sidebar */}
@@ -231,13 +293,13 @@ export function Header() {
 
                     {isAdmin && (
                         <div className="flex items-center gap-3">
-                            <button
-                                onClick={() => setIsChatOpen(true)}
+                            <Link
+                                href="/admin/ai-assistant"
                                 className="flex items-center gap-2 p-2 rounded-xl hover:bg-[var(--color-primary)]/10 text-[var(--color-primary)] transition-all group border border-transparent hover:border-[var(--color-primary)]/20"
                             >
                                 <Bot size={20} className="group-hover:scale-110 transition-transform" />
-                                <span className="hidden lg:inline text-xs font-bold uppercase tracking-wider">AI AGENT</span>
-                            </button>
+                                <span className="hidden lg:inline text-xs font-bold uppercase tracking-wider">AI ASSISTANT</span>
+                            </Link>
 
                             <div className="h-8 w-[1px] bg-[var(--color-outline-variant)]/20 mx-1 hidden sm:block" />
 
@@ -261,14 +323,16 @@ export function Header() {
                         </div>
                     )}
 
-                    {/* Mobile Menu Toggle */}
-                    <button
-                        className="md:hidden p-2 text-[var(--color-on-surface)]"
-                        onClick={toggleMenu}
-                        aria-label="Toggle menu"
-                    >
-                        {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                    </button>
+                    {/* Mobile Menu Toggle - Hidden in Admin and Account */}
+                    {(!isAdmin && !isAccountPage) && (
+                        <button
+                            className="md:hidden p-2 text-[var(--color-on-surface)]"
+                            onClick={toggleMenu}
+                            aria-label="Toggle menu"
+                        >
+                            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                        </button>
+                    )}
                 </div>
             </div>
 

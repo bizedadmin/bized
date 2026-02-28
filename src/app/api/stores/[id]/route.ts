@@ -86,7 +86,7 @@ export async function PATCH(
             // Footer / Legal
             "privacyPolicyUrl", "termsUrl", "footerText",
             // List data (arrays)
-            "products", "services", "reviews", "faq", "productCategories",
+            "products", "services", "reviews", "faq", "productCategories", "teamMembers",
             // AI Configuration
             "aiConfig",
         ];

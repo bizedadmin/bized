@@ -128,6 +128,42 @@ export const HELP_CONTENT = {
     productIdentification: {
         title: "Product Identification",
         description: "Providing a clear Brand and GTIN (Barcode) is essential for Google Shopping, Amazon, and other marketplaces. It helps search engines verify that your product is authentic."
+    },
+    chartOfAccounts: {
+        title: "Chart of Accounts",
+        description: "The complete list of every account your business uses to record financial transactions. Based on global accounting standards, it categorizes money into Assets, Liabilities, Equity, Revenue, and Expenses."
+    },
+    assetAccount: {
+        title: "Asset Account",
+        description: "Represents resources owned by your business that have economic value, such as Cash, Bank accounts, Inventory, or money owed to you by customers (Accounts Receivable)."
+    },
+    liabilityAccount: {
+        title: "Liability Account",
+        description: "Accounts that track what your business owes to others, such as vendor bills (Accounts Payable), loans, or taxes collected but not yet paid."
+    },
+    equityAccount: {
+        title: "Equity Account",
+        description: "The net value of your business, representing the owner's investment plus retained earnings (profits kept in the business)."
+    },
+    revenueAccount: {
+        title: "Revenue Account",
+        description: "Tracks the income generated from your primary business activities, like Product Sales or Service Fees."
+    },
+    expenseAccount: {
+        title: "Expense Account",
+        description: "Tracks the costs incurred to generate revenue, such as Rent, Utilities, Shipping, or the Cost of Goods Sold."
+    },
+    invoiceStatus: {
+        title: "Invoice Status",
+        description: "'Draft' means it's not yet official. 'Sent' means the customer has received it. 'Paid' is completed, and 'Overdue' means the payment date has passed without settlement."
+    },
+    bankReconciliation: {
+        title: "Bank Reconciliation",
+        description: "The process of matching your internal ledger transactions with your actual bank statement to ensure your records are 100% accurate and no transactions are missing."
+    },
+    taxLiability: {
+        title: "Tax Liability",
+        description: "The total amount of tax your business has collected from customers (Sales Tax/VAT/GST) minus the tax you've paid on business purchases. This is what you owe to the government."
     }
 } as const;
 

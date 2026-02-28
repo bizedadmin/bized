@@ -99,7 +99,7 @@ export function AiChatSheet() {
         <Sheet
             open={isChatOpen}
             onClose={() => setIsChatOpen(false)}
-            title="Sales AI Agent"
+            title="AI Assistant"
             icon={<Bot size={20} />}
             footer={
                 <div className="flex flex-col gap-3">
@@ -124,7 +124,7 @@ export function AiChatSheet() {
                             value={input}
                             onChange={e => setInput(e.target.value)}
                             onKeyDown={e => e.key === "Enter" && handleSend()}
-                            placeholder="Ask your Sales AI..."
+                            placeholder="Ask your AI Assistant..."
                             className="flex-1 h-12 px-4 rounded-xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/20 focus:border-[var(--color-primary)] outline-none transition-all text-sm"
                         />
                         <button
@@ -142,7 +142,7 @@ export function AiChatSheet() {
                 {messages.length === 0 && (
                     <div className="flex-1 flex flex-col items-center justify-center text-center p-8 opacity-40">
                         <Bot size={48} className="mb-4" />
-                        <h3 className="text-lg font-bold mb-1">Your AI Sales Assistant</h3>
+                        <h3 className="text-lg font-bold mb-1">Your AI Assistant</h3>
                         <p className="text-xs">I can help you write product descriptions, improve your store&apos;s branding, or answer business questions.</p>
                         {!(currentBusiness?.aiConfig?.openaiApiKey || currentBusiness?.aiConfig?.googleApiKey) && (
                             <Link

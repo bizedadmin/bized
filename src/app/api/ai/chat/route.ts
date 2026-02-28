@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        // Prepare system prompt for "Sales AI Agent"
+        // Prepare system prompt for "AI Assistant"
         const businessContext = `
             Business Name: ${business?.name}
             Industry: ${business?.industry}
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
         `;
 
         const systemPrompt = `
-            ${aiConfig.systemPrompt || "You are a proactive Sales AI Agent for Bized."}
+            ${aiConfig.systemPrompt || "You are a proactive AI Assistant for Bized."}
             
             BUSINESS CONTEXT:
             ${businessContext}

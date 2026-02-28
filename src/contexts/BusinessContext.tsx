@@ -132,6 +132,17 @@ export interface TaxRate {
     isDefault?: boolean;
 }
 
+export interface TeamMember {
+    id: string;
+    name: string;
+    email: string;
+    role: "Owner" | "Admin" | "Staff";
+    status: "Active" | "Pending";
+    avatar?: string;
+    lastActive?: string;
+    invitedAt?: string;
+}
+
 export interface Business {
     _id: string;
     name: string;
@@ -193,6 +204,7 @@ export interface Business {
     services?: ServiceItem[];
     reviews?: ReviewItem[];
     faq?: FAQItem[];
+    teamMembers?: TeamMember[];
     aiConfig?: {
         provider?: "openai" | "google";
         openaiApiKey?: string;
