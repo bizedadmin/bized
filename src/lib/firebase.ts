@@ -1,7 +1,6 @@
+
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getStorage } from "firebase/storage";
-import { getMessaging, isSupported } from "firebase/messaging";
+import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,29 +11,8 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase (Singleton pattern)
+// Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const auth = getAuth(app);
 
-export const auth = getAuth(app);
-export const storage = getStorage(app);
-export const googleProvider = new GoogleAuthProvider();
-
-import { getAnalytics, isSupported as isAnalyticsSupported } from "firebase/analytics";
-
-// Messaging is only supported in browser environments
-export const messaging = async () => {
-    if (typeof window !== 'undefined' && await isSupported()) {
-        return getMessaging(app);
-    }
-    return null;
-};
-
-// Analytics is only supported in browser environments
-export const analytics = async () => {
-    if (typeof window !== 'undefined' && await isAnalyticsSupported()) {
-        return getAnalytics(app);
-    }
-    return null;
-};
-
-export default app;
+export { app, auth };

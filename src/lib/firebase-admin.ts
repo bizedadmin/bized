@@ -1,41 +1,40 @@
-import admin from 'firebase-admin';
 
-// Initialize Firebase Admin SDK
-if (!admin.apps.length) {
-    try {
-        const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n').replace(/"/g, '');
-        const projectId = process.env.FIREBASE_PROJECT_ID;
-        const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-        const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+import "server-only";
+import admin from "firebase-admin";
 
-        admin.initializeApp({
-            credential: admin.credential.cert({
-                projectId,
-                clientEmail,
-                privateKey,
-            }),
-            storageBucket,
-        });
-
-        const bucket = admin.storage().bucket(storageBucket);
-
-        // Configure CORS to allow image editing from the web app
-        bucket.setCorsConfiguration([
-            {
-                origin: ['*'],
-                method: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'],
-                responseHeader: ['Content-Type', 'Access-Control-Allow-Origin', 'x-goog-resumable'],
-                maxAgeSeconds: 3600
-            }
-        ]).catch(err => console.error('Error setting Firebase CORS:', err));
-
-        // console.log('Firebase Admin: Initialization successful');
-    } catch (error) {
-        console.error('Firebase Admin: Initialization error:', error);
-    }
+interface FirebaseAdminConfig {
+    projectId: string;
+    clientEmail: string;
+    privateKey: string;
+    storageBucket?: string;
 }
 
-export const adminAuth = admin.auth();
-export const adminStorage = admin.storage();
-export const adminMessaging = admin.messaging();
-export default admin;
+function formatPrivateKey(key: string) {
+    return key.replace(/\\n/g, "\n");
+}
+
+export function createFirebaseAdminApp(config: FirebaseAdminConfig) {
+    if (admin.apps.length > 0) {
+        return admin.app();
+    }
+
+    return admin.initializeApp({
+        credential: admin.credential.cert({
+            projectId: config.projectId,
+            clientEmail: config.clientEmail,
+            privateKey: formatPrivateKey(config.privateKey),
+        }),
+        storageBucket: config.storageBucket,
+    });
+}
+
+export function initAdmin() {
+    const params = {
+        projectId: process.env.FIREBASE_PROJECT_ID as string,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL as string,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY as string,
+        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET as string,
+    };
+
+    return createFirebaseAdminApp(params);
+}

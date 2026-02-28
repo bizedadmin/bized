@@ -1,0 +1,11 @@
+
+/Users/mac/bized/src/components/admin/products/ProductForm.tsx
+    13:81  warning  'ProductVariant' is defined but never used                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+    96:27  warning  'setIsAiImproving' is assigned a value but never used                                                                                                                                                                                                                                    @typescript-eslint/no-unused-vars
+  1403:73  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  1523:91  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  1730:45  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  1813:53  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+✖ 6 problems (1 error, 5 warnings)
+

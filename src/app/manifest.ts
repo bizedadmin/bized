@@ -1,41 +1,20 @@
-import { MetadataRoute } from 'next';
+import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'Bized - Business Operating System',
+        name: 'Bized',
         short_name: 'Bized',
-        description: 'Manage your business, store, and links in one place.',
+        description: 'The Hybrid Commerce OS for small businesses.',
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
-        theme_color: '#007AFF',
-        orientation: 'portrait',
-        categories: ['productivity', 'business', 'finance'],
+        theme_color: '#2563EB',
         icons: [
             {
-                src: '/icon-192.png',
-                sizes: '192x192',
-                type: 'image/png',
-                purpose: 'maskable',
-            },
-            {
-                src: '/icon-512.png',
-                sizes: '512x512',
-                type: 'image/png',
-                purpose: 'maskable',
-            },
-        ],
-        screenshots: [
-            {
-                src: '/hero-dashboard.png',
-                sizes: '1280x720',
-                type: 'image/png',
-            },
-            {
-                src: '/feature-crm.png',
-                sizes: '1280x720',
+                src: '/icon.png',
+                sizes: 'any',
                 type: 'image/png',
             },
         ],
-    };
+    }
 }

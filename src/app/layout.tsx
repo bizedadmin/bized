@@ -1,78 +1,45 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Rubik, Noto_Sans, Inter, Nunito, Roboto } from "next/font/google";
-
+import { Outfit } from "next/font/google"; // Using Outfit for modern feel
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const outfit = Outfit({
   subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
 });
-
-const nunito = Nunito({
-  variable: "--font-nunito",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-});
-
-const roboto = Roboto({
-  variable: "--font-roboto",
-  subsets: ["latin"],
-  weight: ["100", "300", "400", "500", "700", "900"],
-});
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const rubik = Rubik({
-  variable: "--font-rubik",
-  subsets: ["latin"],
-});
-
-const notoSans = Noto_Sans({
-  variable: "--font-noto-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-});
-
-export const metadata: Metadata = {
-  title: "Bized | All-in-One Business Operating System",
-  description: "Bized empowers businesses to build their online presence, manage operations, and handle finances in one unified platform.",
-  manifest: "/manifest.webmanifest",
-  appleWebApp: {
-    capable: true,
-    title: "Bized",
-    statusBarStyle: "black-translucent",
-  },
-  icons: {
-    icon: "/icon.png",
-    shortcut: "/icon.png",
-    apple: "/icon.png",
-    other: {
-      rel: "apple-touch-startup-image",
-      url: "/splash.png",
-    },
-  },
-};
 
 export const viewport: Viewport = {
-  themeColor: "#007AFF",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  viewportFit: "cover",
+  userScalable: false, // For "App-like" feel
 };
 
-import { ThemeProvider } from "@/components/theme-provider";
-import { LanguageProvider } from "@/lib/i18n/LanguageContext";
-import { Providers } from "@/components/providers";
-import { Toaster } from "@/components/ui/sonner";
+export const metadata: Metadata = {
+  title: "Bized.app - Get Discovered Online. Unified Chat. Total Control.",
+  description: "The Hybrid Commerce OS for small businesses. Sell products and book services across WhatsApp, Instagram, and Google with one link.",
+  applicationName: "Bized",
+  authors: [{ name: "Bized Team" }],
+  keywords: ["Hybrid Commerce", "WhatsApp Business API", "Online Store", "Appointment Scheduling", "Unified Inbox", "Small Business OS", "Discovery", "Click-to-chat"],
+  openGraph: {
+    title: "Bized.app - Get Discovered Online.",
+    description: "The Hybrid Commerce OS for small businesses.",
+    type: "website",
+    locale: "en_US",
+    siteName: "Bized",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Bized.app",
+    description: "The Hybrid Commerce OS for small businesses.",
+  },
+  other: {
+    "google-play-app": "app-id=com.bized.app", // Example for future PWA/Native link
+  },
+};
+
+
+import { Providers } from "@/components/Providers";
 
 export default function RootLayout({
   children,
@@ -81,38 +48,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${rubik.variable} ${notoSans.variable} ${inter.variable} ${nunito.variable} ${roboto.variable} antialiased`}
-        style={{ fontFamily: "var(--font-roboto), sans-serif" }}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Providers>
-            <LanguageProvider>
-              {children}
-            </LanguageProvider>
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register('/sw.js').then(function (registration) {
-      console.log('ServiceWorker registration successful with scope: ', registration.scope);
-    }, function (err) {
-      console.log('ServiceWorker registration failed: ', err);
-    });
-  });
-}
-`,
-              }}
-            />
-            <Toaster />
-          </Providers>
-        </ThemeProvider>
+      <body className={`${outfit.variable} antialiased`}>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
