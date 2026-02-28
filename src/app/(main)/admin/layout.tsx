@@ -294,7 +294,10 @@ export default function AdminLayout({
                                         <span>Account</span>
                                     </button>
                                     <button
-                                        onClick={() => signOut({ callbackUrl: "/" })}
+                                        onClick={async () => {
+                                            await signOut({ redirect: false });
+                                            window.location.href = "/";
+                                        }}
                                         className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-[var(--color-error)] hover:bg-[var(--color-error)]/5 transition-all"
                                     >
                                         <LogOut size={18} />

@@ -278,7 +278,10 @@ export function Header() {
                                         <span className="text-[10px] text-[var(--color-on-surface-variant)] opacity-60 uppercase tracking-tighter">Pro Workspace</span>
                                     </div>
                                     <button
-                                        onClick={() => signOut({ callbackUrl: "/" })}
+                                        onClick={async () => {
+                                            await signOut({ redirect: false });
+                                            window.location.href = "/";
+                                        }}
                                         className="p-2.5 rounded-xl border border-[var(--color-outline-variant)]/20 hover:bg-[var(--color-error)]/5 hover:text-[var(--color-error)] transition-colors group"
                                     >
                                         <LogOut size={18} className="group-hover:-translate-x-0.5 transition-transform" />
