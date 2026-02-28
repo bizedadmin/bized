@@ -134,7 +134,7 @@ export function Header() {
                                     {pathname === "/admin/pos" ? (
                                         <div className="flex items-center gap-4">
                                             <Button
-                                                variant="ghost"
+                                                variant="text"
                                                 onClick={() => router.push("/admin/pos/transactions")}
                                                 className="h-10 w-10 p-0 rounded-xl hover:bg-[var(--color-surface-container-high)] border border-transparent hover:border-[var(--color-outline-variant)]/10"
                                             >

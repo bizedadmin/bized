@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
             ].map(acc => ({ ...acc, createdAt: new Date(), updatedAt: new Date() }));
 
             await db.collection("finance_accounts").insertMany(defaultAccounts);
-            return NextResponse.json({ accounts: defaultAccounts.map(a => ({ ...a, _id: a._id?.toString() })) });
+            return NextResponse.json({ accounts: defaultAccounts.map((a: any) => ({ ...a, _id: a._id?.toString() })) });
         }
 
         // Backfill logic for existing accounts missing codes

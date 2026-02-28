@@ -133,7 +133,7 @@ export default function FinancialReportsPage() {
                     <Button variant="outline" className="h-12 px-5 rounded-2xl gap-2 font-bold border-[var(--color-outline-variant)]/30">
                         <Printer size={18} /> Print
                     </Button>
-                    <Button variant="default" className="h-12 px-5 rounded-2xl gap-2 font-bold bg-[var(--color-primary)] text-[var(--color-on-primary)]">
+                    <Button variant="primary" className="h-12 px-5 rounded-2xl gap-2 font-bold bg-[var(--color-primary)] text-[var(--color-on-primary)]">
                         <Download size={18} /> Export
                     </Button>
                 </div>

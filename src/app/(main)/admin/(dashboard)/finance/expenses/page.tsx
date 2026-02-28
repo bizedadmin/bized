@@ -21,7 +21,7 @@ export default function ExpensesPage() {
                     </p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="default" className="h-12 px-5 rounded-[var(--radius-m3-xl)] gap-2 shadow-sm font-bold bg-[var(--color-primary)] text-[var(--color-on-primary)]">
+                    <Button variant="primary" className="h-12 px-5 rounded-[var(--radius-m3-xl)] gap-2 shadow-sm font-bold bg-[var(--color-primary)] text-[var(--color-on-primary)]">
                         <Plus size={18} /> Log Expense
                     </Button>
                 </div>
@@ -51,7 +51,7 @@ export default function ExpensesPage() {
                             className="w-full pl-10 pr-4 py-2.5 bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/20 rounded-xl text-sm focus:outline-none"
                         />
                     </div>
-                    <Button variant="ghost" className="h-10 px-4 rounded-xl gap-2 text-xs font-bold">
+                    <Button variant="text" className="h-10 px-4 rounded-xl gap-2 text-xs font-bold">
                         <Filter size={14} /> More Filters
                     </Button>
                 </div>

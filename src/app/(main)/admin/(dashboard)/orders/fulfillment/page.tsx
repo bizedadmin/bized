@@ -196,7 +196,7 @@ export default function FulfillmentPage() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <Link href={`/admin/orders/${f.orderId}`}>
-                                            <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button variant="text" className="h-8 w-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <ArrowUpRight size={16} />
                                             </Button>
                                         </Link>

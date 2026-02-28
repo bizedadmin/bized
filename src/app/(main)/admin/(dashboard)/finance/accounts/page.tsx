@@ -115,8 +115,12 @@ export default function ChartOfAccountsPage() {
                         </p>
                     </div>
                     <div className="flex gap-2">
-                        <Button variant="default" className="h-12 px-5 rounded-[var(--radius-m3-xl)] gap-2 shadow-sm font-bold bg-[var(--color-primary)] text-[var(--color-on-primary)]">
-                            <Plus size={18} /> New Account
+                        <Button
+                            variant="primary"
+                            className="h-12 px-5 rounded-[var(--radius-m3-xl)] gap-2 shadow-sm font-bold bg-[var(--color-primary)] text-[var(--color-on-primary)]"
+                        >
+                            <Plus size={18} />
+                            <span>New Account</span>
                         </Button>
                     </div>
                 </div>
@@ -176,15 +180,15 @@ export default function ChartOfAccountsPage() {
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
                                                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${(account.status ?? 'active') === 'active'
-                                                            ? 'bg-emerald-500/10 text-emerald-600'
-                                                            : 'bg-[var(--color-outline-variant)]/20 text-[var(--color-on-surface-variant)] opacity-60'
+                                                        ? 'bg-emerald-500/10 text-emerald-600'
+                                                        : 'bg-[var(--color-outline-variant)]/20 text-[var(--color-on-surface-variant)] opacity-60'
                                                         }`}>
                                                         {account.status ?? 'active'}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
                                                     <Button
-                                                        variant="ghost"
+                                                        variant="text"
                                                         className="h-8 px-3 rounded-lg text-xs font-bold text-[var(--color-primary)] opacity-0 group-hover:opacity-100 transition-opacity"
                                                         onClick={() => handleEditClick(account)}
                                                     >

@@ -71,7 +71,7 @@ export default function BillsPage() {
                     </p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="default" className="h-12 px-5 rounded-[var(--radius-m3-xl)] gap-2 shadow-sm font-bold bg-[var(--color-primary)] text-[var(--color-on-primary)]">
+                    <Button variant="primary" className="h-12 px-5 rounded-[var(--radius-m3-xl)] gap-2 shadow-sm font-bold bg-[var(--color-primary)] text-[var(--color-on-primary)]">
                         <Plus size={18} /> Record Bill
                     </Button>
                 </div>

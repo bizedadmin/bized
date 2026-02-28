@@ -72,7 +72,7 @@ export default function InvoicesPage() {
                     </p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="default" className="h-12 px-5 rounded-[var(--radius-m3-xl)] gap-2 shadow-sm font-bold bg-[var(--color-primary)] text-[var(--color-on-primary)]">
+                    <Button variant="primary" className="h-12 px-5 rounded-[var(--radius-m3-xl)] gap-2 shadow-sm font-bold bg-[var(--color-primary)] text-[var(--color-on-primary)]">
                         <Plus size={18} /> Create Invoice
                     </Button>
                 </div>
@@ -147,13 +147,13 @@ export default function InvoicesPage() {
                                     </td>
                                     <td className="px-6 py-4 text-center">
                                         <div className="flex items-center justify-center gap-1">
-                                            <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg text-[var(--color-on-surface-variant)] hover:text-blue-600 transition-colors">
+                                            <Button variant="text" className="h-8 w-8 p-0 rounded-lg text-[var(--color-on-surface-variant)] hover:text-blue-600 transition-colors">
                                                 <Mail size={14} />
                                             </Button>
-                                            <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg text-[var(--color-on-surface-variant)] hover:text-[var(--color-on-surface)] transition-colors">
+                                            <Button variant="text" className="h-8 w-8 p-0 rounded-lg text-[var(--color-on-surface-variant)] hover:text-[var(--color-on-surface)] transition-colors">
                                                 <Download size={14} />
                                             </Button>
-                                            <Button variant="ghost" className="h-8 w-8 p-0 rounded-lg text-[var(--color-on-surface-variant)]">
+                                            <Button variant="text" className="h-8 w-8 p-0 rounded-lg text-[var(--color-on-surface-variant)]">
                                                 <MoreVertical size={14} />
                                             </Button>
                                         </div>

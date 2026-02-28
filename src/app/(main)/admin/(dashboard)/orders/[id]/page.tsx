@@ -160,7 +160,7 @@ export default function OrderDetailPage() {
                 {/* Header */}
                 <div className="flex items-center gap-4">
                     <Link href="/admin/orders">
-                        <Button variant="ghost" className="h-10 w-10 p-0 rounded-xl"><ArrowLeft size={20} /></Button>
+                        <Button variant="text" className="h-10 w-10 p-0 rounded-xl"><ArrowLeft size={20} /></Button>
                     </Link>
                     <div className="flex-1">
                         <div className="flex items-center gap-3 flex-wrap">
@@ -251,7 +251,7 @@ export default function OrderDetailPage() {
                                     </div>
                                 </div>
                                 <span className="text-xs font-black text-emerald-600 shrink-0">{fmt(amountPaidTotal)} / {fmt(order.totalPayable)}</span>
-                                <Button onClick={() => { setShowPayModal(true); setPayError(null); }} variant="ghost"
+                                <Button onClick={() => { setShowPayModal(true); setPayError(null); }} variant="text"
                                     className="h-8 w-8 p-0 rounded-lg ml-1 shrink-0" title="Add payment">
                                     <Plus size={16} />
                                 </Button>
@@ -316,7 +316,7 @@ export default function OrderDetailPage() {
                                             {inv.paymentStatus !== "PaymentComplete" && (
                                                 <Button
                                                     onClick={() => { setPayingInvoiceId(inv._id); setPayForm(f => ({ ...f, amount: String(inv.totalPaymentDue) })); setShowPayModal(true); }}
-                                                    variant="ghost" className="h-8 px-3 rounded-lg text-xs font-bold text-emerald-600">
+                                                    variant="text" className="h-8 px-3 rounded-lg text-xs font-bold text-emerald-600">
                                                     Pay
                                                 </Button>
                                             )}
@@ -331,7 +331,7 @@ export default function OrderDetailPage() {
                             <div className="p-5 border-b border-[var(--color-outline-variant)]/10 flex items-center gap-2">
                                 <Truck size={18} className="opacity-40" />
                                 <span className="font-black text-sm uppercase tracking-widest opacity-40">Fulfillments / Shipments</span>
-                                <Button onClick={() => { setShowFulfillModal(true); setFulfillError(null); }} variant="ghost"
+                                <Button onClick={() => { setShowFulfillModal(true); setFulfillError(null); }} variant="text"
                                     className="h-8 w-8 p-0 rounded-lg ml-auto">
                                     <Plus size={16} />
                                 </Button>

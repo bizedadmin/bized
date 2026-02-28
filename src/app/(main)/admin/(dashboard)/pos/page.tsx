@@ -403,7 +403,7 @@ export default function NewOrderPage() {
                         className="h-12 px-6 rounded-2xl font-black border-2 border-[var(--color-outline-variant)]/40">
                         + New Sale
                     </Button>
-                    <Button onClick={() => router.push("/admin/pos/transactions")} variant="ghost"
+                    <Button onClick={() => router.push("/admin/pos/transactions")} variant="text"
                         className="h-12 px-6 rounded-2xl font-black text-[var(--color-on-surface-variant)]">
                         All Transactions
                     </Button>
@@ -1124,7 +1124,7 @@ export default function NewOrderPage() {
                 footer={
                     <div className="flex gap-3 w-full">
                         <Button
-                            variant="ghost"
+                            variant="text"
                             onClick={() => setDetailItem(null)}
                             className="flex-1 h-14 rounded-[var(--radius-m3-l)] font-black text-sm"
                         >
@@ -1274,7 +1274,7 @@ export default function NewOrderPage() {
                 footer={
                     <div className="flex gap-3 w-full">
                         <Button
-                            variant="ghost"
+                            variant="text"
                             onClick={() => setShowCustom(false)}
                             className="flex-1 h-14 rounded-[var(--radius-m3-l)] font-black text-sm"
                         >

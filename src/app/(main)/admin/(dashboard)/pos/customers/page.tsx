@@ -300,7 +300,7 @@ export default function POSCustomersPage() {
                         {search ? "Try adjusting your search filters to find what you're looking for." : "Start processing sales in the Register to build your customer list."}
                     </p>
                     {search && (
-                        <Button variant="ghost" onClick={() => setSearch("")} className="mt-6 font-bold text-[var(--color-primary)]">
+                        <Button variant="text" onClick={() => setSearch("")} className="mt-6 font-bold text-[var(--color-primary)]">
                             Clear Search
                         </Button>
                     )}
