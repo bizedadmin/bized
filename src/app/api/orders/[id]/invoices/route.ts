@@ -4,13 +4,14 @@ import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import type { PaymentStatus } from "@/lib/orders";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 /**
  * GET /api/orders/[id]/invoices?storeId=...
  * Returns all invoices for this order (an order can have multiple invoices).
  */
 export async function GET(req: NextRequest, { params }: Params) {
+    const { id } = await params;
     try {
         const session = await auth();
         if (!session?.user?.id)
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         const db = client.db();
 
         const invoices = await db.collection("orders_invoices")
-            .find({ orderId: params.id, storeId })
+            .find({ orderId: id, storeId })
             .sort({ createdAt: 1 })
             .toArray();
 
@@ -49,6 +50,7 @@ export async function GET(req: NextRequest, { params }: Params) {
  * schema.org/Invoice
  */
 export async function POST(req: NextRequest, { params }: Params) {
+    const { id } = await params;
     try {
         const session = await auth();
         if (!session?.user?.id)
@@ -80,19 +82,19 @@ export async function POST(req: NextRequest, { params }: Params) {
             return NextResponse.json({ error: "Store not found" }, { status: 404 });
 
         const order = await db.collection("orders").findOne({
-            _id: new ObjectId(params.id), storeId
+            _id: new ObjectId(id), storeId
         });
         if (!order)
             return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
         // Generate invoice number: INV-<orderNumber>-<seq>
         const existingCount = await db.collection("orders_invoices")
-            .countDocuments({ orderId: params.id });
+            .countDocuments({ orderId: id });
         const invoiceNumber = `${order.orderNumber}-INV-${String(existingCount + 1).padStart(2, "0")}`;
 
         const invoice = {
             "@type": "Invoice",   // schema.org
-            orderId: params.id,
+            orderId: id,
             orderNumber: order.orderNumber,
             storeId,
             invoiceNumber,

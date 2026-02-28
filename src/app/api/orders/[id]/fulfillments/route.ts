@@ -4,7 +4,7 @@ import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import type { FulfillmentStatus, DeliveryMode } from "@/lib/orders";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 /**
  * GET /api/orders/[id]/fulfillments?storeId=...
@@ -12,6 +12,7 @@ type Params = { params: { id: string } };
  * An order can have multiple partial shipments (schema.org/ParcelDelivery).
  */
 export async function GET(req: NextRequest, { params }: Params) {
+    const { id } = await params;
     try {
         const session = await auth();
         if (!session?.user?.id)
@@ -25,7 +26,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         const db = client.db();
 
         const fulfillments = await db.collection("orders_fulfillments")
-            .find({ orderId: params.id, storeId })
+            .find({ orderId: id, storeId })
             .sort({ createdAt: 1 })
             .toArray();
 
@@ -51,6 +52,7 @@ export async function GET(req: NextRequest, { params }: Params) {
  * - Update orderStatus to OrderShipped if first tracked shipment is posted
  */
 export async function POST(req: NextRequest, { params }: Params) {
+    const { id } = await params;
     try {
         const session = await auth();
         if (!session?.user?.id)
@@ -82,14 +84,14 @@ export async function POST(req: NextRequest, { params }: Params) {
             return NextResponse.json({ error: "Store not found" }, { status: 404 });
 
         const order = await db.collection("orders").findOne({
-            _id: new ObjectId(params.id), storeId
+            _id: new ObjectId(id), storeId
         });
         if (!order)
             return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
         const fulfillment = {
             "@type": "ParcelDelivery",   // schema.org
-            orderId: params.id,
+            orderId: id,
             orderNumber: order.orderNumber,
             storeId,
             trackingNumber: trackingNumber ?? null,
@@ -113,7 +115,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         // Update parent order fulfillmentStatus
         // If any fulfillment has a trackingNumber → order is at least "Shipped"
         const allFulfillments = await db.collection("orders_fulfillments")
-            .find({ orderId: params.id, storeId })
+            .find({ orderId: id, storeId })
             .toArray();
 
         const allDelivered = allFulfillments.every(f => f.deliveryStatus === "Delivered");
@@ -132,7 +134,7 @@ export async function POST(req: NextRequest, { params }: Params) {
                     order.orderStatus;
 
         await db.collection("orders").updateOne(
-            { _id: new ObjectId(params.id) },
+            { _id: new ObjectId(id) },
             {
                 $set: {
                     fulfillmentStatus: newFulfillmentStatus,
@@ -159,6 +161,7 @@ export async function POST(req: NextRequest, { params }: Params) {
  * Body must include { fulfillmentId, deliveryStatus }
  */
 export async function PATCH(req: NextRequest, { params }: Params) {
+    const { id } = await params;
     try {
         const session = await auth();
         if (!session?.user?.id)
@@ -182,13 +185,13 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         if (deliveryStatus === "Delivered") statusUpdate.deliveredAt = new Date();
 
         await db.collection("orders_fulfillments").updateOne(
-            { _id: new ObjectId(fulfillmentId), orderId: params.id },
+            { _id: new ObjectId(fulfillmentId), orderId: id },
             { $set: statusUpdate }
         );
 
         // Recalculate parent order status
         const allFulfillments = await db.collection("orders_fulfillments")
-            .find({ orderId: params.id })
+            .find({ orderId: id })
             .toArray();
 
         const allDelivered = allFulfillments.every(f =>
@@ -202,7 +205,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         const newOrderStatus = allDelivered ? "OrderDelivered" : anyShipped ? "OrderShipped" : "OrderProcessing";
 
         await db.collection("orders").updateOne(
-            { _id: new ObjectId(params.id) },
+            { _id: new ObjectId(id) },
             { $set: { fulfillmentStatus: newFulfillmentStatus, orderStatus: newOrderStatus, updatedAt: new Date() } }
         );
 

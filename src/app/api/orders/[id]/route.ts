@@ -4,13 +4,14 @@ import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import type { OrderStatus, PaymentStatus, FulfillmentStatus } from "@/lib/orders";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 /**
  * GET /api/orders/[id]?storeId=...
  * Returns a single order with its payments, invoices, and fulfillments.
  */
 export async function GET(req: NextRequest, { params }: Params) {
+    const { id } = await params;
     try {
         const session = await auth();
         if (!session?.user?.id)
@@ -30,12 +31,12 @@ export async function GET(req: NextRequest, { params }: Params) {
             return NextResponse.json({ error: "Store not found" }, { status: 404 });
 
         const order = await db.collection("orders").findOne({
-            _id: new ObjectId(params.id), storeId
+            _id: new ObjectId(id), storeId
         });
         if (!order)
             return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
-        const orderId = params.id;
+        const orderId = id;
 
         // Fetch sub-collections
         const [payments, invoices, fulfillments] = await Promise.all([
@@ -62,6 +63,7 @@ export async function GET(req: NextRequest, { params }: Params) {
  * Automatically recalculates amountDue when payments change.
  */
 export async function PATCH(req: NextRequest, { params }: Params) {
+    const { id } = await params;
     try {
         const session = await auth();
         if (!session?.user?.id)
@@ -102,7 +104,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         }
 
         const result = await db.collection("orders").updateOne(
-            { _id: new ObjectId(params.id), storeId },
+            { _id: new ObjectId(id), storeId },
             { $set: setData }
         );
 
@@ -122,6 +124,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
  * Hard delete only in dev/test scenarios.
  */
 export async function DELETE(req: NextRequest, { params }: Params) {
+    const { id } = await params;
     try {
         const session = await auth();
         if (!session?.user?.id)
@@ -142,7 +145,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
 
         // Soft cancel
         await db.collection("orders").updateOne(
-            { _id: new ObjectId(params.id), storeId },
+            { _id: new ObjectId(id), storeId },
             { $set: { orderStatus: "OrderCancelled" as OrderStatus, updatedAt: new Date() } }
         );
 

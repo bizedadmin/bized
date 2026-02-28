@@ -5,13 +5,14 @@ import { ObjectId } from "mongodb";
 import { postJournalEntry, getAccountByCode } from "@/lib/finance";
 import type { PaymentStatus } from "@/lib/orders";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 /**
  * GET /api/orders/[id]/payments?storeId=...
  * Returns all payment transactions for a given order.
  */
 export async function GET(req: NextRequest, { params }: Params) {
+    const { id } = await params;
     try {
         const session = await auth();
         if (!session?.user?.id)
@@ -25,7 +26,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         const db = client.db();
 
         const payments = await db.collection("orders_payments")
-            .find({ orderId: params.id, storeId })
+            .find({ orderId: id, storeId })
             .sort({ createdAt: -1 })
             .toArray();
 
@@ -54,6 +55,7 @@ export async function GET(req: NextRequest, { params }: Params) {
  * 5. Auto-post journal entries (Cash debit, AR credit)
  */
 export async function POST(req: NextRequest, { params }: Params) {
+    const { id } = await params;
     try {
         const session = await auth();
         if (!session?.user?.id)
@@ -87,7 +89,7 @@ export async function POST(req: NextRequest, { params }: Params) {
             return NextResponse.json({ error: "Store not found" }, { status: 404 });
 
         const order = await db.collection("orders").findOne({
-            _id: new ObjectId(params.id), storeId
+            _id: new ObjectId(id), storeId
         });
         if (!order)
             return NextResponse.json({ error: "Order not found" }, { status: 404 });
@@ -97,7 +99,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         // 1. Record the payment
         const payment = {
             "@type": "PayAction", // schema.org
-            orderId: params.id,
+            orderId: id,
             orderNumber: order.orderNumber,
             storeId,
             amount: parsedAmount,
@@ -118,7 +120,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
         // 2. Recalculate payment totals on the order
         const allPayments = await db.collection("orders_payments")
-            .find({ orderId: params.id, storeId, paymentStatus: "PaymentComplete" })
+            .find({ orderId: id, storeId, paymentStatus: "PaymentComplete" })
             .toArray();
 
         const amountPaid = allPayments.reduce((s, p) => s + p.amount, 0);
@@ -134,7 +136,7 @@ export async function POST(req: NextRequest, { params }: Params) {
             : order.orderStatus;
 
         await db.collection("orders").updateOne(
-            { _id: new ObjectId(params.id) },
+            { _id: new ObjectId(id) },
             {
                 $set: {
                     amountPaid,
@@ -175,7 +177,7 @@ export async function POST(req: NextRequest, { params }: Params) {
             await postJournalEntry(
                 db, storeId, arAccount._id.toString(), "Credit", parsedAmount,
                 `Payment received for ${order.orderNumber} (${paymentMethod})`,
-                { category: "Sales", referenceId: params.id, referenceType: "Order", createdBy: session.user.id }
+                { category: "Sales", referenceId: id, referenceType: "Order", createdBy: session.user.id }
             );
         }
         const revenueAccount = await getAccountByCode(db, storeId, "4000");
@@ -183,7 +185,7 @@ export async function POST(req: NextRequest, { params }: Params) {
             await postJournalEntry(
                 db, storeId, revenueAccount._id.toString(), "Credit", parsedAmount,
                 `Sales Revenue for ${order.orderNumber}`,
-                { category: "Sales", referenceId: params.id, referenceType: "Order", createdBy: session.user.id }
+                { category: "Sales", referenceId: id, referenceType: "Order", createdBy: session.user.id }
             );
         }
 

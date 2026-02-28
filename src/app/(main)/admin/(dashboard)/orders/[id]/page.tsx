@@ -92,7 +92,7 @@ export default function OrderDetailPage() {
                     amount: parseFloat(payForm.amount),
                     paymentMethod: payForm.paymentMethod,
                     paymentGateway: payForm.paymentGateway,
-                    invoiceId: payingInvoiceId ?? payForm.invoiceId || undefined,
+                    invoiceId: (payingInvoiceId ?? payForm.invoiceId) || undefined,
                     notes: payForm.notes || undefined,
                 }),
             });
@@ -309,8 +309,8 @@ export default function OrderDetailPage() {
                                                 {inv.paymentDueDate && <p className="text-xs opacity-40">Due: {new Date(inv.paymentDueDate).toLocaleDateString()}</p>}
                                             </div>
                                             <span className={`text-xs font-black px-2 py-1 rounded-full ${inv.paymentStatus === "PaymentComplete" ? "bg-emerald-500/10 text-emerald-600" :
-                                                    inv.paymentStatus === "PaymentDue" ? "bg-amber-500/10 text-amber-600" :
-                                                        "bg-blue-500/10 text-blue-600"
+                                                inv.paymentStatus === "PaymentDue" ? "bg-amber-500/10 text-amber-600" :
+                                                    "bg-blue-500/10 text-blue-600"
                                                 }`}>{inv.paymentStatus.replace("Payment", "")}</span>
                                             <span className="font-black shrink-0">{fmt(inv.totalPaymentDue)}</span>
                                             {inv.paymentStatus !== "PaymentComplete" && (
@@ -351,8 +351,8 @@ export default function OrderDetailPage() {
                                                     <p className="text-xs opacity-40">{f.deliveryMode} · Created {new Date(f.createdAt).toLocaleDateString()}</p>
                                                 </div>
                                                 <span className={`text-xs font-black px-2 py-1 rounded-full ${f.deliveryStatus === "Delivered" ? "bg-emerald-500/10 text-emerald-600" :
-                                                        f.deliveryStatus === "Shipped" ? "bg-violet-500/10 text-violet-600" :
-                                                            "bg-amber-500/10 text-amber-600"
+                                                    f.deliveryStatus === "Shipped" ? "bg-violet-500/10 text-violet-600" :
+                                                        "bg-amber-500/10 text-amber-600"
                                                     }`}>{f.deliveryStatus}</span>
                                             </div>
                                             {/* Advance fulfillment */}
@@ -456,8 +456,8 @@ export default function OrderDetailPage() {
                             {["Cash", "Card", "Bank Transfer", "M-Pesa"].map(m => (
                                 <button key={m} onClick={() => setPayForm(f => ({ ...f, paymentMethod: m }))}
                                     className={`py-3 rounded-2xl text-sm font-bold transition-all border ${payForm.paymentMethod === m
-                                            ? "bg-[var(--color-primary)]/10 border-[var(--color-primary)]/30 text-[var(--color-primary)]"
-                                            : "border-[var(--color-outline-variant)]/20 opacity-60"
+                                        ? "bg-[var(--color-primary)]/10 border-[var(--color-primary)]/30 text-[var(--color-primary)]"
+                                        : "border-[var(--color-outline-variant)]/20 opacity-60"
                                         }`}>{m}</button>
                             ))}
                         </div>
@@ -513,8 +513,8 @@ export default function OrderDetailPage() {
                             {["Delivery", "Pickup", "Download"].map(m => (
                                 <button key={m} onClick={() => setFulfillForm(f => ({ ...f, deliveryMode: m }))}
                                     className={`py-3 rounded-2xl text-xs font-black transition-all border ${fulfillForm.deliveryMode === m
-                                            ? "bg-[var(--color-primary)]/10 border-[var(--color-primary)]/30 text-[var(--color-primary)]"
-                                            : "border-[var(--color-outline-variant)]/20 opacity-60"
+                                        ? "bg-[var(--color-primary)]/10 border-[var(--color-primary)]/30 text-[var(--color-primary)]"
+                                        : "border-[var(--color-outline-variant)]/20 opacity-60"
                                         }`}>{m}</button>
                             ))}
                         </div>
