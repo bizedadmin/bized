@@ -169,14 +169,17 @@ export async function POST(req: NextRequest) {
 
         // Auto-create the first Invoice for this order
         const invoiceNumber = `INV-${orderNumber}`;
-        await db.collection("orders_invoices").insertOne({
+        await db.collection("finance_invoices").insertOne({
             "@type": "Invoice",
             orderId,
             storeId,
             orderNumber,
             invoiceNumber,
+            customerName: customer.name,
+            customerEmail: customer.email ?? null,
             paymentStatus: "PaymentDue" as PaymentStatus,
             totalPaymentDue: totalPayable,
+            paymentDueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // Default 14 days
             priceCurrency,
             description: `Invoice for order ${orderNumber}`,
             lineItems: (orderedItem as any[]).map(i => ({
@@ -185,6 +188,7 @@ export async function POST(req: NextRequest) {
             })),
             createdAt: new Date(),
             updatedAt: new Date(),
+            createdBy: session.user.id,
         });
 
         return NextResponse.json({

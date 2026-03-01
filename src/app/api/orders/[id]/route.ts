@@ -41,7 +41,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         // Fetch sub-collections
         const [payments, invoices, fulfillments] = await Promise.all([
             db.collection("orders_payments").find({ orderId }).sort({ createdAt: -1 }).toArray(),
-            db.collection("orders_invoices").find({ orderId }).sort({ createdAt: 1 }).toArray(),
+            db.collection("finance_invoices").find({ orderId }).sort({ createdAt: 1 }).toArray(),
             db.collection("orders_fulfillments").find({ orderId }).sort({ createdAt: 1 }).toArray(),
         ]);
 

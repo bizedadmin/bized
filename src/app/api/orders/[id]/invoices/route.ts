@@ -24,7 +24,7 @@ export async function GET(req: NextRequest, { params }: Params) {
         const client = await clientPromise;
         const db = client.db();
 
-        const invoices = await db.collection("orders_invoices")
+        const invoices = await db.collection("finance_invoices")
             .find({ orderId: id, storeId })
             .sort({ createdAt: 1 })
             .toArray();
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest, { params }: Params) {
             return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
         // Generate invoice number: INV-<orderNumber>-<seq>
-        const existingCount = await db.collection("orders_invoices")
+        const existingCount = await db.collection("finance_invoices")
             .countDocuments({ orderId: id });
         const invoiceNumber = `${order.orderNumber}-INV-${String(existingCount + 1).padStart(2, "0")}`;
 
@@ -104,6 +104,8 @@ export async function POST(req: NextRequest, { params }: Params) {
             paymentDueDate: paymentDueDate ? new Date(paymentDueDate) : null,
             description: description ?? `Invoice for ${order.orderNumber}`,
             lineItems: lineItems ?? [],
+            customerName: order.customer?.name || "Guest",
+            customerEmail: order.customer?.email || null,
             // Customer (denormalised from order for standalone invoice rendering)
             customer: order.customer,
             seller: order.seller,
@@ -112,7 +114,7 @@ export async function POST(req: NextRequest, { params }: Params) {
             createdBy: session.user.id,
         };
 
-        const result = await db.collection("orders_invoices").insertOne(invoice);
+        const result = await db.collection("finance_invoices").insertOne(invoice);
 
         return NextResponse.json({
             id: result.insertedId.toString(),

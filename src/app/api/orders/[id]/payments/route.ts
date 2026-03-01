@@ -150,7 +150,7 @@ export async function POST(req: NextRequest, { params }: Params) {
 
         // 3. Update invoice paymentStatus if invoiceId is provided
         if (invoiceId) {
-            const inv = await db.collection("orders_invoices").findOne({
+            const inv = await db.collection("finance_invoices").findOne({
                 _id: new ObjectId(invoiceId)
             });
             if (inv) {
@@ -162,9 +162,18 @@ export async function POST(req: NextRequest, { params }: Params) {
                     invPaid >= inv.totalPaymentDue ? "PaymentComplete" :
                         invPaid > 0 ? "PaymentAutoPay" :
                             "PaymentDue";
-                await db.collection("orders_invoices").updateOne(
+                // also map schema.org statuses to UI statuses Draft/Sent/Paid/Overdue for the finance_invoices collection
+                let mappedStatus = "Draft";
+                if (invStatus === "PaymentDue" || invStatus === "PaymentAutoPay") {
+                    const isOverdue = inv.paymentDueDate ? new Date(inv.paymentDueDate) < new Date() : false;
+                    mappedStatus = isOverdue ? "Overdue" : "Sent";
+                } else if (invStatus === "PaymentComplete" || invStatus === "Paid") {
+                    mappedStatus = "Paid";
+                }
+
+                await db.collection("finance_invoices").updateOne(
                     { _id: new ObjectId(invoiceId) },
-                    { $set: { paymentStatus: invStatus, updatedAt: new Date() } }
+                    { $set: { paymentStatus: mappedStatus, updatedAt: new Date() } }
                 );
             }
         }

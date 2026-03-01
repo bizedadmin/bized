@@ -28,50 +28,14 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: "Store not found" }, { status: 404 });
         }
 
-        const [financeInvoices, orderInvoices] = await Promise.all([
-            db.collection("finance_invoices").find({ storeId }).toArray(),
-            db.collection("orders_invoices").find({ storeId }).toArray()
-        ]);
-
-        // Map order invoices to match the frontend expected structure
-        const mappedOrderInvoices = orderInvoices.map((i) => {
-            // Map paymentStatus: schema.org (PaymentDue/PaymentComplete/PaymentAutoPay) to UI (Sent/Paid/Draft/Overdue)
-            let mappedStatus = "Draft";
-            if (i.paymentStatus === "PaymentDue" || i.paymentStatus === "PaymentAutoPay") {
-                // If it's past due date, might be Overdue, but order invoices don't always have due dates yet
-                const isOverdue = i.paymentDueDate ? new Date(i.paymentDueDate) < new Date() : false;
-                mappedStatus = isOverdue ? "Overdue" : "Sent";
-            } else if (i.paymentStatus === "PaymentComplete" || i.paymentStatus === "Paid") {
-                mappedStatus = "Paid";
-            }
-
-            return {
-                ...i,
-                _id: i._id.toString(),
-                customerName: i.customer?.name || "Guest Customer",
-                customerEmail: i.customer?.email || "",
-                totalPaymentDue: i.totalPaymentDue || 0,
-                paymentStatus: mappedStatus,
-            };
-        });
-
-        const mappedFinanceInvoices = financeInvoices.map((i) => {
-            const mapped = {
-                ...i,
-                _id: i._id.toString()
-            };
-            return mapped as any; // Cast to bypass strict TS inference on array spread
-        });
-
-        // Combine and sort by createdAt descending
-        const allInvoices = [...mappedOrderInvoices, ...mappedFinanceInvoices].sort((a: any, b: any) => {
-            const dateA = new Date(a.createdAt || 0).getTime();
-            const dateB = new Date(b.createdAt || 0).getTime();
-            return dateB - dateA; // Descending
-        });
+        const invoices = await db
+            .collection("finance_invoices")
+            .find({ storeId })
+            .sort({ createdAt: -1 })
+            .toArray();
 
         return NextResponse.json({
-            invoices: allInvoices
+            invoices: invoices.map((i) => ({ ...i, _id: i._id.toString() }))
         });
     } catch (error) {
         console.error("List invoices error:", error);
