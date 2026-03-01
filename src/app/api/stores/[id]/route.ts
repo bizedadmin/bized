@@ -32,13 +32,33 @@ export async function GET(
             return NextResponse.json({ error: "Store not found" }, { status: 404 });
         }
 
+        // Fetch payment methods and include them in the store object
+        const paymentMethods = await db.collection("store_payment_methods")
+            .find({ storeId: id })
+            .sort({ sortOrder: 1 })
+            .toArray();
+
+        const sanitizedPm = paymentMethods.map((pm: any) => {
+            const method = { ...pm, id: pm.id || pm._id.toString() };
+            delete method._id;
+            delete method.storeId;
+            if (method.apiKey) method.apiKey = "••••••••";
+            if (method.publicKey) method.publicKey = "••••••••";
+            if (method.webhookSecret) method.webhookSecret = "••••••••";
+            return method;
+        });
+
         if (store.aiConfig) {
             if (store.aiConfig.openaiApiKey) store.aiConfig.openaiApiKey = "••••••••";
             if (store.aiConfig.googleApiKey) store.aiConfig.googleApiKey = "••••••••";
         }
 
         return NextResponse.json({
-            store: { ...store, _id: store._id.toString() },
+            store: {
+                ...store,
+                _id: store._id.toString(),
+                paymentMethods: sanitizedPm
+            },
         });
     } catch (error) {
         console.error("Fetch store error:", error);
@@ -89,6 +109,8 @@ export async function PATCH(
             "products", "services", "reviews", "faq", "productCategories", "teamMembers",
             // AI Configuration
             "aiConfig",
+            // Checkout Settings
+            "checkoutSettings",
         ];
 
         const client = await clientPromise;

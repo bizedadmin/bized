@@ -18,9 +18,38 @@ export async function GET() {
             .sort({ createdAt: -1 })
             .toArray();
 
+        // Get all payment methods for user's stores in one shot for performance
+        const storeIds = stores.map(s => s._id.toString());
+        const allMethods = await db.collection("store_payment_methods")
+            .find({ storeId: { $in: storeIds } })
+            .sort({ sortOrder: 1 })
+            .toArray();
+
+        // Group methods by storeId
+        const methodsByStore = allMethods.reduce((acc: any, pm: any) => {
+            const sid = pm.storeId;
+            if (!acc[sid]) acc[sid] = [];
+
+            const method = { ...pm, id: pm.id || pm._id.toString() };
+            delete method._id;
+            delete method.storeId;
+            if (method.apiKey) method.apiKey = "••••••••";
+            if (method.publicKey) method.publicKey = "••••••••";
+            if (method.webhookSecret) method.webhookSecret = "••••••••";
+
+            acc[sid].push(method);
+            return acc;
+        }, {});
+
         return NextResponse.json({
             stores: stores.map((s) => {
-                const store = { ...s, _id: s._id.toString() } as any;
+                const sid = s._id.toString();
+                const store = {
+                    ...s,
+                    _id: sid,
+                    paymentMethods: methodsByStore[sid] || []
+                } as any;
+
                 if (store.aiConfig) {
                     const keysToHandle = ['openaiApiKey', 'googleApiKey'];
                     for (const key of keysToHandle) {

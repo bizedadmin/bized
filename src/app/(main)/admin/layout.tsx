@@ -38,7 +38,12 @@ import {
     Scale,
     LineChart,
     Calendar,
-    Truck
+    Truck,
+    MonitorSmartphone,
+    TabletSmartphone,
+    Languages,
+    Coins,
+    Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AiChatSheet } from "@/components/admin/AiChatSheet";
@@ -75,8 +80,8 @@ const subNavItems: Record<string, NavItem[]> = {
         { label: "Stock Levels", href: "/admin/inventory", icon: BarChart3 },
     ],
     "POS": [
-        { label: "Register", href: "/admin/pos", icon: CreditCard },
-        { label: "Transactions", href: "/admin/pos/transactions", icon: ArrowRightLeft },
+        { label: "Register", href: "/admin/pos", icon: MonitorSmartphone },
+        { label: "Orders", href: "/admin/pos/orders", icon: ShoppingBag },
         { label: "Sessions", href: "/admin/pos/sessions", icon: Clock },
         { label: "Customers", href: "/admin/pos/customers", icon: Users },
         { label: "Reports", href: "/admin/pos/reports", icon: BarChartHorizontal },
@@ -97,15 +102,22 @@ const subNavItems: Record<string, NavItem[]> = {
         { label: "Team Directory", href: "/admin/users/team", icon: UserPlus },
         { label: "Permissions", href: "/admin/users/permissions", icon: FileText },
     ],
+    "Settings": [
+        { label: "General", href: "/admin/settings?tab=general", icon: Settings },
+        { label: "Regional", href: "/admin/settings?tab=regional", icon: Languages },
+        { label: "Payment Methods", href: "/admin/settings?tab=payments", icon: CreditCard },
+        { label: "Taxes", href: "/admin/settings?tab=taxes", icon: Coins },
+        { label: "AI Config", href: "/admin/settings?tab=ai", icon: Sparkles },
+    ],
 };
 
 const railItems: NavItem[] = [
     { label: "Home", icon: LayoutDashboard, href: "/admin" },
-    { label: "Store", icon: Store, href: "/admin/storefront" },
+    { label: "Store", icon: TabletSmartphone, href: "/admin/storefront" },
+    { label: "POS", icon: MonitorSmartphone, href: "/admin/pos" },
     { label: "Catalog", icon: Package, href: "/admin/products" },
     { label: "Orders", icon: ShoppingBag, href: "/admin/orders" },
     { label: "Inventory", icon: BarChart3, href: "/admin/inventory" },
-    { label: "POS", icon: CreditCard, href: "/admin/pos" },
     { label: "Finance", icon: Landmark, href: "/admin/finance" },
     { label: "Users", icon: UserPlus, href: "/admin/users" },
 ];

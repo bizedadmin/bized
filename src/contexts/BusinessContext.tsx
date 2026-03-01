@@ -143,6 +143,24 @@ export interface TeamMember {
     invitedAt?: string;
 }
 
+export interface PaymentMethod {
+    id: string;
+    name: string;
+    type: "Cash" | "CreditCard" | "BankTransfer" | "MobileMoney" | "Crypto" | "Cheque" | "Other";
+    enabled: boolean;
+    coaCode: string;
+    gateway?: string;
+    gatewayAccountId?: string;
+    apiKey?: string;
+    publicKey?: string;
+    webhookSecret?: string;
+    description?: string;
+    icon?: string;
+    sortOrder: number;
+    _id?: string;
+    settings?: Record<string, any>;
+}
+
 export interface Business {
     _id: string;
     name: string;
@@ -212,6 +230,12 @@ export interface Business {
         model?: string;
         systemPrompt?: string;
     };
+    checkoutSettings?: {
+        saveCards?: boolean;
+        stkPush?: boolean;
+        receipts?: boolean;
+    };
+    paymentMethods?: PaymentMethod[];
     createdAt: string;
     updatedAt: string;
 }

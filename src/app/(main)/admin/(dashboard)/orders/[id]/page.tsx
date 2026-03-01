@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { Sheet } from "@/components/ui/Sheet";
 
 type OrderStatus = "OrderPaymentDue" | "OrderProcessing" | "OrderShipped" | "OrderPickupAvailable" | "OrderDelivered" | "OrderCancelled";
@@ -30,7 +30,9 @@ const STATUS_STYLES: Record<string, string> = {
 
 export default function OrderDetailPage() {
     const params = useParams();
+    const searchParams = useSearchParams();
     const orderId = params?.id as string;
+    const backPath = searchParams?.get("from") ?? "/admin/orders";
     const { currentBusiness, isLoading: bizLoading } = useBusiness();
 
     const [data, setData] = useState<any>(null);
@@ -147,7 +149,7 @@ export default function OrderDetailPage() {
         <div className="p-8 text-center">
             <AlertCircle className="mx-auto mb-4 opacity-20" size={48} />
             <p className="font-bold opacity-40">{error ?? "Order not found"}</p>
-            <Link href="/admin/orders"><Button variant="outline" className="mt-4 rounded-2xl">← Back to Orders</Button></Link>
+            <Link href={backPath}><Button variant="outline" className="mt-4 rounded-2xl">← Back</Button></Link>
         </div>
     );
 
@@ -159,7 +161,7 @@ export default function OrderDetailPage() {
             <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8">
                 {/* Header */}
                 <div className="flex items-center gap-4">
-                    <Link href="/admin/orders">
+                    <Link href={backPath}>
                         <Button variant="text" className="h-10 w-10 p-0 rounded-xl"><ArrowLeft size={20} /></Button>
                     </Link>
                     <div className="flex-1">

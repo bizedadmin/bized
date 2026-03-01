@@ -7,7 +7,7 @@ import {
     ChevronDown, ChevronUp, CheckCircle2, ShieldCheck, X,
     Loader2, ShoppingCart, Tag, Percent, CreditCard, Banknote,
     Smartphone, Building2, StickyNote, Receipt, UserSearch,
-    Hash, ChevronRight, Edit2, Info, Mail, Slash, Calculator, Settings2
+    Hash, ChevronRight, Edit2, Info, Mail, Slash, Calculator, Settings2, UserPlus
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -132,6 +132,12 @@ export default function NewOrderPage() {
     const [selectedModifiers, setSelectedModifiers] = useState<any[]>([]);
     const [editingLineId, setEditingLineId] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'entry' | 'summary'>('entry');
+
+    // ── Add New Customer ──
+    const [isAddCustSheetOpen, setIsAddCustSheetOpen] = useState(false);
+    const [newQuickCust, setNewQuickCust] = useState({ name: "", phone: "", email: "", address: "" });
+    const [isAddCustSaving, setIsAddCustSaving] = useState(false);
+    const [addCustSuccess, setAddCustSuccess] = useState(false);
 
     const currency = currentBusiness?.currency ?? "KES";
     const products = currentBusiness?.products ?? [];
@@ -323,6 +329,45 @@ export default function NewOrderPage() {
         setIsCustExpanded(false); // Make it compact after selection
     };
 
+    const handleSaveNewCustomer = async (andSale = false) => {
+        if (!newQuickCust.name || !currentBusiness?._id) return;
+        setIsAddCustSaving(true);
+        try {
+            const res = await fetch("/api/customers", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    storeId: currentBusiness._id,
+                    name: newQuickCust.name,
+                    telephone: newQuickCust.phone,
+                    email: newQuickCust.email,
+                    address: newQuickCust.address ? { "@type": "PostalAddress", streetAddress: newQuickCust.address } : undefined
+                })
+            });
+            if (res.ok) {
+                // Pre-fill the POS customer fields
+                setCustName(newQuickCust.name);
+                if (newQuickCust.phone) {
+                    const raw = newQuickCust.phone;
+                    const cc = COUNTRY_CODES.find(x => raw.startsWith(x.code));
+                    if (cc) { setCountryCode(cc.code); setPhone(raw.slice(cc.code.length)); }
+                    else setPhone(raw);
+                }
+                if (newQuickCust.email) setEmail(newQuickCust.email);
+                setAddCustSuccess(true);
+                setTimeout(() => {
+                    setAddCustSuccess(false);
+                    setIsAddCustSheetOpen(false);
+                    setNewQuickCust({ name: "", phone: "", email: "", address: "" });
+                }, 1200);
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsAddCustSaving(false);
+        }
+    };
+
     const resetForm = () => {
         setCustName(""); setPhone(""); setEmail(""); setAddress(""); setCustSearch("");
         setLineItems([]); setRemark(""); setDiscount(0); setAdjustment(0);
@@ -375,38 +420,170 @@ export default function NewOrderPage() {
 
     // ── Success ──
     if (orderNumber) {
-        return (
-            <div className="p-4 sm:p-8 max-w-2xl mx-auto flex flex-col items-center justify-center min-h-[70vh] text-center">
-                <div className="w-[72px] h-[72px] rounded-[1.5rem] bg-[var(--color-tertiary-container)] text-[var(--color-tertiary)] flex items-center justify-center mb-6 shadow-[var(--shadow-m3-2)] animate-in zoom-in duration-300">
-                    <CheckCircle2 size={36} />
-                </div>
-                <h2 className="text-3xl font-black tracking-tight text-[var(--color-on-surface)]">Order Created!</h2>
-                <div className="mt-4 mb-3 px-6 py-3 rounded-2xl bg-[var(--color-primary-container)] border border-[var(--color-primary)]/10 shadow-[var(--shadow-m3-1)]">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-on-primary-container)] opacity-50 mb-0.5">Order Number</p>
-                    <p className="font-mono font-black text-2xl text-[var(--color-primary)]">{orderNumber}</p>
-                </div>
-                <p className="text-sm text-[var(--color-on-surface-variant)] opacity-60 mb-2">
-                    <strong className="font-black text-[var(--color-on-surface)]">{custName}</strong> · {countryCode}{phone}
-                </p>
-                <p className="text-sm font-black text-[var(--color-primary)] mb-8">{fmt(totalPayable)} · {paymentMethod}</p>
+        const now = new Date();
+        const dateStr = now.toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+        const timeStr = now.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
 
-                <div className="flex gap-3 flex-wrap justify-center">
-                    <Button onClick={() => orderId && router.push(`/admin/orders/${orderId}`)}
-                        className="h-12 px-6 rounded-2xl font-black bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-[var(--shadow-m3-2)]">
-                        View Order
-                    </Button>
-                    <Button onClick={() => { }} variant="outline"
-                        className="h-12 px-6 rounded-2xl font-black border-2 border-[var(--color-outline-variant)]/40 flex items-center gap-2">
-                        <Receipt size={18} /> Print Receipt
-                    </Button>
-                    <Button onClick={resetForm} variant="outline"
-                        className="h-12 px-6 rounded-2xl font-black border-2 border-[var(--color-outline-variant)]/40">
-                        + New Sale
-                    </Button>
-                    <Button onClick={() => router.push("/admin/pos/transactions")} variant="text"
-                        className="h-12 px-6 rounded-2xl font-black text-[var(--color-on-surface-variant)]">
-                        All Transactions
-                    </Button>
+        return (
+            <div className="min-h-screen bg-[var(--color-surface-container-low)] py-8 px-4">
+                <div className="max-w-2xl mx-auto space-y-4">
+
+                    {/* ── Success Hero ── */}
+                    <div className="bg-[var(--color-surface)] rounded-[2rem] border border-[var(--color-outline-variant)]/10 shadow-[var(--shadow-m3-2)] p-8 flex flex-col items-center text-center animate-in fade-in zoom-in duration-500">
+                        <div className="relative mb-6">
+                            <div className="w-20 h-20 rounded-[1.75rem] bg-[var(--color-tertiary-container)] text-[var(--color-tertiary)] flex items-center justify-center shadow-[var(--shadow-m3-3)] animate-in zoom-in duration-300">
+                                <CheckCircle2 size={40} strokeWidth={2} />
+                            </div>
+                            <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl bg-[var(--color-primary)] text-[var(--color-on-primary)] flex items-center justify-center shadow-md text-xs font-black">✓</div>
+                        </div>
+                        <h1 className="text-3xl font-black tracking-tight text-[var(--color-on-surface)] mb-1">Order Created!</h1>
+                        <p className="text-sm font-medium text-[var(--color-on-surface-variant)] opacity-50">{dateStr} · {timeStr}</p>
+                        <div className="mt-5 px-8 py-4 rounded-2xl bg-[var(--color-primary-container)] border border-[var(--color-primary)]/15 shadow-[var(--shadow-m3-1)] w-full max-w-sm">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-on-primary-container)] opacity-50 mb-1">Order Reference</p>
+                            <p className="font-mono font-black text-2xl text-[var(--color-primary)] tracking-wider">{orderNumber}</p>
+                        </div>
+                    </div>
+
+                    {/* ── Customer & Payment ── */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="bg-[var(--color-surface)] rounded-[1.75rem] border border-[var(--color-outline-variant)]/10 shadow-[var(--shadow-m3-1)] p-6">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-on-surface-variant)] opacity-40 mb-4">Customer</p>
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-12 h-12 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] flex items-center justify-center font-black text-lg shadow-lg shadow-[var(--color-primary)]/20">
+                                    {custName.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <p className="font-black text-base text-[var(--color-on-surface)] leading-tight">{custName}</p>
+                                    <p className="text-xs font-bold text-[var(--color-on-surface-variant)] opacity-50">{countryCode}{phone}</p>
+                                </div>
+                            </div>
+                            {email && (
+                                <div className="flex items-center gap-2 text-xs font-bold text-[var(--color-on-surface-variant)] opacity-60 mb-2">
+                                    <Mail size={12} /> {email}
+                                </div>
+                            )}
+                            {address && (
+                                <div className="flex items-start gap-2 text-xs font-bold text-[var(--color-on-surface-variant)] opacity-60">
+                                    <Hash size={12} className="mt-0.5 shrink-0" /> {address}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="bg-[var(--color-surface)] rounded-[1.75rem] border border-[var(--color-outline-variant)]/10 shadow-[var(--shadow-m3-1)] p-6 space-y-4">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-on-surface-variant)] opacity-40">Payment & Channel</p>
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-black text-[var(--color-on-surface-variant)] opacity-50 uppercase tracking-widest">Method</span>
+                                <span className="font-black text-sm text-[var(--color-on-surface)] flex items-center gap-2">
+                                    {paymentMethod === "Cash" && <Banknote size={14} className="text-[var(--color-primary)]" />}
+                                    {paymentMethod === "Card" && <CreditCard size={14} className="text-[var(--color-primary)]" />}
+                                    {paymentMethod === "M-Pesa" && <Smartphone size={14} className="text-[var(--color-primary)]" />}
+                                    {paymentMethod === "Bank Transfer" && <Building2 size={14} className="text-[var(--color-primary)]" />}
+                                    {paymentMethod}
+                                </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-black text-[var(--color-on-surface-variant)] opacity-50 uppercase tracking-widest">Channel</span>
+                                <span className="font-black text-sm text-[var(--color-on-surface)]">{channel}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-black text-[var(--color-on-surface-variant)] opacity-50 uppercase tracking-widest">Status</span>
+                                <span className="px-3 py-1 rounded-full bg-[oklch(0.6_0.15_150)]/15 text-[oklch(0.45_0.15_150)] text-[10px] font-black uppercase tracking-widest">Processing</span>
+                            </div>
+                            {remark && (
+                                <div className="pt-2 border-t border-[var(--color-outline-variant)]/10">
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-[var(--color-on-surface-variant)] opacity-40 mb-1">Note</p>
+                                    <p className="text-xs font-bold text-[var(--color-on-surface-variant)] opacity-70 leading-relaxed">{remark}</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* ── Order Items ── */}
+                    <div className="bg-[var(--color-surface)] rounded-[1.75rem] border border-[var(--color-outline-variant)]/10 shadow-[var(--shadow-m3-1)] overflow-hidden">
+                        <div className="px-6 pt-5 pb-3 border-b border-[var(--color-outline-variant)]/10 flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
+                                <Package size={15} />
+                            </div>
+                            <p className="text-xs font-black uppercase tracking-widest text-[var(--color-on-surface-variant)] opacity-60">Order Items</p>
+                            <span className="ml-auto text-[10px] font-black bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full px-3 py-1">
+                                {lineItems.reduce((s, i) => s + i.qty, 0)} items
+                            </span>
+                        </div>
+                        <div className="divide-y divide-[var(--color-outline-variant)]/8">
+                            {lineItems.map((item, idx) => (
+                                <div key={item.id} className="flex items-center gap-4 px-6 py-4">
+                                    <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-container)] flex items-center justify-center shrink-0 text-xs font-black text-[var(--color-on-surface-variant)] opacity-40">
+                                        {idx + 1}
+                                    </div>
+                                    {item.image && <img src={item.image} alt={item.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-black text-sm text-[var(--color-on-surface)] truncate">{item.name}</p>
+                                        {item.note && <p className="text-[10px] font-medium text-[var(--color-primary)] opacity-60 truncate mt-0.5">{item.note}</p>}
+                                    </div>
+                                    <div className="text-right shrink-0">
+                                        <p className="font-black text-sm text-[var(--color-on-surface)]">{fmt(item.unitPrice * item.qty)}</p>
+                                        <p className="text-[10px] font-bold text-[var(--color-on-surface-variant)] opacity-40">{item.qty} × {fmt(item.unitPrice)}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="px-6 pb-6 pt-3 border-t border-[var(--color-outline-variant)]/10 space-y-2.5">
+                            <div className="flex justify-between text-sm">
+                                <span className="font-bold text-[var(--color-on-surface-variant)] opacity-60">Subtotal</span>
+                                <span className="font-black text-[var(--color-on-surface)]">{fmt(subtotal)}</span>
+                            </div>
+                            {discountAmt > 0 && (
+                                <div className="flex justify-between text-sm">
+                                    <span className="font-bold text-[var(--color-error)] opacity-80">Discount {discountType === "percent" ? `(${discount}%)` : ""}</span>
+                                    <span className="font-black text-[var(--color-error)]">− {fmt(discountAmt)}</span>
+                                </div>
+                            )}
+                            {adjustment !== 0 && (
+                                <div className="flex justify-between text-sm">
+                                    <span className="font-bold text-[var(--color-on-surface-variant)] opacity-60">Adjustment</span>
+                                    <span className="font-black text-[var(--color-on-surface)]">{adjustment > 0 ? "+ " : "− "}{fmt(Math.abs(adjustment))}</span>
+                                </div>
+                            )}
+                            <div className="h-px bg-[var(--color-outline-variant)]/15 my-1" />
+                            <div className="flex justify-between">
+                                <span className="font-black text-base text-[var(--color-on-surface)]">Total Paid</span>
+                                <span className="font-black text-xl text-[var(--color-primary)]">{fmt(totalPayable)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ── Actions ── */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <Button
+                            onClick={() => orderId && router.push(`/admin/orders/${orderId}`)}
+                            className="h-14 rounded-2xl font-black bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-[var(--shadow-m3-2)] hover:shadow-[var(--shadow-m3-3)] active:scale-95 transition-all"
+                        >
+                            View Order
+                        </Button>
+                        <Button
+                            onClick={() => window.print()}
+                            variant="outline"
+                            className="h-14 rounded-2xl font-black border-2 border-[var(--color-outline-variant)]/40 flex items-center justify-center gap-2 hover:bg-[var(--color-surface-container)] active:scale-95 transition-all"
+                        >
+                            <Receipt size={18} /> Print Receipt
+                        </Button>
+                        <Button
+                            onClick={resetForm}
+                            variant="outline"
+                            className="h-14 rounded-2xl font-black border-2 border-[var(--color-outline-variant)]/40 hover:bg-[var(--color-surface-container)] active:scale-95 transition-all"
+                        >
+                            + New Sale
+                        </Button>
+                    </div>
+                    <div className="flex justify-center pb-4">
+                        <Button
+                            onClick={() => router.push("/admin/pos/transactions")}
+                            variant="text"
+                            className="h-10 px-6 rounded-2xl font-black text-[var(--color-on-surface-variant)] opacity-50 hover:opacity-100 transition-all"
+                        >
+                            View All Transactions →
+                        </Button>
+                    </div>
                 </div>
             </div>
         );
@@ -468,15 +645,24 @@ export default function NewOrderPage() {
                                 </div>
                                 <h2 className="text-xs font-black uppercase tracking-widest text-[var(--color-on-surface-variant)] opacity-60">Customer</h2>
                             </div>
-                            {(phone || email || address) && (
+                            <div className="flex items-center gap-2">
                                 <button
-                                    onClick={() => setIsCustExpanded(!isCustExpanded)}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--color-surface-container)] hover:bg-[var(--color-surface-container-high)] text-[10px] font-black text-[var(--color-primary)] transition-all"
+                                    onClick={() => setIsAddCustSheetOpen(true)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 text-[10px] font-black text-[var(--color-primary)] transition-all"
                                 >
-                                    {isCustExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                                    {isCustExpanded ? "Minimize" : "View Details"}
+                                    <UserPlus size={12} />
+                                    Add New
                                 </button>
-                            )}
+                                {(phone || email || address) && (
+                                    <button
+                                        onClick={() => setIsCustExpanded(!isCustExpanded)}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--color-surface-container)] hover:bg-[var(--color-surface-container-high)] text-[10px] font-black text-[var(--color-primary)] transition-all"
+                                    >
+                                        {isCustExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                                        {isCustExpanded ? "Minimize" : "View Details"}
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         <div className="p-6 space-y-4">
@@ -547,6 +733,86 @@ export default function NewOrderPage() {
                             )}
                         </div>
                     </div>
+
+                    {/* ── Add New Customer Sheet ── */}
+                    <Sheet
+                        open={isAddCustSheetOpen}
+                        onClose={() => !isAddCustSaving && setIsAddCustSheetOpen(false)}
+                        title="New Customer"
+                        icon={<UserPlus size={20} />}
+                        footer={
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+                                <Button
+                                    disabled={isAddCustSaving || !newQuickCust.name}
+                                    variant="outline"
+                                    onClick={() => handleSaveNewCustomer(false)}
+                                    className="h-14 rounded-[var(--radius-m3-l)] font-black text-sm border-2 border-[var(--color-outline-variant)]/40"
+                                >
+                                    {isAddCustSaving ? <Loader2 size={18} className="animate-spin" /> : addCustSuccess ? <CheckCircle2 size={18} className="text-emerald-500" /> : "Save Profile"}
+                                </Button>
+                                <Button
+                                    disabled={isAddCustSaving || !newQuickCust.name}
+                                    onClick={() => handleSaveNewCustomer(true)}
+                                    className="h-14 rounded-[var(--radius-m3-l)] font-black text-sm bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-lg shadow-[var(--color-primary)]/20"
+                                >
+                                    {isAddCustSaving ? <Loader2 size={18} className="animate-spin" /> : "Save & Fill"}
+                                </Button>
+                            </div>
+                        }
+                    >
+                        <div className="space-y-6">
+                            <div className="space-y-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-black uppercase tracking-widest text-[var(--color-on-surface-variant)] opacity-40">Full Name *</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Alice Johnson"
+                                        value={newQuickCust.name}
+                                        onChange={e => setNewQuickCust({ ...newQuickCust, name: e.target.value })}
+                                        className={inputCls}
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-black uppercase tracking-widest text-[var(--color-on-surface-variant)] opacity-40">Phone Number</label>
+                                    <input
+                                        type="tel"
+                                        placeholder="+254..."
+                                        value={newQuickCust.phone}
+                                        onChange={e => setNewQuickCust({ ...newQuickCust, phone: e.target.value })}
+                                        className={inputCls}
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-black uppercase tracking-widest text-[var(--color-on-surface-variant)] opacity-40">Email Address</label>
+                                    <input
+                                        type="email"
+                                        placeholder="alice@example.com"
+                                        value={newQuickCust.email}
+                                        onChange={e => setNewQuickCust({ ...newQuickCust, email: e.target.value })}
+                                        className={inputCls}
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-black uppercase tracking-widest text-[var(--color-on-surface-variant)] opacity-40">Physical Address</label>
+                                    <textarea
+                                        placeholder="Street, Apartment, City"
+                                        value={newQuickCust.address}
+                                        rows={3}
+                                        onChange={e => setNewQuickCust({ ...newQuickCust, address: e.target.value })}
+                                        className={`${inputCls} h-auto py-4 resize-none`}
+                                    />
+                                </div>
+                            </div>
+                            <div className="p-5 rounded-[var(--radius-m3-xl)] bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/10 flex gap-4">
+                                <div className="w-12 h-12 rounded-[var(--radius-m3-l)] bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] shrink-0">
+                                    <CheckCircle2 size={20} />
+                                </div>
+                                <p className="text-xs font-bold text-[var(--color-on-surface-variant)] leading-relaxed">
+                                    Profile saved to your CRM. Use <strong className="text-[var(--color-primary)]">Save &amp; Fill</strong> to instantly pre-fill the customer fields on this sale.
+                                </p>
+                            </div>
+                        </div>
+                    </Sheet>
 
                     {/* ── Edit Customer Sheet ── */}
                     <Sheet

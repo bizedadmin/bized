@@ -164,6 +164,10 @@ export const HELP_CONTENT = {
     taxLiability: {
         title: "Tax Liability",
         description: "The total amount of tax your business has collected from customers (Sales Tax/VAT/GST) minus the tax you've paid on business purchases. This is what you owe to the government."
+    },
+    paymentMethods: {
+        title: "Payment Methods",
+        description: "Configure how your customers can pay for their orders. Each enabled method is mapped to a specific Chart of Accounts (COA) code, allowing for automatic, double-entry financial reporting. You can use default methods like Cash and Cards, or add custom ones for specific regions or processors."
     }
 } as const;
 

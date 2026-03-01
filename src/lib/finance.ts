@@ -28,6 +28,7 @@ export async function postJournalEntry(
         referenceType?: "Invoice" | "Bill" | "Order" | "Manual";
         date?: Date;
         createdBy?: string;
+        paymentMethod?: string; // e.g. "Cash", "CreditCard" — for per-channel reporting
     }
 ) {
     const entry = {
@@ -39,6 +40,7 @@ export async function postJournalEntry(
         category: opts?.category ?? "General",
         referenceId: opts?.referenceId ?? null,
         referenceType: opts?.referenceType ?? "Manual",
+        paymentMethod: opts?.paymentMethod ?? null,
         date: opts?.date ?? new Date(),
         "@type": "TransferAction", // schema.org
         createdBy: opts?.createdBy ?? "system",

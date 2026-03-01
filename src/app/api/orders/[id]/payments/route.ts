@@ -169,23 +169,74 @@ export async function POST(req: NextRequest, { params }: Params) {
             }
         }
 
-        // 4. Auto-post journal entries when a payment is received
-        // Credit → 1200 Accounts Receivable (payment received)
-        // Credit → 4000 Sales Revenue (revenue recognised)
+        // 4. Auto-post double-entry journal entries when a payment is received.
+        //
+        // Entry A: Debit the payment-method-specific asset account (money IN to a real account).
+        //          The COA code is resolved from the store's payment method config:
+        //          Cash → 1000 | Card → 1010 | BankTransfer → 1020 | MobileMoney → 1030 | etc.
+        //
+        // Entry B: Credit Accounts Receivable 1200 (clearing the amount owed).
+        //
+        // Entry C: Credit Sales Revenue 4000 (revenue recognised on payment).
+        //
+        // This produces a fully balanced double-entry ledger per payment channel.
+
+        // Resolve the correct asset account from payment method config
+        let assetCoaCode = "1000"; // default: Cash on Hand
+        const pmConfig = await db.collection("store_payment_methods").findOne({
+            storeId,
+            $or: [
+                { type: paymentMethod },
+                { name: { $regex: paymentMethod, $options: "i" } },
+            ]
+        });
+        if (pmConfig?.coaCode) assetCoaCode = pmConfig.coaCode;
+
+        const extraOpts = {
+            category: "Sales",
+            referenceId: id,
+            referenceType: "Order" as const,
+            createdBy: session.user.id,
+            paymentMethod, // propagated for per-channel reporting
+        };
+
+        // A. Debit payment channel asset account (money received into this account)
+        const assetAccount = await getAccountByCode(db, storeId, assetCoaCode);
+        if (assetAccount) {
+            await postJournalEntry(
+                db, storeId, assetAccount._id.toString(), "Debit", parsedAmount,
+                `${paymentMethod} payment received for ${order.orderNumber}`,
+                extraOpts
+            );
+        } else {
+            // Fallback: try the generic cash account
+            const cashAccount = await getAccountByCode(db, storeId, "1000");
+            if (cashAccount) {
+                await postJournalEntry(
+                    db, storeId, cashAccount._id.toString(), "Debit", parsedAmount,
+                    `${paymentMethod} payment received for ${order.orderNumber}`,
+                    extraOpts
+                );
+            }
+        }
+
+        // B. Credit Accounts Receivable (clearing the AR balance)
         const arAccount = await getAccountByCode(db, storeId, "1200");
         if (arAccount) {
             await postJournalEntry(
                 db, storeId, arAccount._id.toString(), "Credit", parsedAmount,
-                `Payment received for ${order.orderNumber} (${paymentMethod})`,
-                { category: "Sales", referenceId: id, referenceType: "Order", createdBy: session.user.id }
+                `AR cleared for ${order.orderNumber} (${paymentMethod})`,
+                extraOpts
             );
         }
+
+        // C. Credit Sales Revenue (recognise revenue)
         const revenueAccount = await getAccountByCode(db, storeId, "4000");
         if (revenueAccount) {
             await postJournalEntry(
                 db, storeId, revenueAccount._id.toString(), "Credit", parsedAmount,
-                `Sales Revenue for ${order.orderNumber}`,
-                { category: "Sales", referenceId: id, referenceType: "Order", createdBy: session.user.id }
+                `Sales Revenue recognised for ${order.orderNumber}`,
+                extraOpts
             );
         }
 

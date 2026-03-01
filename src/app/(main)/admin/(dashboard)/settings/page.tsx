@@ -27,7 +27,13 @@ import {
     Loader2,
     Clock,
     X,
-    Plus
+    Plus,
+    Smartphone,
+    Info,
+    CreditCard,
+    Layers,
+    Landmark,
+    List
 } from "lucide-react";
 import Link from "next/link";
 import { useBusiness } from "@/contexts/BusinessContext";
@@ -41,7 +47,7 @@ import { COUNTRIES } from "@/lib/countries";
 import { Sheet } from "@/components/ui/Sheet";
 import { HelpIcon } from "@/components/admin/HelpCenter";
 
-type SettingsTab = "general" | "contact" | "whatsapp" | "branding" | "regional" | "taxes" | "social" | "legal" | "ai";
+type SettingsTab = "general" | "contact" | "whatsapp" | "branding" | "regional" | "payments" | "taxes" | "social" | "legal" | "ai";
 
 const TABS = [
     { id: "general", label: "General", icon: Building2, description: "Store name and industry" },
@@ -49,6 +55,7 @@ const TABS = [
     { id: "whatsapp", label: "WhatsApp", icon: MessageSquare, description: "Chat and button config" },
     { id: "branding", label: "Branding", icon: Palette, description: "Logo and theme colors" },
     { id: "regional", label: "Regional", icon: Languages, description: "Currency and formatting" },
+    { id: "payments", label: "Payment Methods", icon: CreditCard, description: "Accepted channels and COA mapping" },
     { id: "taxes", label: "Taxes", icon: Coins, description: "Tax rates and configuration" },
     { id: "social", label: "Socials", icon: Share2, description: "WhatsApp and social links" },
     { id: "legal", label: "Legal", icon: Shield, description: "Policies and terms" },
@@ -57,8 +64,91 @@ const TABS = [
 
 import { useAi } from "@/contexts/AiContext";
 
+interface PaymentMethod {
+    id: string;
+    name: string;
+    type: "Cash" | "CreditCard" | "BankTransfer" | "MobileMoney" | "Crypto" | "Cheque" | "Other";
+    enabled: boolean;
+    coaCode: string;
+    gateway?: string;
+    gatewayAccountId?: string;
+    apiKey?: string;
+    publicKey?: string;
+    webhookSecret?: string;
+    description?: string;
+    icon?: string;
+    sortOrder: number;
+    _id?: string;
+    settings?: Record<string, any>;
+}
+
+const PaymentMethodCard = ({ method, onToggle, onEdit }: {
+    method: PaymentMethod;
+    onToggle: (enabled: boolean) => void;
+    onEdit: () => void;
+}) => (
+    <div
+        className={cn(
+            "flex items-center gap-4 p-5 rounded-2xl border transition-all group",
+            method.enabled
+                ? "bg-[var(--color-surface-container-low)] border-[var(--color-primary)]/20 shadow-sm"
+                : "bg-[var(--color-surface-container-lowest)] border-[var(--color-outline-variant)]/10 opacity-70 grayscale-[0.5]"
+        )}
+    >
+        <div className={cn(
+            "w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0 transition-all",
+            method.enabled ? "bg-[var(--color-primary)]/10 scale-105" : "bg-[var(--color-surface-container)]"
+        )}>
+            {method.icon || "💰"}
+        </div>
+        <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-black text-sm text-[var(--color-on-surface)] group-hover:text-[var(--color-primary)] transition-colors">{method.name}</span>
+                {method.gateway && (
+                    <span className={cn(
+                        "text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border",
+                        method.enabled
+                            ? "bg-[var(--color-primary)]/10 border-[var(--color-primary)]/20 text-[var(--color-primary)] shadow-sm"
+                            : "bg-[var(--color-secondary-container)]/30 border-[var(--color-outline-variant)]/20 text-[var(--color-on-secondary-container)] opacity-60"
+                    )}>
+                        {method.gateway}
+                    </span>
+                )}
+            </div>
+            <div className="flex items-center gap-3 mt-1 flex-wrap">
+                <span className="text-[10px] font-bold text-[var(--color-on-surface-variant)] opacity-60 line-clamp-1">
+                    {method.description || method.type}
+                </span>
+                <span className="flex items-center gap-1 text-[10px] font-black text-[var(--color-primary)] uppercase tracking-widest whitespace-nowrap">
+                    <List size={10} /> COA {method.coaCode}
+                </span>
+            </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+            <button
+                onClick={onEdit}
+                className="w-10 h-10 rounded-xl hover:bg-[var(--color-surface-container-highest)] flex items-center justify-center transition-all text-[var(--color-on-surface-variant)] opacity-40 hover:opacity-100 hover:scale-105 active:scale-95"
+            >
+                <Settings size={18} />
+            </button>
+            <button
+                onClick={() => onToggle(!method.enabled)}
+                className={cn(
+                    "w-12 h-6 rounded-full p-1 transition-all relative shrink-0",
+                    method.enabled ? "bg-[var(--color-primary)] shadow-md shadow-[var(--color-primary)]/30" : "bg-[var(--color-outline-variant)]/30"
+                )}
+            >
+                <div className={cn(
+                    "w-4 h-4 rounded-full bg-white shadow-sm transition-transform",
+                    method.enabled ? "translate-x-6" : "translate-x-0"
+                )} />
+            </button>
+        </div>
+    </div>
+);
+
 export default function SettingsPage() {
-    const { currentBusiness, updateBusiness, isLoading } = useBusiness();
+    const { currentBusiness, updateBusiness, refreshBusinesses, isLoading } = useBusiness();
     const { setContextData, setOnApplyChanges } = useAi();
     const searchParams = useSearchParams();
     const [activeTab, setActiveTab] = useState<SettingsTab>(() => {
@@ -79,6 +169,109 @@ export default function SettingsPage() {
     const [formData, setFormData] = useState<any>(null);
     const [isCurrencyModalOpen, setIsCurrencyModalOpen] = useState(false);
     const [isCountryModalOpen, setIsCountryModalOpen] = useState(false);
+
+    // — Payment Methods state —
+    const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(currentBusiness?.paymentMethods || []);
+    const [paymentSubTab, setPaymentSubTab] = useState<'methods' | 'accounting' | 'checkout'>('methods');
+    const [pmLoading, setPmLoading] = useState(false);
+    const [pmSaving, setPmSaving] = useState(false);
+    const [pmSaveSuccess, setPmSaveSuccess] = useState(false);
+    const [editingPm, setEditingPm] = useState<PaymentMethod | null>(null);
+
+    // Sync from context if it's already there
+    React.useEffect(() => {
+        if (currentBusiness?.paymentMethods) {
+            setPaymentMethods(currentBusiness.paymentMethods);
+        }
+    }, [currentBusiness?.paymentMethods]);
+    const [pmEditForm, setPmEditForm] = useState({
+        gateway: "",
+        gatewayAccountId: "",
+        apiKey: "",
+        publicKey: "",
+        webhookSecret: "",
+        description: "",
+        coaCode: ""
+    });
+    const [pmSettings, setPmSettings] = useState<Record<string, any>>({});
+    const [newPmOpen, setNewPmOpen] = useState(false);
+    const [newPmForm, setNewPmForm] = useState({
+        name: "",
+        type: "Cash" as PaymentMethod["type"],
+        coaCode: "",
+        gateway: "",
+        apiKey: "",
+        publicKey: "",
+        webhookSecret: "",
+        description: "",
+        icon: ""
+    });
+    const [newPmSettings, setNewPmSettings] = useState<Record<string, any>>({});
+
+    const fetchPaymentMethods = React.useCallback(async () => {
+        if (!currentBusiness?._id) return;
+        setPmLoading(true);
+        try {
+            const res = await fetch(`/api/stores/${currentBusiness._id}/payment-methods`);
+            const data = await res.json();
+            if (data.methods) setPaymentMethods(data.methods);
+        } finally {
+            setPmLoading(false);
+        }
+    }, [currentBusiness?._id]);
+
+    React.useEffect(() => {
+        // Only fetch if context doesn't have them yet or we specifically need a refresh
+        if (activeTab === "payments" && (!currentBusiness?.paymentMethods || currentBusiness.paymentMethods.length === 0)) {
+            fetchPaymentMethods();
+        }
+    }, [activeTab, fetchPaymentMethods, currentBusiness?.paymentMethods]);
+
+    const handlePmToggle = async (methodId: string, enabled: boolean) => {
+        setPaymentMethods(prev => prev.map(m => m.id === methodId ? { ...m, enabled } : m));
+        await fetch(`/api/stores/${currentBusiness?._id}/payment-methods`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ updates: [{ id: methodId, enabled }] }),
+        });
+        refreshBusinesses();
+    };
+
+    const handlePmEditSave = async () => {
+        if (!editingPm || !currentBusiness?._id) return;
+        setPmSaving(true);
+        await fetch(`/api/stores/${currentBusiness._id}/payment-methods`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                updates: [{ id: editingPm.id, ...pmEditForm, settings: pmSettings }]
+            })
+        });
+        setPmSaving(false);
+        setPmSaveSuccess(true);
+        setEditingPm(null);
+        refreshBusinesses();
+        setTimeout(() => setPmSaveSuccess(false), 2500);
+    };
+
+    const handleNewPmCreate = async () => {
+        if (!newPmForm.name || !newPmForm.coaCode || !currentBusiness?._id) return;
+        setPmSaving(true);
+        const res = await fetch(`/api/stores/${currentBusiness._id}/payment-methods`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...newPmForm, settings: newPmSettings }),
+        });
+        const data = await res.json();
+        setPmSaving(false);
+        if (res.ok) {
+            setNewPmOpen(false);
+            setNewPmForm({ name: "", type: "Cash", coaCode: "", gateway: "", apiKey: "", publicKey: "", webhookSecret: "", description: "", icon: "" });
+            refreshBusinesses();
+        } else {
+            alert(data.error);
+        }
+    };
 
     const [isTaxAiOpen, setIsTaxAiOpen] = useState(false);
     const [isTaxAiLoading, setIsTaxAiLoading] = useState(false);
@@ -838,6 +1031,234 @@ export default function SettingsPage() {
                                 </section>
                             )}
 
+                            {/* TAB CONTENT: PAYMENT METHODS */}
+                            {activeTab === 'payments' && (
+                                <section className="space-y-6">
+                                    {/* Sub-Tab Switcher */}
+                                    <div className="flex items-center gap-1 p-1 bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/10 rounded-2xl w-fit">
+                                        {[
+                                            { id: 'methods', label: 'Gateways', icon: CreditCard },
+                                            { id: 'accounting', label: 'COA Mapping', icon: List },
+                                            { id: 'checkout', label: 'Checkout Settings', icon: Smartphone }
+                                        ].map((tab) => (
+                                            <button
+                                                key={tab.id}
+                                                onClick={() => setPaymentSubTab(tab.id as any)}
+                                                className={cn(
+                                                    "flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black transition-all",
+                                                    paymentSubTab === tab.id
+                                                        ? "bg-[var(--color-primary)] text-white shadow-md active:scale-95"
+                                                        : "text-[var(--color-on-surface-variant)] opacity-50 hover:opacity-100 hover:bg-[var(--color-surface-container-high)]"
+                                                )}
+                                            >
+                                                <tab.icon size={14} />
+                                                {tab.label}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {paymentSubTab === 'methods' && (
+                                        <div className="bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/10 rounded-[2.5rem] p-8 shadow-[var(--shadow-m3-1)] space-y-6">
+                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        <h3 className="text-xl font-black text-[var(--color-on-surface)]">Payment Channels</h3>
+                                                        <HelpIcon topic="paymentMethods" />
+                                                    </div>
+                                                    <p className="text-xs font-medium text-[var(--color-on-surface-variant)] opacity-60 mt-1">
+                                                        Each enabled channel auto-creates a dedicated ledger account in your Chart of Accounts.
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={() => setNewPmOpen(true)}
+                                                    className="flex items-center gap-2 h-12 px-5 rounded-2xl bg-[var(--color-primary)] text-[var(--color-on-primary)] font-bold text-sm shadow-md hover:shadow-lg hover:scale-[1.02] transition-all active:scale-95 shrink-0"
+                                                >
+                                                    <Plus size={18} /> Add Custom
+                                                </button>
+                                            </div>
+
+                                            <div className="flex items-start gap-4 p-5 rounded-2xl bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/10">
+                                                <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center shrink-0">
+                                                    <Landmark size={20} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-black text-sm text-[var(--color-on-surface)]">Automatic Finance Integration</p>
+                                                    <p className="text-xs text-[var(--color-on-surface-variant)] opacity-70 mt-0.5">
+                                                        When an order is paid, the system posts a <strong>Debit</strong> to the matching channel account and a <strong>Credit</strong> to Accounts Receivable — fully IFRS/GAAP double-entry compliant.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {pmLoading ? (
+                                                <div className="space-y-3">
+                                                    {[...Array(4)].map((_, i) => (
+                                                        <div key={i} className="h-20 rounded-2xl bg-[var(--color-surface-container-low)] animate-pulse" />
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-10">
+                                                    {/* Section: Activated */}
+                                                    {(paymentMethods.filter(m => m.enabled).length > 0) && (
+                                                        <div className="space-y-4">
+                                                            <div className="flex items-center gap-2 px-1">
+                                                                <div className="w-1 h-4 rounded-full bg-[var(--color-primary)]" />
+                                                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-primary)]">
+                                                                    Activated Channels ({paymentMethods.filter(m => m.enabled).length})
+                                                                </h4>
+                                                            </div>
+                                                            <div className="grid gap-3">
+                                                                {paymentMethods.filter(m => m.enabled).map(method => (
+                                                                    <PaymentMethodCard
+                                                                        key={method.id}
+                                                                        method={method}
+                                                                        onEdit={() => {
+                                                                            setEditingPm(method);
+                                                                            setPmEditForm({
+                                                                                gateway: method.gateway || "",
+                                                                                gatewayAccountId: method.gatewayAccountId || "",
+                                                                                apiKey: method.apiKey || "",
+                                                                                publicKey: method.publicKey || "",
+                                                                                webhookSecret: method.webhookSecret || "",
+                                                                                description: method.description || "",
+                                                                                coaCode: method.coaCode,
+                                                                            });
+                                                                            setPmSettings(method.settings || {});
+                                                                        }}
+                                                                        onToggle={(enabled) => handlePmToggle(method.id, enabled)}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Section: Available */}
+                                                    <div className="space-y-4">
+                                                        <div className="flex items-center gap-2 px-1">
+                                                            <div className="w-1 h-4 rounded-full bg-[var(--color-outline-variant)]/40" />
+                                                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">
+                                                                Available Gateways ({paymentMethods.filter(m => !m.enabled).length})
+                                                            </h4>
+                                                        </div>
+                                                        <div className="grid gap-3">
+                                                            {paymentMethods.filter(m => !m.enabled).map(method => (
+                                                                <PaymentMethodCard
+                                                                    key={method.id}
+                                                                    method={method}
+                                                                    onEdit={() => {
+                                                                        setEditingPm(method);
+                                                                        setPmEditForm({
+                                                                            gateway: method.gateway || "",
+                                                                            gatewayAccountId: method.gatewayAccountId || "",
+                                                                            apiKey: method.apiKey || "",
+                                                                            publicKey: method.publicKey || "",
+                                                                            webhookSecret: method.webhookSecret || "",
+                                                                            description: method.description || "",
+                                                                            coaCode: method.coaCode,
+                                                                        });
+                                                                        setPmSettings(method.settings || {});
+                                                                    }}
+                                                                    onToggle={(enabled) => handlePmToggle(method.id, enabled)}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {paymentSubTab === 'accounting' && (
+                                        <div className="bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/10 rounded-[2.5rem] p-8 shadow-[var(--shadow-m3-1)] space-y-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                                                    <List size={20} />
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-black text-sm text-[var(--color-on-surface)]">Chart of Accounts Mapping</h4>
+                                                    <p className="text-[10px] text-[var(--color-on-surface-variant)] opacity-60">Enabled channels auto-create Current Asset accounts in your ledger</p>
+                                                </div>
+                                            </div>
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full text-left text-xs">
+                                                    <thead>
+                                                        <tr className="border-b border-[var(--color-outline-variant)]/10">
+                                                            <th className="py-2 px-3 font-black uppercase tracking-widest text-[var(--color-on-surface-variant)] opacity-50">Channel</th>
+                                                            <th className="py-2 px-3 font-black uppercase tracking-widest text-[var(--color-on-surface-variant)] opacity-50">COA Code</th>
+                                                            <th className="py-2 px-3 font-black uppercase tracking-widest text-[var(--color-on-surface-variant)] opacity-50">Account Type</th>
+                                                            <th className="py-2 px-3 font-black uppercase tracking-widest text-[var(--color-on-surface-variant)] opacity-50">Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-[var(--color-outline-variant)]/5">
+                                                        {paymentMethods.map(m => (
+                                                            <tr key={m.id} className={cn("transition-colors", !m.enabled && "opacity-40")}>
+                                                                <td className="py-3 px-3 font-bold">{m.icon} {m.name}</td>
+                                                                <td className="py-3 px-3 font-mono font-black text-[var(--color-primary)]">{m.coaCode}</td>
+                                                                <td className="py-3 px-3 text-[var(--color-on-surface-variant)]">Current Asset</td>
+                                                                <td className="py-3 px-3">
+                                                                    <span className={cn(
+                                                                        "px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest",
+                                                                        m.enabled ? "bg-emerald-500/10 text-emerald-600" : "bg-[var(--color-surface-container)] text-[var(--color-on-surface-variant)]"
+                                                                    )}>
+                                                                        {m.enabled ? "Active" : "Inactive"}
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {paymentSubTab === 'checkout' && (
+                                        <div className="bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/10 rounded-[2.5rem] p-8 shadow-[var(--shadow-m3-1)] space-y-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                                                    <Smartphone size={20} />
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-black text-sm text-[var(--color-on-surface)]">Checkout Experience</h4>
+                                                    <p className="text-[10px] text-[var(--color-on-surface-variant)] opacity-60">Control how customers interact with payments</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid gap-4">
+                                                {[
+                                                    { id: 'saveCards', label: 'Allow customers to save cards', desc: 'Securely store card tokens for faster checkout via PCI-compliant processors.' },
+                                                    { id: 'stkPush', label: 'Auto-trigger STK Push', desc: 'Automatically send payment requests to mobile phones for M-Pesa / Mobile Money.' },
+                                                    { id: 'receipts', label: 'Send automated e-receipts', desc: 'System will email a professional billing confirmation immediately upon successful payment.' }
+                                                ].map(item => (
+                                                    <div key={item.id} className="flex items-center justify-between p-4 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/10">
+                                                        <div className="flex-1 pr-8">
+                                                            <p className="text-sm font-bold text-[var(--color-on-surface)]">{item.label}</p>
+                                                            <p className="text-[10px] text-[var(--color-on-surface-variant)] opacity-60 mt-0.5">{item.desc}</p>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => setFormData({
+                                                                ...formData,
+                                                                checkoutSettings: {
+                                                                    ...(formData.checkoutSettings || {}),
+                                                                    [item.id]: !(formData.checkoutSettings?.[item.id as keyof typeof formData.checkoutSettings] ?? false)
+                                                                }
+                                                            })}
+                                                            className={cn(
+                                                                "w-12 h-6 rounded-full p-1 transition-all relative shrink-0",
+                                                                formData.checkoutSettings?.[item.id as keyof typeof formData.checkoutSettings] ? "bg-[var(--color-primary)]" : "bg-[var(--color-outline-variant)]/30"
+                                                            )}
+                                                        >
+                                                            <div className={cn(
+                                                                "w-4 h-4 rounded-full bg-white shadow-sm transition-transform",
+                                                                formData.checkoutSettings?.[item.id as keyof typeof formData.checkoutSettings] ? "translate-x-6" : "translate-x-0"
+                                                            )} />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </section>
+                            )}
+
                             {/* TAB CONTENT: LEGAL */}
                             {activeTab === 'legal' && (
                                 <section className="bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/10 rounded-[2.5rem] p-8 shadow-[var(--shadow-m3-1)] space-y-8">
@@ -1143,6 +1564,300 @@ export default function SettingsPage() {
                     )}
                 </div>
             </Sheet>
+            <Sheet
+                open={!!editingPm}
+                onClose={() => setEditingPm(null)}
+                title={editingPm ? `Configure ${pmEditForm.gateway || editingPm.name}` : ""}
+                footer={
+                    <div className="flex flex-col gap-4 w-full px-1">
+                        <div className="flex items-center justify-between opacity-60">
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest">
+                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                AES-256 Encrypted
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-widest">v1.2.x SECURE</span>
+                        </div>
+                        <Button
+                            onClick={handlePmEditSave}
+                            disabled={pmSaving}
+                            className={cn(
+                                "w-full h-14 rounded-2xl font-black uppercase tracking-widest transition-all shadow-xl active:scale-95",
+                                pmEditForm.gateway?.toLowerCase() === "stripe" ? "bg-[#635bff] hover:bg-[#5b51ea] text-white" :
+                                    pmEditForm.gateway?.toLowerCase() === "paystack" ? "bg-[#0ba4db] hover:bg-[#0995c7] text-white" :
+                                        pmEditForm.gateway?.toLowerCase() === "m-pesa" ? "bg-[#49ab21] hover:bg-[#3e921b] text-white" :
+                                            pmEditForm.gateway?.toLowerCase() === "dpo" ? "bg-[#004a8f] hover:bg-[#003d76] text-white" :
+                                                "bg-[var(--color-primary)] text-white"
+                            )}
+                        >
+                            {pmSaving ? <Loader2 className="animate-spin" /> : "Verify & Save Settings"}
+                        </Button>
+                    </div>
+                }
+            >
+                <div className="space-y-8 py-2">
+                    {/* Brand Banner */}
+                    <div className={cn(
+                        "p-8 rounded-[2rem] flex flex-col items-center justify-center text-center gap-5 border transition-all duration-500",
+                        pmEditForm.gateway?.toLowerCase() === "stripe" ? "bg-[#635bff]/5 border-[#635bff]/20" :
+                            pmEditForm.gateway?.toLowerCase() === "paystack" ? "bg-[#0ba4db]/5 border-[#0ba4db]/20" :
+                                pmEditForm.gateway?.toLowerCase() === "m-pesa" ? "bg-[#49ab21]/5 border-[#49ab21]/20" :
+                                    pmEditForm.gateway?.toLowerCase() === "dpo" ? "bg-[#004a8f]/5 border-[#004a8f]/20" :
+                                        "bg-[var(--color-surface-container-low)] border-[var(--color-outline-variant)]/20"
+                    )}>
+                        <div className={cn(
+                            "w-20 h-20 rounded-3xl flex items-center justify-center shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500",
+                            pmEditForm.gateway?.toLowerCase() === "stripe" ? "bg-white text-[#635bff]" :
+                                pmEditForm.gateway?.toLowerCase() === "paystack" ? "bg-white text-[#0ba4db]" :
+                                    pmEditForm.gateway?.toLowerCase() === "m-pesa" ? "bg-white text-[#49ab21]" :
+                                        pmEditForm.gateway?.toLowerCase() === "dpo" ? "bg-white text-[#004a8f]" :
+                                            "bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)]"
+                        )}>
+                            {pmEditForm.gateway?.toLowerCase() === "stripe" ? <CreditCard size={40} /> :
+                                pmEditForm.gateway?.toLowerCase() === "m-pesa" ? <Smartphone size={40} /> :
+                                    <Settings size={40} />}
+                        </div>
+                        <div className="space-y-2">
+                            <h3 className="text-2xl font-black tracking-tight text-[var(--color-on-surface)]">
+                                {pmEditForm.gateway === "Stripe" ? "Stripe Global" :
+                                    pmEditForm.gateway === "Paystack" ? "Paystack Africa" :
+                                        pmEditForm.gateway === "M-Pesa" ? "M-Pesa Express" :
+                                            pmEditForm.gateway === "DPO" ? "DPO Central" :
+                                                "Standard Ledger Channel"}
+                            </h3>
+                            <div className="flex items-center justify-center gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-primary)] opacity-60">Verified Gateway</span>
+                                <div className="w-1 h-3 rounded-full bg-[var(--color-outline-variant)]/30" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Store: {currentBusiness?._id?.slice(-8)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-10">
+                        {/* Gateway Input (Legacy or Free-form) */}
+                        {!editingPm?.gateway && (
+                            <div className="space-y-3 px-1">
+                                <label className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 ml-1">Payment Provider Backend</label>
+                                <input
+                                    type="text"
+                                    value={pmEditForm.gateway}
+                                    onChange={e => setPmEditForm({ ...pmEditForm, gateway: e.target.value })}
+                                    placeholder="e.g. Stripe, Paystack, M-Pesa, DPO"
+                                    className="w-full h-16 px-6 rounded-2xl bg-[var(--color-surface-container-low)] border-2 border-transparent focus:border-[var(--color-primary)] outline-none transition-all font-bold text-lg shadow-sm"
+                                />
+                            </div>
+                        )}
+
+                        <div className="space-y-8">
+                            {/* Security Section */}
+                            <div className="bg-[var(--color-surface-container-low)]/50 p-6 rounded-[2rem] border border-[var(--color-outline-variant)]/10 space-y-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
+                                        <Shield size={16} />
+                                    </div>
+                                    <h4 className="text-[10px] font-black uppercase tracking-widest opacity-60">Security Credentials</h4>
+                                </div>
+                                <div className="space-y-5">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-bold uppercase tracking-widest opacity-50 ml-2">
+                                            {pmEditForm.gateway === "M-Pesa" ? "Consumer Key" : pmEditForm.gateway === "DPO" ? "Company Token" : "Secret / Integration Key"}
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={pmEditForm.apiKey}
+                                            onChange={e => setPmEditForm({ ...pmEditForm, apiKey: e.target.value })}
+                                            placeholder={pmEditForm.gateway === "M-Pesa" ? "MSF_..." : "sk_..."}
+                                            className="w-full h-14 px-6 rounded-2xl bg-white/50 border border-[var(--color-outline-variant)]/20 outline-none focus:border-[var(--color-primary)] transition-all font-mono text-sm tracking-widest"
+                                        />
+                                    </div>
+
+                                    {pmEditForm.gateway !== "DPO" && (
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-bold uppercase tracking-widest opacity-50 ml-2">
+                                                {pmEditForm.gateway === "M-Pesa" ? "Consumer Secret" : "Public / Client Key"}
+                                            </label>
+                                            <input
+                                                type={pmEditForm.gateway === "M-Pesa" ? "password" : "text"}
+                                                value={pmEditForm.gateway === "M-Pesa" ? pmEditForm.webhookSecret : pmEditForm.publicKey}
+                                                onChange={e => setPmEditForm({ ...pmEditForm, [pmEditForm.gateway === "M-Pesa" ? 'webhookSecret' : 'publicKey']: e.target.value })}
+                                                placeholder={pmEditForm.gateway === "M-Pesa" ? "MSF_SEC_..." : "pk_..."}
+                                                className="w-full h-14 px-6 rounded-2xl bg-white/50 border border-[var(--color-outline-variant)]/20 outline-none focus:border-[var(--color-primary)] transition-all font-mono text-sm tracking-widest"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Options & Operations */}
+                            {(pmEditForm.gateway === "Stripe" || pmEditForm.gateway === "Paystack" || pmEditForm.gateway === "M-Pesa" || pmEditForm.gateway === "DPO") && (
+                                <div className="bg-[var(--color-surface-container-low)]/50 p-6 rounded-[2rem] border border-[var(--color-outline-variant)]/10 space-y-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
+                                            <Layers size={16} />
+                                        </div>
+                                        <h4 className="text-[10px] font-black uppercase tracking-widest opacity-60">Operations & Environment</h4>
+                                    </div>
+                                    <div className="space-y-5">
+                                        {pmEditForm.gateway === "M-Pesa" && (
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-bold uppercase tracking-widest opacity-50 ml-2">STK Passkey</label>
+                                                <input
+                                                    type="password"
+                                                    value={pmSettings.passkey || ""}
+                                                    onChange={e => setPmSettings({ ...pmSettings, passkey: e.target.value })}
+                                                    className="w-full h-14 px-6 rounded-2xl bg-white/50 border border-[var(--color-outline-variant)]/20 outline-none focus:border-[var(--color-primary)] transition-all font-mono text-sm tracking-widest"
+                                                />
+                                            </div>
+                                        )}
+
+                                        {pmEditForm.gateway === "DPO" && (
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-bold uppercase tracking-widest opacity-50 ml-2">Service Type</label>
+                                                <input
+                                                    type="text"
+                                                    value={pmSettings.serviceType || ""}
+                                                    onChange={e => setPmSettings({ ...pmSettings, serviceType: e.target.value })}
+                                                    className="w-full h-14 px-6 rounded-2xl bg-white/50 border border-[var(--color-outline-variant)]/20 shadow-sm outline-none focus:border-[var(--color-primary)] transition-all font-bold"
+                                                />
+                                            </div>
+                                        )}
+
+                                        {pmEditForm.gateway === "Stripe" && (
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-bold uppercase tracking-widest opacity-50 ml-2">Webhook Signing Secret</label>
+                                                <input
+                                                    type="password"
+                                                    value={pmEditForm.webhookSecret}
+                                                    onChange={e => setPmEditForm({ ...pmEditForm, webhookSecret: e.target.value })}
+                                                    placeholder="whsec_..."
+                                                    className="w-full h-14 px-6 rounded-2xl bg-white/50 border border-[var(--color-outline-variant)]/20 outline-none focus:border-[var(--color-primary)] transition-all font-mono text-sm tracking-widest"
+                                                />
+                                            </div>
+                                        )}
+
+                                        <div className="flex flex-col gap-3">
+                                            <label className="text-[10px] font-bold uppercase tracking-widest opacity-50 ml-2">Operating Environment</label>
+                                            <div className="flex p-2 bg-[var(--color-surface-container-highest)]/20 rounded-[1.25rem] border border-[var(--color-outline-variant)]/10">
+                                                <button
+                                                    onClick={() => setPmSettings({ ...pmSettings, mode: "sandbox" })}
+                                                    className={cn(
+                                                        "flex-1 h-12 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                                                        pmSettings.mode !== "production" ? "bg-white shadow-xl text-black scale-100" : "opacity-40 hover:opacity-100 scale-95"
+                                                    )}
+                                                >
+                                                    Sandbox
+                                                </button>
+                                                <button
+                                                    onClick={() => setPmSettings({ ...pmSettings, mode: "production" })}
+                                                    className={cn(
+                                                        "flex-1 h-12 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                                                        pmSettings.mode === "production" ? "bg-[var(--color-error)] text-white shadow-xl scale-100" : "opacity-40 hover:opacity-100 scale-95"
+                                                    )}
+                                                >
+                                                    Live
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Legacy / Identity Section */}
+                            <div className="space-y-6 px-1 pt-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-50 ml-2">Account Identification</label>
+                                    <input
+                                        type="text"
+                                        value={pmEditForm.gatewayAccountId}
+                                        onChange={e => setPmEditForm({ ...pmEditForm, gatewayAccountId: e.target.value })}
+                                        className="w-full h-16 px-6 rounded-2xl bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/20 outline-none focus:border-[var(--color-primary)] transition-all font-bold text-lg"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-50 ml-2">Finance Ledger (COA)</label>
+                                    <div className="relative group">
+                                        <input
+                                            type="text"
+                                            value={pmEditForm.coaCode}
+                                            onChange={e => setPmEditForm({ ...pmEditForm, coaCode: e.target.value })}
+                                            className="w-full h-16 px-6 rounded-2xl bg-[var(--color-primary)]/10 border-2 border-[var(--color-primary)]/20 outline-none text-[var(--color-primary)] font-black text-2xl tracking-tighter"
+                                        />
+                                        <div className="absolute right-6 top-1/2 -translate-y-1/2 bg-[var(--color-primary)] text-white py-1.5 px-3 rounded-lg text-[8px] font-black uppercase tracking-widest">Connected</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Sheet>
+
+            <Sheet
+                open={newPmOpen}
+                onClose={() => setNewPmOpen(false)}
+                title="Register Payment Channel"
+                footer={
+                    <Button
+                        onClick={handleNewPmCreate}
+                        disabled={pmSaving || !newPmForm.name || !newPmForm.coaCode}
+                        className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-[var(--color-primary)] text-white transition-all shadow-xl active:scale-95"
+                    >
+                        {pmSaving ? <Loader2 className="animate-spin" /> : "Deploy Channel"}
+                    </Button>
+                }
+            >
+                <div className="space-y-8 py-2">
+                    <div className="bg-[var(--color-surface-container-low)] p-6 rounded-[2rem] border border-[var(--color-outline-variant)]/10 space-y-6">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Channel Branding</label>
+                            <input
+                                type="text"
+                                value={newPmForm.name}
+                                onChange={e => setNewPmForm({ ...newPmForm, name: e.target.value })}
+                                placeholder="e.g. USDT Gateway"
+                                className="w-full h-14 px-5 rounded-2xl bg-white/50 border border-[var(--color-outline-variant)]/20 outline-none focus:border-[var(--color-primary)] transition-all font-bold"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-5">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold uppercase tracking-widest opacity-60 ml-2">Market Asset Type</label>
+                                <select
+                                    value={newPmForm.type}
+                                    onChange={e => setNewPmForm({ ...newPmForm, type: e.target.value as any })}
+                                    className="w-full h-14 px-5 rounded-2xl bg-white/50 border border-[var(--color-outline-variant)]/20 outline-none focus:border-[var(--color-primary)] transition-all font-bold appearance-none"
+                                >
+                                    <option value="Cash">Cash</option>
+                                    <option value="CreditCard">Credit / Debit Card</option>
+                                    <option value="BankTransfer">Bank Transfer</option>
+                                    <option value="MobileMoney">Mobile Money</option>
+                                    <option value="Crypto">Cryptocurrency</option>
+                                    <option value="Cheque">Cheque</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold uppercase tracking-widest opacity-60 ml-2">Finance Ledger (COA)</label>
+                                <input
+                                    type="text"
+                                    value={newPmForm.coaCode}
+                                    onChange={e => setNewPmForm({ ...newPmForm, coaCode: e.target.value })}
+                                    placeholder="e.g. 1060"
+                                    className="w-full h-14 px-5 rounded-2xl bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 outline-none text-[var(--color-primary)] font-black text-xl"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Infrastructure Hub</label>
+                            <input
+                                placeholder="Stripe, Paystack, M-Pesa..."
+                                className="w-full h-14 px-5 rounded-2xl bg-white/50 border border-[var(--color-outline-variant)]/20 outline-none focus:border-[var(--color-primary)] transition-all font-bold"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </Sheet>
+
             <CountryModal
                 isOpen={isCountryModalOpen}
                 onClose={() => setIsCountryModalOpen(false)}
@@ -1156,6 +1871,6 @@ export default function SettingsPage() {
                     setIsCountryModalOpen(false);
                 }}
             />
-        </div>
+        </div >
     );
 }
