@@ -31,6 +31,12 @@ export interface PlatformSettings {
     measurementSystem: "metric" | "imperial";
     // Payment Gateways
     enabledGateways: string[];
+    platformPartnerKeys?: {
+        stripe?: { clientId: string; secretKey: string };
+        paypal?: { clientId: string; secretKey: string };
+        paystack?: { secretKey: string; publicKey: string };
+        adyen?: { apiKey: string; merchantAccount: string };
+    };
 }
 
 export const PLATFORM_SETTINGS_ID = "global";
@@ -60,7 +66,8 @@ export const DEFAULT_PLATFORM_SETTINGS: PlatformSettings = {
     dateFormat: "DD/MM/YYYY",
     numberFormat: "commas",
     measurementSystem: "metric",
-    enabledGateways: ["stripe", "mpesa", "paystack", "dpo"]
+    enabledGateways: ["stripe", "mpesa", "paystack", "dpo", "adyen", "paypal"],
+    platformPartnerKeys: {}
 };
 
 export async function getPlatformSettings(): Promise<PlatformSettings> {

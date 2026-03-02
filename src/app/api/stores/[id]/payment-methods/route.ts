@@ -31,6 +31,8 @@ export interface PaymentMethodConfig {
     icon?: string;        // emoji or icon name for UI
     sortOrder: number;
     settings?: Record<string, any>; // extra config like currency, testMode, etc.
+    connectedAccountId?: string; // For platform/partner accounts
+    onboardingStatus?: "pending" | "completed" | "none";
 }
 
 /** Default payment method configurations - seeded on first GET if none exist */
@@ -110,6 +112,26 @@ const DEFAULT_PAYMENT_METHODS: Omit<PaymentMethodConfig, "id">[] = [
         description: "Bitcoin, USDT and other digital currency payments",
         icon: "₿",
         sortOrder: 8,
+    },
+    {
+        name: "Adyen (Global)",
+        type: "CreditCard",
+        enabled: false,
+        coaCode: "1055",
+        gateway: "Adyen",
+        description: "Global enterprise payments via Adyen",
+        icon: "🟦",
+        sortOrder: 9,
+    },
+    {
+        name: "PayPal (Global)",
+        type: "CreditCard",
+        enabled: false,
+        coaCode: "1060",
+        gateway: "PayPal",
+        description: "Payments via PayPal (Global)",
+        icon: "🅿️",
+        sortOrder: 10,
     },
 ];
 

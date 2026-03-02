@@ -20,10 +20,17 @@ async function getBusiness(id: string) {
             || await db.collection("users").findOne({ businessId: id });
 
         // Merge original document with new owner fields, bypass TS document checking
+        const paymentMethods = await db.collection("store_payment_methods").find({ storeId: id }).toArray();
+
         const business: any = {
             ...rawBusiness,
             ownerName: owner?.name || "Unknown Owner",
-            ownerEmail: owner?.email || rawBusiness.email || "N/A"
+            ownerEmail: owner?.email || rawBusiness.email || "N/A",
+            paymentMethods: paymentMethods.map(m => ({
+                gateway: m.gateway,
+                subaccount: m.connectedAccountId || m.gatewayAccountId || "Manual",
+                status: m.onboardingStatus || (m.enabled ? "active" : "disabled")
+            }))
         };
         return business;
     } catch (e) {
@@ -179,6 +186,39 @@ export default async function BusinessDetail({ params }: { params: Promise<{ id:
                             <div className="text-white">{business.countryCode || 'N/A'}</div>
                             <div className="text-zinc-500">Database ID</div>
                             <div className="text-zinc-400 font-mono text-xs">{business._id.toString()}</div>
+                        </div>
+                    </div>
+
+                    <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+                        <h2 className="text-lg font-bold text-white mb-4">Payment Gateway Configuration</h2>
+                        <div className="space-y-4">
+                            {business.paymentMethods.length > 0 ? (
+                                business.paymentMethods.map((pm: any, idx: number) => (
+                                    <div key={idx} className="flex items-center justify-between p-4 rounded-xl bg-zinc-950 border border-zinc-800">
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center text-xl">
+                                                {pm.gateway === 'Stripe' ? '💳' : pm.gateway === 'Paystack' ? '⚡' : pm.gateway === 'M-Pesa' ? '📱' : '🌍'}
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-white">{pm.gateway}</div>
+                                                <div className="text-xs text-zinc-500 font-mono">ID: {pm.subaccount}</div>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border ${pm.status === 'completed' || pm.status === 'active'
+                                                    ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                                    : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                                                }`}>
+                                                {pm.status}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center py-8 text-zinc-500 border border-dashed border-zinc-800 rounded-xl">
+                                    No payment gateways configured yet.
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

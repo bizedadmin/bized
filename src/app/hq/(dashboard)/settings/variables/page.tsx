@@ -105,6 +105,27 @@ export default async function GlobalVariablesPage({
         } else if (type === "gateways") {
             const gateways = formData.getAll("gateways") as string[];
             update = { enabledGateways: gateways };
+        } else if (type === "partner-keys") {
+            update = {
+                platformPartnerKeys: {
+                    stripe: {
+                        clientId: formData.get("stripeClientId") as string,
+                        secretKey: formData.get("stripeSecretKey") as string,
+                    },
+                    paypal: {
+                        clientId: formData.get("paypalClientId") as string,
+                        secretKey: formData.get("paypalSecretKey") as string,
+                    },
+                    paystack: {
+                        publicKey: formData.get("paystackPublicKey") as string,
+                        secretKey: formData.get("paystackSecretKey") as string,
+                    },
+                    adyen: {
+                        merchantAccount: formData.get("adyenMerchantAccount") as string,
+                        apiKey: formData.get("adyenApiKey") as string,
+                    }
+                }
+            };
         }
 
         await db.collection("platform_settings").updateOne(
@@ -253,6 +274,8 @@ export default async function GlobalVariablesPage({
                                         { id: "mpesa", name: "M-Pesa", description: "Mobile money for East Africa (STK Push)", logo: "📱" },
                                         { id: "paystack", name: "Paystack", description: "Modern payments for Africa", logo: "⚡" },
                                         { id: "dpo", name: "DPO Group", description: "Pan-African payment service provider", logo: "🌍" },
+                                        { id: "adyen", name: "Adyen", description: "Global enterprise payment platform", logo: "🟦" },
+                                        { id: "paypal", name: "PayPal", description: "Global payments via PayPal and Venmo", logo: "🅿️" },
                                     ].map(gateway => (
                                         <label
                                             key={gateway.id}
@@ -287,6 +310,105 @@ export default async function GlobalVariablesPage({
                                 </div>
                                 <button className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg transition-all active:scale-95">
                                     <CreditCard className="w-4 h-4" /> Update Global Gateway Access
+                                </button>
+                            </form>
+                        </div>
+                    )}
+
+                    {activeTab === "partner-keys" && (
+                        <div className="space-y-6">
+                            <div>
+                                <h2 className="text-xl font-bold text-white mb-2 text-indigo-400">Platform Partner Keys</h2>
+                                <p className="text-sm text-zinc-400">Configure your Bized Platform credentials to enable programmatic onboarding and revenue splitting.</p>
+                            </div>
+
+                            <form action={updateVariables} className="space-y-8 max-w-4xl">
+                                <input type="hidden" name="type" value="partner-keys" />
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    {/* Stripe Connect */}
+                                    <div className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+                                                <CreditCard size={20} />
+                                            </div>
+                                            <h3 className="font-bold text-white">Stripe Connect (Global)</h3>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-zinc-500 uppercase">Connect Client ID</label>
+                                                <input type="text" name="stripeClientId" defaultValue={settings.platformPartnerKeys?.stripe?.clientId} className="w-full h-10 px-4 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-indigo-500 outline-none transition-all text-white text-sm" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-zinc-500 uppercase">Connect Secret Key</label>
+                                                <input type="password" name="stripeSecretKey" defaultValue={settings.platformPartnerKeys?.stripe?.secretKey} className="w-full h-10 px-4 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-indigo-500 outline-none transition-all text-white text-sm" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Paystack Partner */}
+                                    <div className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-lg bg-teal-500/10 text-teal-500">
+                                                <Zap size={20} />
+                                            </div>
+                                            <h3 className="font-bold text-white">Paystack Partner (Africa)</h3>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-zinc-500 uppercase">Platform Public Key</label>
+                                                <input type="text" name="paystackPublicKey" defaultValue={settings.platformPartnerKeys?.paystack?.publicKey} className="w-full h-10 px-4 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-indigo-500 outline-none transition-all text-white text-sm" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-zinc-500 uppercase">Platform Secret Key</label>
+                                                <input type="password" name="paystackSecretKey" defaultValue={settings.platformPartnerKeys?.paystack?.secretKey} className="w-full h-10 px-4 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-indigo-500 outline-none transition-all text-white text-sm" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* PayPal Partner */}
+                                    <div className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+                                                <CreditCard size={20} />
+                                            </div>
+                                            <h3 className="font-bold text-white">PayPal Commerce (Global)</h3>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-zinc-500 uppercase">Partner Client ID</label>
+                                                <input type="text" name="paypalClientId" defaultValue={settings.platformPartnerKeys?.paypal?.clientId} className="w-full h-10 px-4 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-indigo-500 outline-none transition-all text-white text-sm" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-zinc-500 uppercase">Partner Secret Key</label>
+                                                <input type="password" name="paypalSecretKey" defaultValue={settings.platformPartnerKeys?.paypal?.secretKey} className="w-full h-10 px-4 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-indigo-500 outline-none transition-all text-white text-sm" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Adyen for Platforms */}
+                                    <div className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
+                                                <LayoutGrid size={20} />
+                                            </div>
+                                            <h3 className="font-bold text-white">Adyen for Platforms</h3>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-zinc-500 uppercase">Merchant Account</label>
+                                                <input type="text" name="adyenMerchantAccount" defaultValue={settings.platformPartnerKeys?.adyen?.merchantAccount} className="w-full h-10 px-4 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-indigo-500 outline-none transition-all text-white text-sm" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-zinc-500 uppercase">Partner API Key</label>
+                                                <input type="password" name="adyenApiKey" defaultValue={settings.platformPartnerKeys?.adyen?.apiKey} className="w-full h-10 px-4 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-indigo-500 outline-none transition-all text-white text-sm" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button className="flex items-center gap-2 px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all active:scale-95 shadow-lg shadow-indigo-600/20">
+                                    <ShieldAlert className="w-5 h-5" /> Save Platform Partner Keys
                                 </button>
                             </form>
                         </div>

@@ -43,6 +43,25 @@ export async function recordOrderPayment(db: any, params: {
 
     const insertResult = await db.collection("orders_payments").insertOne(payment);
 
+    // 2b. Record Platform Commission if applicable
+    const { getPlatformSettings } = await import("./platform-settings");
+    const platform = await getPlatformSettings();
+    if (platform.platformCommission > 0 && !["Cash", "Manual"].includes(paymentGateway)) {
+        const platformFee = Number((amount * (platform.platformCommission / 100)).toFixed(2));
+        await db.collection("platform_commissions").insertOne({
+            orderId: new ObjectId(orderId),
+            paymentId: insertResult.insertedId,
+            storeId,
+            amount: platformFee,
+            totalAmount: amount, // The original payment amount
+            currency,
+            percentage: platform.platformCommission,
+            gateway: paymentGateway,
+            status: "Recorded", // Initially just recorded, split happens at gateway level
+            createdAt: new Date()
+        });
+    }
+
     // 3. Update Order financial status
     const allPayments = await db.collection("orders_payments")
         .find({ orderId: new ObjectId(orderId), paymentStatus: "PaymentComplete" })

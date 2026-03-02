@@ -33,6 +33,7 @@ import {
     CreditCard,
     Layers,
     Landmark,
+    Zap,
     List
 } from "lucide-react";
 import Link from "next/link";
@@ -245,6 +246,11 @@ export default function SettingsPage() {
             body: JSON.stringify({ updates: [{ id: methodId, enabled }] }),
         });
         refreshBusinesses();
+    };
+
+    const handleConnectGateway = (gateway: string) => {
+        if (!currentBusiness?._id) return;
+        window.location.href = `/api/payments/onboard/${gateway.toLowerCase()}?storeId=${currentBusiness._id}`;
     };
 
     const handlePmEditSave = async () => {
@@ -1612,7 +1618,9 @@ export default function SettingsPage() {
                             pmEditForm.gateway?.toLowerCase() === "paystack" ? "bg-[#0ba4db]/5 border-[#0ba4db]/20" :
                                 pmEditForm.gateway?.toLowerCase() === "m-pesa" ? "bg-[#49ab21]/5 border-[#49ab21]/20" :
                                     pmEditForm.gateway?.toLowerCase() === "dpo" ? "bg-[#004a8f]/5 border-[#004a8f]/20" :
-                                        "bg-[var(--color-surface-container-low)] border-[var(--color-outline-variant)]/20"
+                                        pmEditForm.gateway?.toLowerCase() === "adyen" ? "bg-[#0abf53]/5 border-[#0abf53]/20" :
+                                            pmEditForm.gateway?.toLowerCase() === "paypal" ? "bg-[#003087]/5 border-[#003087]/20" :
+                                                "bg-[var(--color-surface-container-low)] border-[var(--color-outline-variant)]/20"
                     )}>
                         <div className={cn(
                             "w-20 h-20 rounded-3xl flex items-center justify-center shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500",
@@ -1620,11 +1628,14 @@ export default function SettingsPage() {
                                 pmEditForm.gateway?.toLowerCase() === "paystack" ? "bg-white text-[#0ba4db]" :
                                     pmEditForm.gateway?.toLowerCase() === "m-pesa" ? "bg-white text-[#49ab21]" :
                                         pmEditForm.gateway?.toLowerCase() === "dpo" ? "bg-white text-[#004a8f]" :
-                                            "bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)]"
+                                            pmEditForm.gateway?.toLowerCase() === "adyen" ? "bg-white text-[#0abf53]" :
+                                                pmEditForm.gateway?.toLowerCase() === "paypal" ? "bg-white text-[#003087]" :
+                                                    "bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)]"
                         )}>
                             {pmEditForm.gateway?.toLowerCase() === "stripe" ? <CreditCard size={40} /> :
                                 pmEditForm.gateway?.toLowerCase() === "m-pesa" ? <Smartphone size={40} /> :
-                                    <Settings size={40} />}
+                                    pmEditForm.gateway?.toLowerCase() === "paypal" ? <div className="text-3xl font-black italic">PP</div> :
+                                        <Settings size={40} />}
                         </div>
                         <div className="space-y-2">
                             <h3 className="text-2xl font-black tracking-tight text-[var(--color-on-surface)]">
@@ -1632,7 +1643,9 @@ export default function SettingsPage() {
                                     pmEditForm.gateway === "Paystack" ? "Paystack Africa" :
                                         pmEditForm.gateway === "M-Pesa" ? "M-Pesa Express" :
                                             pmEditForm.gateway === "DPO" ? "DPO Central" :
-                                                "Standard Ledger Channel"}
+                                                pmEditForm.gateway === "Adyen" ? "Adyen Global" :
+                                                    pmEditForm.gateway === "PayPal" ? "PayPal Global" :
+                                                        "Standard Ledger Channel"}
                             </h3>
                             <div className="flex items-center justify-center gap-2">
                                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-primary)] opacity-60">Verified Gateway</span>
@@ -1658,6 +1671,32 @@ export default function SettingsPage() {
                         )}
 
                         <div className="space-y-8">
+                            {/* Platform Onboarding Section */}
+                            {(pmEditForm.gateway?.toLowerCase() === "stripe" || pmEditForm.gateway?.toLowerCase() === "paystack") && (
+                                <div className="bg-indigo-500/5 p-8 rounded-[2rem] border-2 border-indigo-500/20 space-y-5 animate-in fade-in slide-in-from-top-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-600">
+                                            <Zap size={20} />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h4 className="text-sm font-black uppercase tracking-widest text-indigo-900 dark:text-indigo-100 italic">One-Click Setup</h4>
+                                            <p className="text-[10px] opacity-60 font-medium">Recommended for automated commission splitting.</p>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        onClick={() => handleConnectGateway(pmEditForm.gateway || "")}
+                                        className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-widest shadow-lg shadow-indigo-600/20"
+                                    >
+                                        Connect {pmEditForm.gateway} Account
+                                    </Button>
+                                    <div className="flex items-center gap-2 justify-center">
+                                        <div className="h-[1px] flex-1 bg-indigo-500/10" />
+                                        <span className="text-[8px] font-black opacity-30 uppercase tracking-widest">OR MANUAL SETUP BELOW</span>
+                                        <div className="h-[1px] flex-1 bg-indigo-500/10" />
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Security Section */}
                             <div className="bg-[var(--color-surface-container-low)]/50 p-6 rounded-[2rem] border border-[var(--color-outline-variant)]/10 space-y-6">
                                 <div className="flex items-center gap-3">
@@ -1698,7 +1737,7 @@ export default function SettingsPage() {
                             </div>
 
                             {/* Options & Operations */}
-                            {(pmEditForm.gateway === "Stripe" || pmEditForm.gateway === "Paystack" || pmEditForm.gateway === "M-Pesa" || pmEditForm.gateway === "DPO") && (
+                            {(pmEditForm.gateway === "Stripe" || pmEditForm.gateway === "Paystack" || pmEditForm.gateway === "M-Pesa" || pmEditForm.gateway === "DPO" || pmEditForm.gateway === "Adyen" || pmEditForm.gateway === "PayPal") && (
                                 <div className="bg-[var(--color-surface-container-low)]/50 p-6 rounded-[2rem] border border-[var(--color-outline-variant)]/10 space-y-6">
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
@@ -1742,6 +1781,56 @@ export default function SettingsPage() {
                                                     className="w-full h-14 px-6 rounded-2xl bg-white/50 border border-[var(--color-outline-variant)]/20 outline-none focus:border-[var(--color-primary)] transition-all font-mono text-sm tracking-widest"
                                                 />
                                             </div>
+                                        )}
+
+                                        {pmEditForm.gateway === "Adyen" && (
+                                            <>
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-50 ml-2">Merchant Account</label>
+                                                    <input
+                                                        type="text"
+                                                        value={pmSettings.merchantAccount || ""}
+                                                        onChange={e => setPmSettings({ ...pmSettings, merchantAccount: e.target.value })}
+                                                        placeholder="YourAdyenAccount"
+                                                        className="w-full h-14 px-6 rounded-2xl bg-white/50 border border-[var(--color-outline-variant)]/20 shadow-sm outline-none focus:border-[var(--color-primary)] transition-all font-bold"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-50 ml-2">Webhook HMAC Key</label>
+                                                    <input
+                                                        type="password"
+                                                        value={pmEditForm.webhookSecret}
+                                                        onChange={e => setPmEditForm({ ...pmEditForm, webhookSecret: e.target.value })}
+                                                        placeholder="ADYEN_HMAC_KEY"
+                                                        className="w-full h-14 px-6 rounded-2xl bg-white/50 border border-[var(--color-outline-variant)]/20 outline-none focus:border-[var(--color-primary)] transition-all font-mono text-sm tracking-widest"
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {pmEditForm.gateway === "PayPal" && (
+                                            <>
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-50 ml-2">Client ID</label>
+                                                    <input
+                                                        type="text"
+                                                        value={pmSettings.clientId || ""}
+                                                        onChange={e => setPmSettings({ ...pmSettings, clientId: e.target.value })}
+                                                        placeholder="PayPal Client ID"
+                                                        className="w-full h-14 px-6 rounded-2xl bg-white/50 border border-[var(--color-outline-variant)]/20 shadow-sm outline-none focus:border-[var(--color-primary)] transition-all font-bold"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-50 ml-2">Client Secret</label>
+                                                    <input
+                                                        type="password"
+                                                        value={pmEditForm.apiKey}
+                                                        onChange={e => setPmEditForm({ ...pmEditForm, apiKey: e.target.value })}
+                                                        placeholder="PayPal Client Secret"
+                                                        className="w-full h-14 px-6 rounded-2xl bg-white/50 border border-[var(--color-outline-variant)]/20 outline-none focus:border-[var(--color-primary)] transition-all font-mono text-sm tracking-widest"
+                                                    />
+                                                </div>
+                                            </>
                                         )}
 
                                         <div className="flex flex-col gap-3">

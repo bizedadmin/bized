@@ -7,13 +7,20 @@ import { decrypt } from "@/lib/encryption";
  */
 export class PaystackAdapter {
     private secretKey: string;
+    private subaccount?: string;
     private baseUrl = "https://api.paystack.co";
 
-    constructor(config: PaymentMethodConfig) {
-        if (!config.apiKey) {
-            throw new Error("Paystack Secret Key (apiKey) is not configured.");
+    constructor(config: PaymentMethodConfig, platformConfig?: { secretKey: string; feePercent: number }) {
+        // Use Platform keys if connectedAccountId is present
+        const isConnectMode = !!(config.connectedAccountId && platformConfig?.secretKey);
+        const key = isConnectMode ? platformConfig.secretKey : (config.apiKey ? decrypt(config.apiKey) : "");
+
+        if (!key) {
+            throw new Error("Paystack Secret Key is not configured (Direct or Connect).");
         }
-        this.secretKey = decrypt(config.apiKey);
+
+        this.secretKey = key;
+        this.subaccount = config.connectedAccountId; // In Paystack we store subaccount code here
     }
 
     /**
@@ -27,22 +34,31 @@ export class PaystackAdapter {
         email: string;
         callbackUrl: string;
     }) {
+        const payload: any = {
+            amount: Math.round(params.amount * 100), // Paystack also uses kobo/cents
+            email: params.email,
+            currency: params.currency.toUpperCase(),
+            reference: params.orderId, // Order ID as Paystack reference
+            callback_url: params.callbackUrl,
+            metadata: {
+                orderId: params.orderId,
+            },
+        };
+
+        // If in partner mode/splitting
+        if (this.subaccount) {
+            payload.subaccount = this.subaccount;
+            // platformFeePercent logic can be handled by Paystack's subaccount split configuration
+            // Or we can pass 'flat_fee' or 'percentage_charge' here if dynamic.
+        }
+
         const response = await fetch(`${this.baseUrl}/transaction/initialize`, {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${this.secretKey}`,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-                amount: Math.round(params.amount * 100), // Paystack also uses kobo/cents
-                email: params.email,
-                currency: params.currency.toUpperCase(),
-                reference: params.orderId, // Order ID as Paystack reference
-                callback_url: params.callbackUrl,
-                metadata: {
-                    orderId: params.orderId,
-                },
-            }),
+            body: JSON.stringify(payload),
         });
 
         const data = await response.json();

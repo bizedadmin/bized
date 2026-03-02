@@ -8,17 +8,27 @@ import { decrypt } from "@/lib/encryption";
  */
 export class StripeAdapter {
     private stripe: Stripe;
+    private connectedAccountId?: string;
+    private platformFeePercent?: number;
 
-    constructor(config: PaymentMethodConfig) {
-        if (!config.apiKey) {
-            throw new Error("Stripe Secret Key (apiKey) is not configured.");
+    constructor(config: PaymentMethodConfig, platformConfig?: { secretKey: string; feePercent: number }) {
+        // If we have a connected account AND platform keys, we use the Platform's Master Secret Key
+        // Otherwise we use the merchant's own API key (Direct mode)
+        const isConnectMode = !!(config.connectedAccountId && platformConfig?.secretKey);
+        const secretKey = isConnectMode
+            ? platformConfig.secretKey
+            : (config.apiKey ? decrypt(config.apiKey) : "");
+
+        if (!secretKey) {
+            throw new Error("Stripe Secret Key is not configured (Direct or Connect).");
         }
 
-        const decryptedKey = decrypt(config.apiKey);
-
-        this.stripe = new Stripe(decryptedKey, {
+        this.stripe = new Stripe(secretKey, {
             apiVersion: "2025-01-27" as any,
         });
+
+        this.connectedAccountId = config.connectedAccountId;
+        this.platformFeePercent = platformConfig?.feePercent;
     }
 
     /**
@@ -33,7 +43,9 @@ export class StripeAdapter {
         successUrl: string;
         cancelUrl: string;
     }) {
-        const session = await this.stripe.checkout.sessions.create({
+        const unitAmount = Math.round(params.amount * 100);
+
+        const sessionOptions: Stripe.Checkout.SessionCreateParams = {
             payment_method_types: ["card"],
             line_items: [
                 {
@@ -42,7 +54,7 @@ export class StripeAdapter {
                         product_data: {
                             name: `Order #${params.orderId}`,
                         },
-                        unit_amount: Math.round(params.amount * 100), // Stripe uses cents
+                        unit_amount: unitAmount,
                     },
                     quantity: 1,
                 },
@@ -55,7 +67,20 @@ export class StripeAdapter {
             metadata: {
                 orderId: params.orderId,
             },
-        });
+        };
+
+        // If in Connect Mode, add split logic (Destination Charge)
+        if (this.connectedAccountId && this.platformFeePercent) {
+            const feeAmount = Math.round(unitAmount * (this.platformFeePercent / 100));
+            sessionOptions.payment_intent_data = {
+                application_fee_amount: feeAmount,
+                transfer_data: {
+                    destination: this.connectedAccountId,
+                },
+            };
+        }
+
+        const session = await this.stripe.checkout.sessions.create(sessionOptions);
 
         return {
             id: session.id,

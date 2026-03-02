@@ -167,6 +167,78 @@ export async function POST(req: NextRequest) {
         const result = await db.collection("orders").insertOne(order);
         const orderId = result.insertedId.toString();
 
+        // ─── Payment Gateway Integration ──────────────────────────────────────────
+        let checkoutUrl: string | null = null;
+        if (paymentMethod && ["Stripe", "Paystack", "M-Pesa", "DPO", "Adyen", "PayPal"].includes(paymentMethod)) {
+            try {
+                const { getGatewayAdapter } = await import("@/lib/gateways");
+                const adapter = await getGatewayAdapter(storeId, paymentMethod, db);
+
+                const host = req.headers.get("host") || "localhost:3000";
+                const protocol = host.includes("localhost") ? "http" : "https";
+                const baseUrl = `${protocol}://${host}`;
+
+                if (paymentMethod === "Stripe") {
+                    const session = await (adapter as any).createCheckoutSession({
+                        orderId,
+                        amount: totalPayable,
+                        currency: priceCurrency,
+                        customerEmail: customer.email,
+                        successUrl: `${baseUrl}/${store.slug}/checkout?status=success&orderId=${orderId}`,
+                        cancelUrl: `${baseUrl}/${store.slug}/checkout?status=cancel&orderId=${orderId}`,
+                    });
+                    checkoutUrl = session.url;
+                } else if (paymentMethod === "PayPal") {
+                    const session = await (adapter as any).createOrder({
+                        orderId,
+                        amount: totalPayable,
+                        currency: priceCurrency,
+                        returnUrl: `${baseUrl}/${store.slug}/checkout?status=success&orderId=${orderId}`,
+                        cancelUrl: `${baseUrl}/${store.slug}/checkout?status=cancel&orderId=${orderId}`,
+                    });
+                    checkoutUrl = session.url;
+                } else if (paymentMethod === "Adyen") {
+                    const session = await (adapter as any).createSessions({
+                        orderId,
+                        amount: totalPayable,
+                        currency: priceCurrency,
+                        returnUrl: `${baseUrl}/${store.slug}/checkout?status=success&orderId=${orderId}`,
+                    });
+                    checkoutUrl = session.url;
+                } else if (paymentMethod === "Paystack") {
+                    const session = await (adapter as any).initializeTransaction({
+                        orderId,
+                        amount: totalPayable,
+                        currency: priceCurrency,
+                        email: customer.email || "customer@example.com",
+                        callbackUrl: `${baseUrl}/${store.slug}/checkout?status=success&orderId=${orderId}`,
+                    });
+                    checkoutUrl = session.authorization_url;
+                } else if (paymentMethod === "DPO") {
+                    const session = await (adapter as any).createToken({
+                        orderId,
+                        amount: totalPayable,
+                        currency: priceCurrency,
+                        customerEmail: customer.email || "customer@example.com",
+                        redirectUrl: `${baseUrl}/${store.slug}/checkout?status=success&orderId=${orderId}`,
+                        backUrl: `${baseUrl}/${store.slug}/checkout?status=cancel&orderId=${orderId}`,
+                    });
+                    checkoutUrl = session.redirectUrl;
+                } else if (paymentMethod === "M-Pesa") {
+                    await (adapter as any).initiateStkPush({
+                        orderId,
+                        amount: totalPayable,
+                        phoneNumber: customer.telephone || "",
+                        callbackUrl: `${baseUrl}/api/webhooks/mpesa?orderId=${orderId}`,
+                    });
+                    // M-Pesa is async on phone, no checkoutUrl needed
+                }
+            } catch (gatewayError) {
+                console.error(`Error initializing ${paymentMethod} checkout:`, gatewayError);
+                // We still created the order, so we continue but without a checkoutUrl
+            }
+        }
+
         // Auto-create the first Invoice for this order
         const invoiceNumber = `INV-${orderNumber}`;
         await db.collection("finance_invoices").insertOne({
@@ -194,6 +266,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
             id: orderId,
             orderNumber,
+            checkoutUrl,
             message: "Order created successfully"
         }, { status: 201 });
     } catch (error: any) {

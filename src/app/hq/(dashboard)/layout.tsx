@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
-import { ShieldAlert, Server, Users, Settings, Activity, Globe } from "lucide-react";
+import { ShieldAlert, Server, Users, Settings, Activity, Globe, CreditCard } from "lucide-react";
 
 export default function PlatformLayout({ children }: { children: ReactNode }) {
     return (
@@ -23,6 +23,7 @@ export default function PlatformLayout({ children }: { children: ReactNode }) {
                     <NavItem href="/" icon={<Activity className="w-5 h-5" />} label="Overview" />
                     <NavItem href="/businesses" icon={<Server className="w-5 h-5" />} label="Businesses" />
                     <NavItem href="/users" icon={<Users className="w-5 h-5" />} label="Platform Staff" />
+                    <NavItem href="/transactions" icon={<CreditCard className="w-5 h-5" />} label="Transactions" />
 
                     <div className="pt-8 pb-2 px-3 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
                         System

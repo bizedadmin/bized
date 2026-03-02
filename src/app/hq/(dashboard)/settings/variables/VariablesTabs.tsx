@@ -14,6 +14,7 @@ const TABS: TabItem[] = [
     { id: "currency", label: "Default Currency", icon: Coins },
     { id: "financials", label: "Financials", icon: Wallet },
     { id: "gateways", label: "Payment Gateways", icon: CreditCard },
+    { id: "partner-keys", label: "Partner Keys", icon: ShieldAlert },
     { id: "system", label: "System & Features", icon: LayoutGrid },
     { id: "branding", label: "Branding & Support", icon: Palette },
     { id: "seo", label: "SEO & Localization", icon: Search },

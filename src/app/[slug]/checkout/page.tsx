@@ -26,6 +26,48 @@ export default function CheckoutPage() {
     const [isPlacing, setIsPlacing] = useState(false);
     const [orderNumber, setOrderNumber] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [store, setStore] = useState<any>(null);
+    const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+    const [isLoadingMethods, setIsLoadingMethods] = useState(true);
+    const [isMpesaPending, setIsMpesaPending] = useState(false);
+
+    React.useEffect(() => {
+        // Handle post-payment redirect
+        const status = searchParams?.get("status");
+        const urlOrderId = searchParams?.get("orderId");
+        if (status === "success" && urlOrderId) {
+            setOrderNumber(urlOrderId);
+            setStep(3);
+            clearCart();
+            return;
+        }
+
+        const fetchStoreData = async () => {
+            try {
+                let sId = adminStoreId;
+                let sData = null;
+
+                if (!sId) {
+                    const res = await fetch(`/api/stores?slug=${slug}`);
+                    const data = await res.json();
+                    sData = data.store ?? data.stores?.[0];
+                    sId = sData?._id;
+                }
+
+                if (sId) {
+                    setStore(sData);
+                    const pmRes = await fetch(`/api/stores/${sId}/payment-methods`);
+                    const pmData = await pmRes.json();
+                    setPaymentMethods(pmData.methods || []);
+                }
+            } catch (err) {
+                console.error("Failed to fetch store/payment data", err);
+            } finally {
+                setIsLoadingMethods(false);
+            }
+        };
+        fetchStoreData();
+    }, [slug, adminStoreId, searchParams, clearCart]);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -112,6 +154,15 @@ export default function CheckoutPage() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error ?? "Failed to place order");
 
+            if (data.checkoutUrl) {
+                window.location.href = data.checkoutUrl;
+                return;
+            }
+
+            if (formData.paymentMethod === "M-Pesa") {
+                setIsMpesaPending(true);
+            }
+
             setOrderNumber(data.orderNumber);
             clearCart();
             setStep(3);
@@ -195,6 +246,16 @@ export default function CheckoutPage() {
                                 Add Another Order
                             </Button>
                         </>
+                    ) : isMpesaPending ? (
+                        <div className="w-full space-y-6">
+                            <div className="p-6 rounded-3xl bg-emerald-500/5 border border-emerald-500/10 text-sm text-emerald-800 dark:text-emerald-200">
+                                <p className="font-bold mb-2">Check your phone!</p>
+                                <p className="opacity-70">A prompt has been sent to <strong>{formData.phone}</strong>. Enter your M-Pesa PIN to complete the payment.</p>
+                            </div>
+                            <Button onClick={() => router.push(`/${slug}`)} className="w-full h-14 rounded-2xl font-black">
+                                Done
+                            </Button>
+                        </div>
                     ) : (
                         <>
                             <Button
@@ -381,15 +442,28 @@ export default function CheckoutPage() {
                         <div className="p-6 rounded-[2rem] bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/10 space-y-3">
                             <h3 className="font-black text-lg">Payment</h3>
                             <div className="grid grid-cols-2 gap-2">
-                                {["Cash", "Card", "Bank Transfer", "M-Pesa"].map(method => (
-                                    <button key={method} onClick={() => setFormData(f => ({ ...f, paymentMethod: method }))}
-                                        className={`py-3 rounded-2xl font-bold text-sm transition-all border ${formData.paymentMethod === method
+                                {paymentMethods.filter(m => m.enabled && !m.platformDisabled).map(m => (
+                                    <button
+                                        key={m.id || m.name}
+                                        onClick={() => setFormData(f => ({ ...f, paymentMethod: m.gateway || m.name }))}
+                                        className={`py-3 px-2 rounded-2xl font-bold text-xs transition-all border flex flex-col items-center justify-center gap-1 ${(formData.paymentMethod === (m.gateway || m.name))
                                             ? "bg-[var(--color-primary)]/10 border-[var(--color-primary)]/30 text-[var(--color-primary)]"
                                             : "border-[var(--color-outline-variant)]/20 text-[var(--color-on-surface-variant)]"
                                             }`}>
-                                        {method}
+                                        <span className="text-xl">{m.icon || "💳"}</span>
+                                        <span className="line-clamp-1">{m.name}</span>
                                     </button>
                                 ))}
+                                {paymentMethods.filter(m => m.enabled && !m.platformDisabled).length === 0 && !isLoadingMethods && (
+                                    <div className="col-span-2 py-4 text-center text-xs opacity-50">
+                                        No payment methods available
+                                    </div>
+                                )}
+                                {isLoadingMethods && (
+                                    <div className="col-span-2 py-4 text-center text-xs opacity-50 animate-pulse">
+                                        Loading payment options...
+                                    </div>
+                                )}
                             </div>
                         </div>
 

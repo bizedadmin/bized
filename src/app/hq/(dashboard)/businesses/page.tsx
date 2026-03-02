@@ -19,13 +19,27 @@ async function getBusinesses(query?: string) {
 
     const businesses = await db.collection("businesses").find(filter).sort({ createdAt: -1 }).toArray();
 
-    return businesses.map(b => ({
-        id: b._id.toString(),
-        name: b.name,
-        subdomain: b.subdomain,
-        status: b.isSuspended ? "suspended" : "active",
-        createdAt: b.createdAt || b._id.getTimestamp(),
-    }));
+    // Fetch all payment methods for these businesses
+    const storeIds = businesses.map(b => b._id.toString());
+    const paymentMethods = await db.collection("store_payment_methods").find({
+        storeId: { $in: storeIds }
+    }).toArray();
+
+    return businesses.map(b => {
+        const methods = paymentMethods.filter(pm => pm.storeId === b._id.toString());
+        return {
+            id: b._id.toString(),
+            name: b.name,
+            subdomain: b.subdomain,
+            status: b.isSuspended ? "suspended" : "active",
+            createdAt: b.createdAt || b._id.getTimestamp(),
+            gateways: methods.map(m => ({
+                gateway: m.gateway,
+                subaccount: m.connectedAccountId || m.gatewayAccountId || "Manual",
+                status: m.onboardingStatus || (m.enabled ? "active" : "disabled")
+            }))
+        };
+    });
 }
 
 export default async function BusinessesDirectory({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
@@ -48,6 +62,7 @@ export default async function BusinessesDirectory({ searchParams }: { searchPara
                         <tr>
                             <th className="px-6 py-4 font-medium">Business Name</th>
                             <th className="px-6 py-4 font-medium">Subdomain</th>
+                            <th className="px-6 py-4 font-medium">Setup Gateways</th>
                             <th className="px-6 py-4 font-medium">Status</th>
                             <th className="px-6 py-4 font-medium">Created On</th>
                             <th className="px-6 py-4 font-medium text-right">Actions</th>
@@ -58,6 +73,23 @@ export default async function BusinessesDirectory({ searchParams }: { searchPara
                             <tr key={business.id} className="hover:bg-zinc-800/50 transition-colors">
                                 <td className="px-6 py-4 text-white font-medium">{business.name}</td>
                                 <td className="px-6 py-4">{business.subdomain}.bized.app</td>
+                                <td className="px-6 py-4">
+                                    <div className="flex flex-wrap gap-2">
+                                        {business.gateways.length > 0 ? (
+                                            business.gateways.map((gw, idx) => (
+                                                <div key={idx} className="flex flex-col gap-0.5 p-2 rounded-lg bg-zinc-950 border border-zinc-800">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="text-[10px] font-bold text-white uppercase italic">{gw.gateway}</span>
+                                                        <div className={`w-1.5 h-1.5 rounded-full ${gw.status === 'completed' || gw.status === 'active' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                                                    </div>
+                                                    <span className="text-[9px] font-mono opacity-50 truncate max-w-[100px]">{gw.subaccount}</span>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <span className="text-zinc-600 italic text-[10px]">No gateways configured</span>
+                                        )}
+                                    </div>
+                                </td>
                                 <td className="px-6 py-4">
                                     {business.status === "active" ? (
                                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-emerald-400 bg-emerald-500/10 rounded-full border border-emerald-500/20">
