@@ -46,6 +46,12 @@ export default function OrderDetailPage() {
     const [isSavingPay, setIsSavingPay] = useState(false);
     const [payError, setPayError] = useState<string | null>(null);
 
+    // Refund modal
+    const [showRefundModal, setShowRefundModal] = useState(false);
+    const [refundForm, setRefundForm] = useState({ amount: "", paymentId: "", reason: "" });
+    const [isSavingRefund, setIsSavingRefund] = useState(false);
+    const [refundError, setRefundError] = useState<string | null>(null);
+
     // Fulfillment modal
     const [showFulfillModal, setShowFulfillModal] = useState(false);
     const [fulfillForm, setFulfillForm] = useState({ trackingNumber: "", carrier: "", trackingUrl: "", deliveryMode: "Delivery", notes: "" });
@@ -106,6 +112,28 @@ export default function OrderDetailPage() {
             await fetch_();
         } catch (e: any) { setPayError(e.message); }
         setIsSavingPay(false);
+    };
+
+    const handleProcessRefund = async () => {
+        if (!refundForm.amount || !refundForm.paymentId) { setRefundError("Amount and payment ID are required."); return; }
+        setIsSavingRefund(true); setRefundError(null);
+        try {
+            const res = await fetch(`/api/orders/${orderId}/refund`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    paymentId: refundForm.paymentId,
+                    amount: parseFloat(refundForm.amount),
+                    reason: refundForm.reason || undefined,
+                }),
+            });
+            const json = await res.json();
+            if (!res.ok) throw new Error(json.error);
+            setShowRefundModal(false);
+            setRefundForm({ amount: "", paymentId: "", reason: "" });
+            await fetch_();
+        } catch (e: any) { setRefundError(e.message); }
+        setIsSavingRefund(false);
     };
 
     const handleAddFulfillment = async () => {
@@ -274,6 +302,13 @@ export default function OrderDetailPage() {
                                                 {pay.notes && <p className="text-xs italic opacity-40 mt-0.5">"{pay.notes}"</p>}
                                             </div>
                                             <span className="font-black text-emerald-600 shrink-0">{fmt(pay.amount)}</span>
+                                            {pay.paymentStatus !== "PaymentRefunded" && pay.amount > 0 && (
+                                                <Button
+                                                    onClick={() => { setRefundForm({ ...refundForm, paymentId: pay._id, amount: String(pay.amount) }); setShowRefundModal(true); }}
+                                                    variant="text" className="h-8 px-2 rounded-lg text-xs font-bold text-rose-600 shrink-0">
+                                                    Refund
+                                                </Button>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -522,6 +557,39 @@ export default function OrderDetailPage() {
                         </div>
                     </div>
                     {fulfillError && <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 text-sm font-medium">{fulfillError}</div>}
+                </div>
+            </Sheet>
+            {/* Refund Payment Sheet */}
+            <Sheet open={showRefundModal} onClose={() => setShowRefundModal(false)} title="Process Refund"
+                icon={<XCircle size={20} className="text-rose-600" />}
+                footer={
+                    <div className="flex gap-3 justify-end w-full">
+                        <Button variant="outline" onClick={() => setShowRefundModal(false)} disabled={isSavingRefund}>Cancel</Button>
+                        <Button onClick={handleProcessRefund} disabled={isSavingRefund} className="bg-rose-600 hover:bg-rose-500 text-white">
+                            {isSavingRefund ? "Processing..." : "Issue Refund"}
+                        </Button>
+                    </div>
+                }>
+                <div className="space-y-5">
+                    <div className="p-4 rounded-2xl bg-rose-50 text-[10px] font-bold text-rose-700 leading-relaxed border border-rose-100 uppercase tracking-widest">
+                        Warning: This will attempt to refund the customer via the original gateway ({payments?.find((p: any) => p._id === refundForm.paymentId)?.paymentGateway}) and record a reversal in your ledger.
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-black uppercase tracking-widest opacity-40">Refund Amount*</label>
+                        <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black opacity-40">{order.priceCurrency}</span>
+                            <input type="number" min="0" step="0.01" placeholder="0.00" value={refundForm.amount}
+                                onChange={e => setRefundForm(f => ({ ...f, amount: e.target.value }))}
+                                className="w-full pl-14 pr-4 py-3 bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/30 rounded-2xl font-bold focus:outline-none focus:border-rose-500" />
+                        </div>
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-black uppercase tracking-widest opacity-40">Reason for Refund (optional)</label>
+                        <textarea placeholder="e.g. Customer returned item" value={refundForm.reason}
+                            onChange={e => setRefundForm(ff => ({ ...ff, reason: e.target.value }))}
+                            className="w-full px-4 py-3 min-h-[100px] bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/30 rounded-2xl font-bold focus:outline-none focus:border-rose-500" />
+                    </div>
+                    {refundError && <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 text-sm font-medium">{refundError}</div>}
                 </div>
             </Sheet>
         </>
