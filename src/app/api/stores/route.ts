@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import clientPromise from "@/lib/mongodb";
 
-// GET /api/stores — list all stores for the current user
-export async function GET() {
+// GET /api/stores — list all stores for the current user (or the impersonated store for Super Admins)
+export async function GET(req: NextRequest) {
     try {
         const session = await auth();
         if (!session?.user?.id) {
@@ -12,11 +12,39 @@ export async function GET() {
 
         const client = await clientPromise;
         const db = client.db();
+
+        // -------------------------------------------------------------
+        // SUPER ADMIN IMPERSONATION OVERRIDE
+        // -------------------------------------------------------------
+        const isSuperAdmin = (session.user as any).isSuperAdmin === true;
+        const impersonationCookie = req.cookies.get("bized_impersonate")?.value;
+
+        let query: any = { ownerId: session.user.id };
+
+        if (isSuperAdmin && impersonationCookie) {
+            const { ObjectId } = require("mongodb");
+            if (ObjectId.isValid(impersonationCookie)) {
+                console.log(`[API Auth Override] Super Admin impersonating store ID: ${impersonationCookie}`);
+                query = { _id: new ObjectId(impersonationCookie) };
+            }
+        }
+        // -------------------------------------------------------------
+
         const stores = await db
             .collection("stores")
-            .find({ ownerId: session.user.id })
+            .find(query)
             .sort({ createdAt: -1 })
             .toArray();
+
+        // Ensure we handle Bized Business backwards compatibility
+        if (stores.length === 0 && isSuperAdmin && impersonationCookie) {
+            const { ObjectId } = require("mongodb");
+            const businessStore = await db.collection("businesses").findOne({ _id: new ObjectId(impersonationCookie) });
+            if (businessStore) {
+                // Remap business to 'store' shape for the main app context
+                stores.push({ ...businessStore, ownerId: businessStore._id.toString() });
+            }
+        }
 
         // Get all payment methods for user's stores in one shot for performance
         const storeIds = stores.map(s => s._id.toString());
@@ -101,6 +129,10 @@ export async function POST(req: NextRequest) {
         const db = client.db();
         const stores = db.collection("stores");
 
+        // Fetch platform-wide defaults
+        const { getPlatformSettings } = require("@/lib/platform-settings");
+        const platformSettings = await getPlatformSettings();
+
         // Check slug uniqueness
         const existingStore = await stores.findOne({ slug: sanitizedSlug });
         if (existingStore) {
@@ -110,6 +142,10 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        // Calculate trial period
+        const trialEnds = new Date();
+        trialEnds.setDate(trialEnds.getDate() + (platformSettings.trialPeriodDays || 14));
+
         // Create store document
         const store = {
             name,
@@ -117,7 +153,12 @@ export async function POST(req: NextRequest) {
             industry: industry === "Other" ? (customIndustry || "Other") : industry,
             businessType,
             ownerId: session.user.id,
+            currency: platformSettings.defaultCurrency || "USD",
+            trialEnds,
             status: "active",
+            // Inherit platform financial defaults
+            platformCommission: platformSettings.platformCommission || 0,
+            taxRate: platformSettings.defaultTaxRate || 0,
             createdAt: new Date(),
             updatedAt: new Date(),
         };

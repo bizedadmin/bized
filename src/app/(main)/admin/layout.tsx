@@ -48,6 +48,7 @@ import {
 import { cn } from "@/lib/utils";
 import { AiChatSheet } from "@/components/admin/AiChatSheet";
 import { HelpCenterProvider } from "@/components/admin/HelpCenter";
+import { ImpersonationBanner } from "@/components/admin/ImpersonationBanner";
 
 type NavItem = {
     label: string;
@@ -227,6 +228,8 @@ export default function AdminLayout({
                 "min-h-screen bg-[var(--color-surface)] relative transition-all duration-300",
                 activePersistentSection ? "md:pl-[336px]" : "md:pl-20"
             )}>
+                <ImpersonationBanner />
+
                 {/* Desktop Navigation Rail - Fixed to absolute top */}
                 <aside
                     className="hidden md:flex flex-col w-20 bg-[var(--color-surface-container-low)] border-r border-[var(--color-outline-variant)]/30 fixed top-0 left-0 h-screen z-[100] pb-4 items-center gap-1 shrink-0 transition-transform duration-300"

@@ -80,6 +80,7 @@ interface PaymentMethod {
     sortOrder: number;
     _id?: string;
     settings?: Record<string, any>;
+    platformDisabled?: boolean;
 }
 
 const PaymentMethodCard = ({ method, onToggle, onEdit }: {
@@ -92,7 +93,8 @@ const PaymentMethodCard = ({ method, onToggle, onEdit }: {
             "flex items-center gap-4 p-5 rounded-2xl border transition-all group",
             method.enabled
                 ? "bg-[var(--color-surface-container-low)] border-[var(--color-primary)]/20 shadow-sm"
-                : "bg-[var(--color-surface-container-lowest)] border-[var(--color-outline-variant)]/10 opacity-70 grayscale-[0.5]"
+                : "bg-[var(--color-surface-container-lowest)] border-[var(--color-outline-variant)]/10 opacity-70 grayscale-[0.5]",
+            method.platformDisabled && "opacity-40 grayscale pointer-events-none"
         )}
     >
         <div className={cn(
@@ -114,6 +116,11 @@ const PaymentMethodCard = ({ method, onToggle, onEdit }: {
                         {method.gateway}
                     </span>
                 )}
+                {method.platformDisabled && (
+                    <span className="text-[9px] font-black bg-rose-500/10 text-rose-600 px-2 py-0.5 rounded-full uppercase tracking-widest border border-rose-500/20">
+                        Disabled by Platform
+                    </span>
+                )}
             </div>
             <div className="flex items-center gap-3 mt-1 flex-wrap">
                 <span className="text-[10px] font-bold text-[var(--color-on-surface-variant)] opacity-60 line-clamp-1">
@@ -126,16 +133,19 @@ const PaymentMethodCard = ({ method, onToggle, onEdit }: {
         </div>
         <div className="flex items-center gap-2 shrink-0">
             <button
+                disabled={method.platformDisabled}
                 onClick={onEdit}
-                className="w-10 h-10 rounded-xl hover:bg-[var(--color-surface-container-highest)] flex items-center justify-center transition-all text-[var(--color-on-surface-variant)] opacity-40 hover:opacity-100 hover:scale-105 active:scale-95"
+                className="w-10 h-10 rounded-xl hover:bg-[var(--color-surface-container-highest)] flex items-center justify-center transition-all text-[var(--color-on-surface-variant)] opacity-40 hover:opacity-100 hover:scale-105 active:scale-95 disabled:hover:scale-100"
             >
                 <Settings size={18} />
             </button>
             <button
+                disabled={method.platformDisabled}
                 onClick={() => onToggle(!method.enabled)}
                 className={cn(
                     "w-12 h-6 rounded-full p-1 transition-all relative shrink-0",
-                    method.enabled ? "bg-[var(--color-primary)] shadow-md shadow-[var(--color-primary)]/30" : "bg-[var(--color-outline-variant)]/30"
+                    method.enabled ? "bg-[var(--color-primary)] shadow-md shadow-[var(--color-primary)]/30" : "bg-[var(--color-outline-variant)]/30",
+                    method.platformDisabled && "bg-[var(--color-outline-variant)]/20 cursor-not-allowed"
                 )}
             >
                 <div className={cn(

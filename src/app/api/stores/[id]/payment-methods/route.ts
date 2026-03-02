@@ -4,6 +4,7 @@ import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { postJournalEntry, getAccountByCode } from "@/lib/finance";
 import { encrypt, decrypt } from "@/lib/encryption";
+import { getPlatformSettings } from "@/lib/platform-settings";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -213,13 +214,24 @@ export async function GET(req: NextRequest, { params }: Params) {
         await ensurePaymentMethodAccounts(db, id, methods as unknown as PaymentMethodConfig[]);
 
 
-        // Mask sensitive fields for the UI
-        const maskedMethods = methods.map((m: any) => ({
-            ...m,
-            _id: m._id?.toString(),
-            apiKey: m.apiKey ? "********************" : undefined,
-            webhookSecret: m.webhookSecret ? "********************" : undefined,
-        }));
+        const platformSettings = await getPlatformSettings();
+        const enabledGateways = (platformSettings.enabledGateways || []).map(g => g.toLowerCase());
+
+        // Mask sensitive fields for the UI & mark platform-disabled gateways
+        const maskedMethods = methods.map((m: any) => {
+            const isGateway = !!m.gateway;
+            const isPlatformDisabled = isGateway && !enabledGateways.includes(m.gateway.toLowerCase());
+
+            return {
+                ...m,
+                _id: m._id?.toString(),
+                apiKey: m.apiKey ? "********************" : undefined,
+                webhookSecret: m.webhookSecret ? "********************" : undefined,
+                platformDisabled: isPlatformDisabled,
+                // If platform disabled, ensure it's effectively disabled for the UI
+                enabled: isPlatformDisabled ? false : m.enabled
+            };
+        });
 
         return NextResponse.json({ methods: maskedMethods });
     } catch (error) {
@@ -253,9 +265,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         const store = await db.collection("stores").findOne({ _id: new ObjectId(id), ownerId: session.user.id });
         if (!store) return NextResponse.json({ error: "Store not found" }, { status: 404 });
 
+        const platformSettings = await getPlatformSettings();
+        const enabledGateways = (platformSettings.enabledGateways || []).map(g => g.toLowerCase());
+
         // Apply each update
         for (const update of updates) {
             const { id: methodId, ...fields } = update;
+
+            // Enforce platform settings for gateways
+            if (fields.enabled) {
+                const method = await db.collection("store_payment_methods").findOne({ storeId: id, id: methodId });
+                if (method?.gateway && !enabledGateways.includes(method.gateway.toLowerCase())) {
+                    return NextResponse.json({ error: `The ${method.gateway} gateway is currently disabled by the platform admins.` }, { status: 403 });
+                }
+            }
 
             // Encrypt sensitive fields if provided
             if (fields.apiKey && !fields.apiKey.includes("****")) {

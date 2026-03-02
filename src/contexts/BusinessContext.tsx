@@ -294,10 +294,20 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
                 return;
             }
 
-            // Restore last selected business from localStorage
+            // Check if we are impersonating (only 1 store returned and user is super admin, but we don't have session.user.id here without a type cast).
+            // Actually, if the API returned stores, let's see if the localStorage ID exists in the returned list.
             const savedId = localStorage.getItem(STORAGE_KEY);
             const restored = stores.find((s: Business) => s._id === savedId);
+
+            // If we are impersonating, the API only returns the 1 impersonated store. 
+            // If `restored` is undefined but stores has items, we MUST select the first one.
             setCurrentBusinessState(restored || stores[0]);
+
+            // Overwrite local storage so it locks in
+            if (!restored && stores[0]) {
+                localStorage.setItem(STORAGE_KEY, stores[0]._id);
+            }
+
             setIsLoading(false);
         })();
         return () => { mounted = false; };

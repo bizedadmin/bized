@@ -1,12 +1,12 @@
-
-import NextAuth from "next-auth" // v5
+import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import { MongoDBAdapter } from "@auth/mongodb-adapter"
-import clientPromise from "@/lib/mongodb" // Adjust path as needed
+import clientPromise from "@/lib/mongodb"
 import { initAdmin } from "@/lib/firebase-admin"
-import { MongoClient } from "mongodb"
+import { authConfig } from "./auth.config"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+    ...authConfig,
     adapter: MongoDBAdapter(clientPromise),
     providers: [
         Credentials({
@@ -25,7 +25,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                     if (!decodedToken) return null
 
-                    // Check if user exists in MongoDB, if not create/update
                     const client = await clientPromise
                     const db = client.db()
                     const users = db.collection("users")
@@ -38,7 +37,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     const existingUser = await users.findOne({ email })
 
                     if (!existingUser) {
-                        // Create new user
                         const newUser = {
                             email,
                             name: decodedToken.name || email.split("@")[0],
@@ -54,45 +52,53 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                             id: result.insertedId.toString(),
                             email: newUser.email,
                             name: newUser.name,
-                            image: newUser.image
+                            image: newUser.image,
+                            isSuperAdmin: false
                         }
-                    } else {
-                        // User found
                     }
 
                     return {
                         id: existingUser._id.toString(),
                         email: existingUser.email,
                         name: existingUser.name,
-                        image: existingUser.image
+                        image: existingUser.image,
+                        isSuperAdmin: existingUser.isSuperAdmin || false
                     }
 
                 } catch (error) {
                     console.error("Firebase auth error:", error)
                     return null
                 }
-            },
-        }),
+            }
+        })
     ],
-    session: {
-        strategy: "jwt", // Credentials provider requires JWT
-    },
+    // Override the generic config callbacks with one that hits DB to guarantee `isSuperAdmin` is fresh
     callbacks: {
-        async session({ session, token }) {
-            if (token && session.user) {
-                session.user.id = token.sub as string
+        ...authConfig.callbacks,
+        async jwt({ token, user, trigger, session }) {
+            let finalToken = token;
+            if (authConfig.callbacks?.jwt) {
+                finalToken = await (authConfig.callbacks.jwt as any)({ token, user, trigger, session }) || token;
             }
-            return session
-        },
-        async jwt({ token, user }) {
-            if (user) {
-                token.sub = user.id
+
+            // Explicitly verify super admin status via DB lookup to prevent stale JWTs
+            if (finalToken?.email) {
+                try {
+                    const client = await clientPromise;
+                    const db = client.db();
+                    const dbUser = await db.collection("users").findOne({ email: finalToken.email });
+                    if (dbUser) {
+                        finalToken.isSuperAdmin = dbUser.isSuperAdmin === true;
+                        if (!finalToken.sub || finalToken.sub !== dbUser._id.toString()) {
+                            finalToken.sub = dbUser._id.toString();
+                        }
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch fresh user JWT data", e);
+                }
             }
-            return token
+
+            return finalToken;
         }
-    },
-    pages: {
-        signIn: '/signin',
-        error: '/signin', // Error code passed in query string as ?error=
     }
 })
