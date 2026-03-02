@@ -9,18 +9,23 @@ export class PayPalAdapter {
     private clientId: string;
     private clientSecret: string;
     private environment: string;
+    private partnerAccountId?: string;
+    private platformFeePercent?: number;
 
-    constructor(config: PaymentMethodConfig) {
-        if (!config.settings?.clientId) {
-            throw new Error("PayPal Client ID is not configured.");
-        }
-        if (!config.apiKey) {
-            throw new Error("PayPal Secret (apiKey) is not configured.");
+    constructor(config: PaymentMethodConfig, platformConfig?: { clientId: string; secretKey: string; feePercent: number }) {
+        const isPartnerMode = !!(config.connectedAccountId && platformConfig?.secretKey);
+
+        // In partner mode, we use Platform's master keys
+        this.clientId = isPartnerMode ? platformConfig.clientId : (config.settings?.clientId || "");
+        this.clientSecret = isPartnerMode ? platformConfig.secretKey : (config.apiKey ? decrypt(config.apiKey) : "");
+
+        if (!this.clientId || !this.clientSecret) {
+            throw new Error("PayPal Client ID or Secret is not configured.");
         }
 
-        this.clientId = config.settings.clientId;
-        this.clientSecret = decrypt(config.apiKey);
-        this.environment = config.settings.environment || "sandbox";
+        this.environment = config.settings?.environment || "sandbox";
+        this.partnerAccountId = config.connectedAccountId; // The merchant's connected PayPal account ID
+        this.platformFeePercent = platformConfig?.feePercent;
     }
 
     private getBaseUrl() {
@@ -56,6 +61,37 @@ export class PayPalAdapter {
         cancelUrl: string;
     }) {
         const token = await this.getAccessToken();
+
+        const purchaseUnit: any = {
+            reference_id: params.orderId,
+            amount: {
+                currency_code: params.currency.toUpperCase(),
+                value: params.amount.toFixed(2),
+            }
+        };
+
+        // If in Partner Mode, apply fee splitting
+        if (this.partnerAccountId && this.platformFeePercent) {
+            const feeAmount = (params.amount * (this.platformFeePercent / 100)).toFixed(2);
+            purchaseUnit.payment_instruction = {
+                disbursement_mode: "INSTANT",
+                platform_fees: [
+                    {
+                        amount: {
+                            currency_code: params.currency.toUpperCase(),
+                            value: feeAmount
+                        },
+                        // In some flows, you might need to specify the partner/payee
+                    }
+                ]
+            };
+
+            // Re-route the main payment to the business's merchant account
+            purchaseUnit.payee = {
+                merchant_id: this.partnerAccountId
+            };
+        }
+
         const res = await fetch(`${this.getBaseUrl()}/v2/checkout/orders`, {
             method: "POST",
             headers: {
@@ -64,15 +100,7 @@ export class PayPalAdapter {
             },
             body: JSON.stringify({
                 intent: "CAPTURE",
-                purchase_units: [
-                    {
-                        reference_id: params.orderId,
-                        amount: {
-                            currency_code: params.currency.toUpperCase(),
-                            value: params.amount.toFixed(2),
-                        },
-                    },
-                ],
+                purchase_units: [purchaseUnit],
                 application_context: {
                     return_url: params.returnUrl,
                     cancel_url: params.cancelUrl,
@@ -105,6 +133,33 @@ export class PayPalAdapter {
 
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to capture PayPal order");
+        return data;
+    }
+
+    /**
+     * Refunds a PayPal capture.
+     */
+    async refundCapture(captureId: string, amount?: number, currency?: string) {
+        const token = await this.getAccessToken();
+        const body: any = {};
+        if (amount && currency) {
+            body.amount = {
+                value: amount.toFixed(2),
+                currency_code: currency.toUpperCase(),
+            };
+        }
+
+        const res = await fetch(`${this.getBaseUrl()}/v2/payments/captures/${captureId}/refund`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to refund PayPal payment");
         return data;
     }
 }

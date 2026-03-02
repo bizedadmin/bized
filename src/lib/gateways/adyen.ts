@@ -9,18 +9,22 @@ export class AdyenAdapter {
     private apiKey: string;
     private merchantAccount: string;
     private environment: string;
+    private connectedAccount?: string;
+    private platformFeePercent?: number;
 
-    constructor(config: PaymentMethodConfig) {
-        if (!config.apiKey) {
-            throw new Error("Adyen API Key is not configured.");
-        }
-        if (!config.settings?.merchantAccount) {
-            throw new Error("Adyen Merchant Account is not configured in settings.");
+    constructor(config: PaymentMethodConfig, platformConfig?: { apiKey: string; merchantAccount: string; feePercent: number }) {
+        const isPlatformMode = !!(config.connectedAccountId && platformConfig?.apiKey);
+
+        this.apiKey = isPlatformMode ? platformConfig.apiKey : (config.apiKey ? decrypt(config.apiKey) : "");
+        this.merchantAccount = isPlatformMode ? platformConfig.merchantAccount : (config.settings?.merchantAccount || "");
+
+        if (!this.apiKey || !this.merchantAccount) {
+            throw new Error("Adyen API Key or Merchant Account is not configured (Direct or Platform).");
         }
 
-        this.apiKey = decrypt(config.apiKey);
-        this.merchantAccount = config.settings.merchantAccount;
-        this.environment = config.settings.environment || "TEST";
+        this.environment = config.settings?.environment || "TEST";
+        this.connectedAccount = config.connectedAccountId; // The store's Adyen sub-account/balance-account
+        this.platformFeePercent = platformConfig?.feePercent;
     }
 
     private getBaseUrl() {
@@ -38,21 +42,42 @@ export class AdyenAdapter {
         currency: string;
         returnUrl: string;
     }) {
+        const unitAmount = Math.round(params.amount * 100);
+        const payload: any = {
+            merchantAccount: this.merchantAccount,
+            amount: {
+                value: unitAmount,
+                currency: params.currency.toUpperCase(),
+            },
+            reference: params.orderId,
+            returnUrl: params.returnUrl,
+        };
+
+        // If in Platform Mode, add splitting
+        if (this.connectedAccount && this.platformFeePercent) {
+            const platformFee = Math.round(unitAmount * (this.platformFeePercent / 100));
+            payload.splits = [
+                {
+                    amount: { value: platformFee },
+                    type: "Commission",
+                    reference: `Platform Fee - Order ${params.orderId}`
+                },
+                {
+                    amount: { value: unitAmount - platformFee },
+                    type: "MarketPlace",
+                    account: this.connectedAccount,
+                    reference: `Merchant Payout - Order ${params.orderId}`
+                }
+            ];
+        }
+
         const response = await fetch(`${this.getBaseUrl()}/sessions`, {
             method: "POST",
             headers: {
                 "X-API-Key": this.apiKey,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-                merchantAccount: this.merchantAccount,
-                amount: {
-                    value: Math.round(params.amount * 100), // Adyen uses minor units
-                    currency: params.currency.toUpperCase(),
-                },
-                reference: params.orderId,
-                returnUrl: params.returnUrl,
-            }),
+            body: JSON.stringify(payload),
         });
 
         const data = await response.json();

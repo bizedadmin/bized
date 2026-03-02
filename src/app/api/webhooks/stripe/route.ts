@@ -19,25 +19,45 @@ export async function POST(req: NextRequest) {
         const client = await clientPromise;
         const db = client.db();
 
-        // 1. Get ANY Stripe configuration from the database 
-        // Note: Stripe Webhook Secret is usually global per account, 
-        // but here it's per-store in our current settings model.
-        // For a production SaaS, you'd usually have a global secret or a way to look up store secret first.
+        // 1. Get Platform Settings and try to verify with Platform Webhook Secret
+        const { getPlatformSettings } = await import("@/lib/platform-settings");
+        const platform = await getPlatformSettings();
+        const platformWebhookSecret = platform.platformPartnerKeys?.stripe?.webhookSecret;
 
-        // Find a store that has a Stripe webhook secret configured
-        const pmConfig = await db.collection("store_payment_methods").findOne({
-            gateway: "Stripe",
-            webhookSecret: { $exists: true, $ne: "" }
-        });
+        let event;
+        let adapter: StripeAdapter | null = null;
 
-        if (!pmConfig) {
-            console.error("Stripe Webhook Secret not found in any store's config.");
-            return NextResponse.json({ error: "Webhook secret not configured" }, { status: 400 });
+        if (platformWebhookSecret && platform.platformPartnerKeys?.stripe?.secretKey) {
+            try {
+                // Try platform-level verification
+                const platformAdapter = new StripeAdapter({} as any, {
+                    secretKey: platform.platformPartnerKeys.stripe.secretKey,
+                    feePercent: platform.platformCommission
+                });
+                event = platformAdapter.verifyWebhook(rawBody, sig, platformWebhookSecret);
+                adapter = platformAdapter;
+            } catch (e) {
+                // Not a platform webhook or signature mismatch
+                console.log("Stripe Webhook: Not a platform-level event or invalid platform secret.");
+            }
         }
 
-        const stripe = new StripeAdapter(pmConfig as any);
-        const decryptedSecret = decrypt(pmConfig.webhookSecret);
-        const event = stripe.verifyWebhook(rawBody, sig, decryptedSecret);
+        // 2. If platform verification failed, try find any store with a matching secret 
+        // (This is common if stores set up their own non-connected Stripe)
+        if (!event) {
+            const pmConfig = await db.collection("store_payment_methods").findOne({
+                gateway: "Stripe",
+                webhookSecret: { $exists: true, $ne: "" }
+            });
+
+            if (!pmConfig) {
+                return NextResponse.json({ error: "No valid Stripe configuration found for verification" }, { status: 400 });
+            }
+
+            adapter = new StripeAdapter(pmConfig as any);
+            const decryptedSecret = decrypt(pmConfig.webhookSecret);
+            event = adapter.verifyWebhook(rawBody, sig, decryptedSecret);
+        }
 
         // 2. Handle successful payment
         if (event.type === "checkout.session.completed") {

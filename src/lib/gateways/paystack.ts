@@ -100,4 +100,23 @@ export class PaystackAdapter {
 
         return hash === xPaystackSignature;
     }
+
+    /**
+     * Refunds a Paystack transaction.
+     */
+    async refundTransaction(reference: string, amount?: number) {
+        const response = await fetch(`${this.baseUrl}/refund`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${this.secretKey}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                transaction: reference,
+                amount: amount ? Math.round(amount * 100) : undefined,
+            }),
+        });
+
+        return await response.json();
+    }
 }

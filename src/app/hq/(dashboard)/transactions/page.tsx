@@ -88,9 +88,15 @@ export default async function TransactionsPage() {
                                     <div className="font-bold text-white group-hover:text-indigo-400 transition-colors">{t.storeName}</div>
                                 </td>
                                 <td className="px-6 py-4">
-                                    <span className="px-2 py-1 rounded-md bg-zinc-950 border border-zinc-800 font-bold text-[10px] text-zinc-300">
-                                        {t.gateway}
-                                    </span>
+                                    <div className="flex flex-col gap-1.5">
+                                        <span className="px-2 py-1 rounded-md bg-zinc-950 border border-zinc-800 font-bold text-[10px] text-zinc-300 w-fit">
+                                            {t.gateway}
+                                        </span>
+                                        <div className={`text-[8px] font-black uppercase tracking-widest flex items-center gap-1 ${t.status === "Settled" ? "text-emerald-500" : "text-amber-500"}`}>
+                                            <div className={`w-1 h-1 rounded-full ${t.status === "Settled" ? "bg-emerald-500" : "bg-amber-500"}`} />
+                                            {t.status}
+                                        </div>
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4 font-bold text-white">
                                     {t.currency} {t.totalAmount.toLocaleString()}

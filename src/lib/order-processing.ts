@@ -48,6 +48,15 @@ export async function recordOrderPayment(db: any, params: {
     const platform = await getPlatformSettings();
     if (platform.platformCommission > 0 && !["Cash", "Manual"].includes(paymentGateway)) {
         const platformFee = Number((amount * (platform.platformCommission / 100)).toFixed(2));
+
+        // Determine settlement status
+        // Gateways with programmatic splitting/Connect setup are "Settled" automatically
+        const automatedGateways = ["Stripe", "Paystack", "Adyen", "PayPal"];
+
+        // Find if this store is using platform partner setup for this gateway
+        const storePm = await db.collection("store_payment_methods").findOne({ storeId, gateway: paymentGateway });
+        const isSettled = automatedGateways.includes(paymentGateway) && !!storePm?.connectedAccountId;
+
         await db.collection("platform_commissions").insertOne({
             orderId: new ObjectId(orderId),
             paymentId: insertResult.insertedId,
@@ -57,7 +66,7 @@ export async function recordOrderPayment(db: any, params: {
             currency,
             percentage: platform.platformCommission,
             gateway: paymentGateway,
-            status: "Recorded", // Initially just recorded, split happens at gateway level
+            status: isSettled ? "Settled" : "Pending Invoice", // "Settled" means platform cut was split at source
             createdAt: new Date()
         });
     }

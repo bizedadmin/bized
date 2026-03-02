@@ -19,21 +19,31 @@ export async function POST(req: NextRequest) {
         const client = await clientPromise;
         const db = client.db();
 
-        // 1. Resolve store-specific secret key for signature verification
-        const pmConfig = await db.collection("store_payment_methods").findOne({
-            gateway: "Paystack",
-            apiKey: { $exists: true, $ne: "" }
-        });
+        // 1. Get Platform Settings and try to verify with Platform Secret
+        const { getPlatformSettings } = await import("@/lib/platform-settings");
+        const platform = await getPlatformSettings();
+        const platformSecret = platform.platformPartnerKeys?.paystack?.secretKey;
 
-        if (!pmConfig) {
-            console.error("Paystack Secret Key not found in any store's config.");
-            return NextResponse.json({ error: "Secret key not configured" }, { status: 400 });
+        let isValidSignature = false;
+        let activeSecret = "";
+
+        if (platformSecret) {
+            isValidSignature = PaystackAdapter.verifyWebhookSignature(rawBody, sig, platformSecret);
+            if (isValidSignature) activeSecret = platformSecret;
         }
 
-        // 2. Verify Signature
-        // Decrypt the stored API key to use for HMAC verification
-        const decryptedSecretKey = decrypt(pmConfig.apiKey);
-        const isValidSignature = PaystackAdapter.verifyWebhookSignature(rawBody, sig, decryptedSecretKey);
+        // 2. If platform verification failed, try find any store configuration
+        if (!isValidSignature) {
+            const pmConfig = await db.collection("store_payment_methods").findOne({
+                gateway: "Paystack",
+                apiKey: { $exists: true, $ne: "" }
+            });
+
+            if (pmConfig) {
+                activeSecret = decrypt(pmConfig.apiKey);
+                isValidSignature = PaystackAdapter.verifyWebhookSignature(rawBody, sig, activeSecret);
+            }
+        }
 
         if (!isValidSignature) {
             console.warn("Paystack Webhook: HMAC-SHA512 verification failed.");

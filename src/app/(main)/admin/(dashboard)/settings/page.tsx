@@ -248,9 +248,9 @@ export default function SettingsPage() {
         refreshBusinesses();
     };
 
-    const handleConnectGateway = (gateway: string) => {
+    const handleConnectGateway = (gateway: string, extraParams: string = "") => {
         if (!currentBusiness?._id) return;
-        window.location.href = `/api/payments/onboard/${gateway.toLowerCase()}?storeId=${currentBusiness._id}`;
+        window.location.href = `/api/payments/onboard/${gateway.toLowerCase()}?storeId=${currentBusiness._id}${extraParams}`;
     };
 
     const handlePmEditSave = async () => {
@@ -1672,7 +1672,7 @@ export default function SettingsPage() {
 
                         <div className="space-y-8">
                             {/* Platform Onboarding Section */}
-                            {(pmEditForm.gateway?.toLowerCase() === "stripe" || pmEditForm.gateway?.toLowerCase() === "paystack") && (
+                            {["stripe", "paystack", "paypal", "adyen"].includes(pmEditForm.gateway?.toLowerCase() || "") && (
                                 <div className="bg-indigo-500/5 p-8 rounded-[2rem] border-2 border-indigo-500/20 space-y-5 animate-in fade-in slide-in-from-top-4">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-600">
@@ -1683,8 +1683,38 @@ export default function SettingsPage() {
                                             <p className="text-[10px] opacity-60 font-medium">Recommended for automated commission splitting.</p>
                                         </div>
                                     </div>
+
+                                    {pmEditForm.gateway?.toLowerCase() === "paystack" && (
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-[8px] font-black uppercase tracking-widest opacity-40 ml-2">Bank Code</label>
+                                                <input
+                                                    id="paystack-bank-code"
+                                                    placeholder="058 (GTBank)"
+                                                    className="w-full h-12 px-4 rounded-xl bg-white border border-indigo-500/10 text-xs"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[8px] font-black uppercase tracking-widest opacity-40 ml-2">Account No.</label>
+                                                <input
+                                                    id="paystack-account-number"
+                                                    placeholder="0123456789"
+                                                    className="w-full h-12 px-4 rounded-xl bg-white border border-indigo-500/10 text-xs"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <Button
-                                        onClick={() => handleConnectGateway(pmEditForm.gateway || "")}
+                                        onClick={() => {
+                                            let url = "";
+                                            if (pmEditForm.gateway?.toLowerCase() === "paystack") {
+                                                const bc = (document.getElementById('paystack-bank-code') as HTMLInputElement)?.value;
+                                                const an = (document.getElementById('paystack-account-number') as HTMLInputElement)?.value;
+                                                url = `&bankCode=${bc}&accountNumber=${an}&businessName=${currentBusiness?.name || 'Bized Store'}`;
+                                            }
+                                            handleConnectGateway(pmEditForm.gateway || "", url);
+                                        }}
                                         className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-widest shadow-lg shadow-indigo-600/20"
                                     >
                                         Connect {pmEditForm.gateway} Account

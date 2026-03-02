@@ -94,4 +94,14 @@ export class StripeAdapter {
     verifyWebhook(body: string, sig: string, webhookSecret: string) {
         return this.stripe.webhooks.constructEvent(body, sig, webhookSecret);
     }
+
+    /**
+     * Refunds a payment.
+     */
+    async refundPayment(paymentIntentId: string, amount?: number) {
+        return await this.stripe.refunds.create({
+            payment_intent: paymentIntentId,
+            amount: amount ? Math.round(amount * 100) : undefined,
+        });
+    }
 }

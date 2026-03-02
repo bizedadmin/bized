@@ -1,3 +1,4 @@
+import { decrypt } from "./encryption";
 import clientPromise from "./mongodb";
 
 export interface PlatformSettings {
@@ -32,10 +33,10 @@ export interface PlatformSettings {
     // Payment Gateways
     enabledGateways: string[];
     platformPartnerKeys?: {
-        stripe?: { clientId: string; secretKey: string };
-        paypal?: { clientId: string; secretKey: string };
-        paystack?: { secretKey: string; publicKey: string };
-        adyen?: { apiKey: string; merchantAccount: string };
+        stripe?: { clientId: string; secretKey: string; webhookSecret: string };
+        paypal?: { clientId: string; secretKey: string; webhookSecret: string };
+        paystack?: { secretKey: string; publicKey: string; webhookSecret: string };
+        adyen?: { apiKey: string; merchantAccount: string; hmacKey: string };
     };
 }
 
@@ -78,6 +79,22 @@ export async function getPlatformSettings(): Promise<PlatformSettings> {
 
     if (!settings) {
         return DEFAULT_PLATFORM_SETTINGS;
+    }
+
+    // Decrypt sensitive keys
+    if (settings.platformPartnerKeys) {
+        const keys = settings.platformPartnerKeys as any;
+        if (keys.stripe?.secretKey) keys.stripe.secretKey = decrypt(keys.stripe.secretKey);
+        if (keys.stripe?.webhookSecret) keys.stripe.webhookSecret = decrypt(keys.stripe.webhookSecret);
+
+        if (keys.paypal?.secretKey) keys.paypal.secretKey = decrypt(keys.paypal.secretKey);
+        if (keys.paypal?.webhookSecret) keys.paypal.webhookSecret = decrypt(keys.paypal.webhookSecret);
+
+        if (keys.paystack?.secretKey) keys.paystack.secretKey = decrypt(keys.paystack.secretKey);
+        if (keys.paystack?.webhookSecret) keys.paystack.webhookSecret = decrypt(keys.paystack.webhookSecret);
+
+        if (keys.adyen?.apiKey) keys.adyen.apiKey = decrypt(keys.adyen.apiKey);
+        if (keys.adyen?.hmacKey) keys.adyen.hmacKey = decrypt(keys.adyen.hmacKey);
     }
 
     // Ensure all fields exist by merging with defaults

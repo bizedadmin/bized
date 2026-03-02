@@ -1,5 +1,6 @@
 import clientPromise from "@/lib/mongodb";
 import { revalidatePath } from "next/cache";
+import { encrypt } from "@/lib/encryption";
 import { Globe, Languages, Clock, Coins, Save, Check, Wallet, Percent, Calendar, ToggleLeft, Bot, Lock, Trash2, LayoutGrid, Palette, Mail, Phone, MessageSquare, Search, Ruler, Hash, ShieldAlert, Zap, CreditCard } from "lucide-react";
 import { CURRENCIES } from "@/lib/currencies";
 import Link from "next/link";
@@ -110,19 +111,23 @@ export default async function GlobalVariablesPage({
                 platformPartnerKeys: {
                     stripe: {
                         clientId: formData.get("stripeClientId") as string,
-                        secretKey: formData.get("stripeSecretKey") as string,
+                        secretKey: encrypt(formData.get("stripeSecretKey") as string),
+                        webhookSecret: encrypt(formData.get("stripeWebhookSecret") as string),
                     },
                     paypal: {
                         clientId: formData.get("paypalClientId") as string,
-                        secretKey: formData.get("paypalSecretKey") as string,
+                        secretKey: encrypt(formData.get("paypalSecretKey") as string),
+                        webhookSecret: encrypt(formData.get("paypalWebhookSecret") as string),
                     },
                     paystack: {
                         publicKey: formData.get("paystackPublicKey") as string,
-                        secretKey: formData.get("paystackSecretKey") as string,
+                        secretKey: encrypt(formData.get("paystackSecretKey") as string),
+                        webhookSecret: encrypt(formData.get("paystackWebhookSecret") as string),
                     },
                     adyen: {
                         merchantAccount: formData.get("adyenMerchantAccount") as string,
-                        apiKey: formData.get("adyenApiKey") as string,
+                        apiKey: encrypt(formData.get("adyenApiKey") as string),
+                        hmacKey: encrypt(formData.get("adyenHmacKey") as string),
                     }
                 }
             };
@@ -343,6 +348,10 @@ export default async function GlobalVariablesPage({
                                                 <label className="text-xs font-bold text-zinc-500 uppercase">Connect Secret Key</label>
                                                 <input type="password" name="stripeSecretKey" defaultValue={settings.platformPartnerKeys?.stripe?.secretKey} className="w-full h-10 px-4 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-indigo-500 outline-none transition-all text-white text-sm" />
                                             </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-zinc-500 uppercase">Connect Webhook Secret</label>
+                                                <input type="password" name="stripeWebhookSecret" defaultValue={settings.platformPartnerKeys?.stripe?.webhookSecret} className="w-full h-10 px-4 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-indigo-500 outline-none transition-all text-white text-sm" />
+                                            </div>
                                         </div>
                                     </div>
 
@@ -362,6 +371,10 @@ export default async function GlobalVariablesPage({
                                             <div className="space-y-2">
                                                 <label className="text-xs font-bold text-zinc-500 uppercase">Platform Secret Key</label>
                                                 <input type="password" name="paystackSecretKey" defaultValue={settings.platformPartnerKeys?.paystack?.secretKey} className="w-full h-10 px-4 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-indigo-500 outline-none transition-all text-white text-sm" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-zinc-500 uppercase">Webhook Secret Key</label>
+                                                <input type="password" name="paystackWebhookSecret" defaultValue={settings.platformPartnerKeys?.paystack?.webhookSecret} className="w-full h-10 px-4 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-indigo-500 outline-none transition-all text-white text-sm" />
                                             </div>
                                         </div>
                                     </div>
@@ -383,6 +396,10 @@ export default async function GlobalVariablesPage({
                                                 <label className="text-xs font-bold text-zinc-500 uppercase">Partner Secret Key</label>
                                                 <input type="password" name="paypalSecretKey" defaultValue={settings.platformPartnerKeys?.paypal?.secretKey} className="w-full h-10 px-4 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-indigo-500 outline-none transition-all text-white text-sm" />
                                             </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-zinc-500 uppercase">Webhook Secret / ID</label>
+                                                <input type="password" name="paypalWebhookSecret" defaultValue={settings.platformPartnerKeys?.paypal?.webhookSecret} className="w-full h-10 px-4 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-indigo-500 outline-none transition-all text-white text-sm" />
+                                            </div>
                                         </div>
                                     </div>
 
@@ -402,6 +419,10 @@ export default async function GlobalVariablesPage({
                                             <div className="space-y-2">
                                                 <label className="text-xs font-bold text-zinc-500 uppercase">Partner API Key</label>
                                                 <input type="password" name="adyenApiKey" defaultValue={settings.platformPartnerKeys?.adyen?.apiKey} className="w-full h-10 px-4 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-indigo-500 outline-none transition-all text-white text-sm" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-bold text-zinc-500 uppercase">HMAC Key</label>
+                                                <input type="password" name="adyenHmacKey" defaultValue={settings.platformPartnerKeys?.adyen?.hmacKey} className="w-full h-10 px-4 rounded-lg bg-zinc-950 border border-zinc-800 focus:border-indigo-500 outline-none transition-all text-white text-sm" />
                                             </div>
                                         </div>
                                     </div>

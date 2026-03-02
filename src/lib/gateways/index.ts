@@ -29,15 +29,23 @@ export async function getGatewayAdapter(storeId: string, gatewayName: string, db
             return new StripeAdapter(config, platformConfig);
         case "paystack":
             return new PaystackAdapter(config, platformConfig);
+        case "paypal":
+            return new PayPalAdapter(config, {
+                clientId: (platform.platformPartnerKeys?.paypal as any)?.clientId || "",
+                secretKey: (platform.platformPartnerKeys?.paypal as any)?.secretKey || "",
+                feePercent: platform.platformCommission || 0
+            });
+        case "adyen":
+            return new AdyenAdapter(config, {
+                apiKey: (platform.platformPartnerKeys?.adyen as any)?.apiKey || "",
+                merchantAccount: (platform.platformPartnerKeys?.adyen as any)?.merchantAccount || "",
+                feePercent: platform.platformCommission || 0
+            });
         case "m-pesa":
         case "mpesa":
             return new MpesaAdapter(config);
         case "dpo":
             return new DpoAdapter(config);
-        case "adyen":
-            return new AdyenAdapter(config);
-        case "paypal":
-            return new PayPalAdapter(config);
         default:
             throw new Error(`Unsupported payment gateway: ${gatewayName}`);
     }
