@@ -161,6 +161,14 @@ export interface PaymentMethod {
     settings?: Record<string, any>;
 }
 
+export interface BusinessSubscription {
+    planId: string;
+    status: "active" | "past_due" | "canceled" | "unpaid" | "trialing" | "incomplete";
+    gateway: "Stripe" | "Paystack" | "Manual";
+    currentPeriodEnd?: string;
+    cancelAtPeriodEnd: boolean;
+}
+
 export interface Business {
     _id: string;
     name: string;
@@ -236,6 +244,7 @@ export interface Business {
         receipts?: boolean;
     };
     paymentMethods?: PaymentMethod[];
+    subscription?: BusinessSubscription;
     createdAt: string;
     updatedAt: string;
 }

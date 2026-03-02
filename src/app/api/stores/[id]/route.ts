@@ -154,6 +154,30 @@ export async function PATCH(
             }
         }
 
+        // Subscription limits enforcement
+        if (updateFields.products || updateFields.teamMembers) {
+            const planId = existingStore.subscription?.planId || "free";
+            const plan = await db.collection("platform_plans").findOne({ id: planId });
+
+            // Default limits if plan not found
+            const limits = plan?.limits || {
+                maxProducts: 50,
+                maxStaff: 1
+            };
+
+            if (updateFields.products && updateFields.products.length > limits.maxProducts) {
+                return NextResponse.json({
+                    error: `Limit reached. Your ${planId} plan only allows up to ${limits.maxProducts} products. Please upgrade to add more.`
+                }, { status: 403 });
+            }
+
+            if (updateFields.teamMembers && updateFields.teamMembers.length > limits.maxStaff) {
+                return NextResponse.json({
+                    error: `Limit reached. Your ${planId} plan only allows up to ${limits.maxStaff} staff members. Please upgrade to add more.`
+                }, { status: 403 });
+            }
+        }
+
         if (Object.keys(updateFields).length === 0) {
             return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
         }
