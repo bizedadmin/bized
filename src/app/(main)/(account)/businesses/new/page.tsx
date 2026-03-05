@@ -50,6 +50,7 @@ import {
     Sparkles
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useBusiness } from "@/contexts/BusinessContext";
 
 export default function NewBusinessWizard() {
     const [step, setStep] = useState(1);
@@ -71,6 +72,7 @@ export default function NewBusinessWizard() {
     const [isCreating, setIsCreating] = useState(false);
     const [error, setError] = useState("");
     const router = useRouter();
+    const { refreshBusinesses } = useBusiness();
 
     const handleNext = async () => {
         if (step === 3) {
@@ -93,6 +95,8 @@ export default function NewBusinessWizard() {
                     setError(data.error || "Failed to create business");
                     return;
                 }
+                await refreshBusinesses();
+                router.refresh();
                 setShowSubscription(true);
             } catch (err) {
                 setError("Network error. Please try again.");

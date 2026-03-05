@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { CircularProgress } from "@/components/ui/Progress";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -96,7 +97,7 @@ export default function SignUpContentClient() {
                     />
                 </div>
                 <Button className="w-full h-12 text-base font-semibold mt-6" disabled={isLoading}>
-                    {isLoading ? "Creating Account..." : "Create Account"}
+                    {isLoading ? <CircularProgress size={24} strokeWidth={5} className="text-[var(--color-on-primary)]" /> : "Create Account"}
                 </Button>
             </form>
 

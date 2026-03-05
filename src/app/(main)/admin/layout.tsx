@@ -61,7 +61,8 @@ const subNavItems: Record<string, NavItem[]> = {
     "Store": [
         { label: "Pages", href: "/admin/storefront/pages", icon: FileText },
         { label: "Whatsapp", href: "/admin/storefront/whatsapp", icon: MessageSquare },
-        { label: "Google", href: "/admin/storefront/google", icon: Search },
+        { label: "Google Profile", href: "/admin/storefront/google", icon: Search },
+        { label: "Google Merchant", href: "/admin/storefront/google-merchant", icon: ShoppingBag },
         { label: "Instagram", href: "/admin/storefront/instagram", icon: Instagram },
     ],
     "Catalog": [

@@ -3,6 +3,7 @@
 import React, { Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { CircularProgress } from "@/components/ui/Progress";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -91,7 +92,7 @@ function SignInContent() {
                     <Link href="#" className="font-medium text-[var(--color-primary)] hover:underline">Forgot password?</Link>
                 </div>
                 <Button className="w-full h-12 text-base font-semibold mt-6" disabled={isLoading}>
-                    {isLoading ? "Signing in..." : "Sign In"}
+                    {isLoading ? <CircularProgress size={24} strokeWidth={5} className="text-[var(--color-on-primary)]" /> : "Sign In"}
                 </Button>
             </form>
 
@@ -110,7 +111,7 @@ export default function SignInPage() {
         <Suspense fallback={
             <AuthLayout title="Loading..." subtitle="Please wait">
                 <div className="flex justify-center py-12">
-                    <div className="w-8 h-8 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"></div>
+                    <CircularProgress size={40} />
                 </div>
             </AuthLayout>
         }>

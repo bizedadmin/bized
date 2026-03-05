@@ -2,7 +2,8 @@
 
 import { ReactNode } from "react";
 import Link from "next/link";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { CircularProgress } from "@/components/ui/Progress";
 import { Button } from "@/components/ui/Button";
 import { motion } from "framer-motion";
 
@@ -26,7 +27,7 @@ export function AuthLayout({
         return (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-surface)]/80 backdrop-blur-sm">
                 <div className="flex flex-col items-center space-y-4">
-                    <Loader2 className="w-10 h-10 text-[var(--color-primary)] animate-spin" />
+                    <CircularProgress size={48} />
                     <p className="text-lg font-medium text-[var(--color-on-surface)]">Connecting securely...</p>
                 </div>
             </div>

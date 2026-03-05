@@ -3,6 +3,7 @@ import { Lock } from "lucide-react";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import Link from "next/link";
 import { Suspense } from "react";
+import { CircularProgress } from "@/components/ui/Progress";
 import SignUpContentClient from "./content";
 
 export default async function SignUpPage() {
@@ -34,7 +35,7 @@ export default async function SignUpPage() {
         <Suspense fallback={
             <AuthLayout title="Loading..." subtitle="Please wait">
                 <div className="flex justify-center py-12">
-                    <div className="w-8 h-8 border-4 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin"></div>
+                    <CircularProgress size={40} />
                 </div>
             </AuthLayout>
         }>

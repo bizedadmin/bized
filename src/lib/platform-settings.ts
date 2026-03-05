@@ -8,6 +8,7 @@ export interface PlatformSettings {
     globalTimezones: string[];
     // Financials
     trialPeriodDays: number;
+    subscriptionGracePeriodDays: number;
     platformCommission: number;
     defaultTaxRate: number;
     minWithdrawal: number;
@@ -48,6 +49,7 @@ export const DEFAULT_PLATFORM_SETTINGS: PlatformSettings = {
     supportedLanguages: ["English"],
     globalTimezones: ["UTC"],
     trialPeriodDays: 14,
+    subscriptionGracePeriodDays: 3,
     platformCommission: 5,
     defaultTaxRate: 16,
     minWithdrawal: 10,

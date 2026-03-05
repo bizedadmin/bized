@@ -184,7 +184,7 @@ export default function SettingsPage() {
 
     // — Payment Methods state —
     const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(currentBusiness?.paymentMethods || []);
-    const [paymentSubTab, setPaymentSubTab] = useState<'methods' | 'accounting' | 'checkout'>('methods');
+    const [paymentSubTab, setPaymentSubTab] = useState<'methods' | 'payouts' | 'accounting' | 'checkout'>('methods');
     const [pmLoading, setPmLoading] = useState(false);
     const [pmSaving, setPmSaving] = useState(false);
     const [pmSaveSuccess, setPmSaveSuccess] = useState(false);
@@ -1055,6 +1055,7 @@ export default function SettingsPage() {
                                     <div className="flex items-center gap-1 p-1 bg-[var(--color-surface-container-low)] border border-[var(--color-outline-variant)]/10 rounded-2xl w-fit">
                                         {[
                                             { id: 'methods', label: 'Gateways', icon: CreditCard },
+                                            { id: 'payouts', label: 'Payouts Setup', icon: Landmark },
                                             { id: 'accounting', label: 'COA Mapping', icon: List },
                                             { id: 'checkout', label: 'Checkout Settings', icon: Smartphone }
                                         ].map((tab) => (
@@ -1184,6 +1185,168 @@ export default function SettingsPage() {
                                         </div>
                                     )}
 
+                                    {paymentSubTab === 'payouts' && (
+                                        <div className="bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/10 rounded-[2.5rem] p-8 shadow-[var(--shadow-m3-1)] space-y-8">
+                                            <div className="flex items-start gap-4 p-6 rounded-2xl bg-indigo-500/5 border border-indigo-500/10">
+                                                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0">
+                                                    <Zap size={24} />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className="font-black text-lg text-[var(--color-on-surface)]">Automated Vendor Payouts</h3>
+                                                    <p className="text-sm text-[var(--color-on-surface-variant)] opacity-70 mt-1 max-w-2xl">
+                                                        Connect your Stripe or Paystack sub-account to enable automated revenue splitting.
+                                                        Bized will automatically deduct the platform commission and deposit your earnings directly into your bank account.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                {/* Paystack Payouts */}
+                                                <div className="p-6 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/10 space-y-6">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-600 flex items-center justify-center font-black">P</div>
+                                                            <h4 className="font-black text-sm uppercase tracking-widest">Paystack Onboarding</h4>
+                                                        </div>
+                                                        {paymentMethods.find(m => m.gateway === 'Paystack')?.gatewayAccountId ? (
+                                                            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">
+                                                                <CheckCircle2 size={12} /> Connected
+                                                            </span>
+                                                        ) : (
+                                                            <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 text-[10px] font-black uppercase tracking-widest border border-amber-500/20">
+                                                                Pending Setup
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    {!paymentMethods.find(m => m.gateway === 'Paystack')?.gatewayAccountId ? (
+                                                        <div className="space-y-4">
+                                                            <p className="text-xs text-[var(--color-on-surface-variant)] opacity-60">Enter your official business bank details to receive payments via Paystack.</p>
+                                                            <div className="space-y-3">
+                                                                <div className="space-y-1">
+                                                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Bank Name</label>
+                                                                    <select className="w-full h-12 px-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/20 focus:border-teal-500 outline-none transition-all text-sm font-medium pr-10" id="paystack_bank">
+                                                                        <option value="">Select Bank</option>
+                                                                        <option value="044">Access Bank</option>
+                                                                        <option value="058">Guaranty Trust Bank</option>
+                                                                        <option value="232">United Bank For Africa</option>
+                                                                        <option value="011">First Bank of Nigeria</option>
+                                                                        <option value="033">United Bank for Africa</option>
+                                                                        <option value="057">Zenith Bank</option>
+                                                                        <option value="035">Wema Bank</option>
+                                                                        <option value="070">Fidelity Bank</option>
+                                                                        <option value="215">Unity Bank</option>
+                                                                        <option value="101">Providus Bank</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Account Number</label>
+                                                                    <input type="text" id="paystack_acc" maxLength={10} placeholder="10-digit account number" className="w-full h-12 px-4 rounded-xl bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/20 focus:border-teal-500 outline-none transition-all text-sm font-bold tracking-[0.2em]" />
+                                                                </div>
+                                                            </div>
+                                                            <button
+                                                                onClick={async () => {
+                                                                    const bankCode = (document.getElementById('paystack_bank') as HTMLSelectElement).value;
+                                                                    const accNum = (document.getElementById('paystack_acc') as HTMLInputElement).value;
+                                                                    if (!bankCode || !accNum) return alert('Please provide bank details');
+
+                                                                    try {
+                                                                        const res = await fetch('/api/billing/subaccount', {
+                                                                            method: 'POST',
+                                                                            body: JSON.stringify({
+                                                                                storeId: currentBusiness?._id,
+                                                                                gateway: 'Paystack',
+                                                                                bankCode,
+                                                                                accountNumber: accNum
+                                                                            })
+                                                                        });
+                                                                        const data = await res.json();
+                                                                        if (data.error) throw new Error(data.error);
+                                                                        window.location.reload();
+                                                                    } catch (e: any) {
+                                                                        alert(e.message);
+                                                                    }
+                                                                }}
+                                                                className="w-full h-12 bg-teal-600 text-white font-black rounded-xl hover:bg-teal-500 transition-all shadow-lg shadow-teal-600/20 active:scale-95 text-xs uppercase tracking-widest"
+                                                            >
+                                                                Link Paystack Settlements
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-4">
+                                                            <div className="p-4 rounded-xl bg-teal-500/5 border border-teal-500/10">
+                                                                <p className="text-[10px] font-black uppercase tracking-widest text-teal-600 opacity-60">Connected ID</p>
+                                                                <p className="text-sm font-mono font-black text-teal-700 mt-0.5">{paymentMethods.find(m => m.gateway === 'Paystack')?.gatewayAccountId}</p>
+                                                            </div>
+                                                            <p className="text-[10px] text-[var(--color-on-surface-variant)] opacity-40 italic">Payouts will be automatically split and settled to your linked bank account every 24-48 hours.</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Stripe Payouts */}
+                                                <div className="p-6 rounded-3xl bg-[var(--color-surface-container-lowest)] border border-[var(--color-outline-variant)]/10 space-y-6">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center font-black">S</div>
+                                                            <h4 className="font-black text-sm uppercase tracking-widest">Stripe Connect</h4>
+                                                        </div>
+                                                        {paymentMethods.find(m => m.gateway === 'Stripe')?.gatewayAccountId ? (
+                                                            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">
+                                                                <CheckCircle2 size={12} /> Active
+                                                            </span>
+                                                        ) : (
+                                                            <span className="px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 text-[10px] font-black uppercase tracking-widest border border-amber-500/20">
+                                                                Requires Connection
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    {!paymentMethods.find(m => m.gateway === 'Stripe')?.gatewayAccountId ? (
+                                                        <div className="space-y-4">
+                                                            <p className="text-xs text-[var(--color-on-surface-variant)] opacity-60">Connect your Stripe account to receive instant global payouts and handle multi-currency revenue splitting.</p>
+                                                            <button
+                                                                onClick={async () => {
+                                                                    try {
+                                                                        const res = await fetch('/api/billing/subaccount', {
+                                                                            method: 'POST',
+                                                                            body: JSON.stringify({
+                                                                                storeId: currentBusiness?._id,
+                                                                                gateway: 'Stripe'
+                                                                            })
+                                                                        });
+                                                                        const data = await res.json();
+                                                                        if (data.onboardingUrl) {
+                                                                            window.location.href = data.onboardingUrl;
+                                                                        }
+                                                                    } catch (e: any) {
+                                                                        alert(e.message);
+                                                                    }
+                                                                }}
+                                                                className="w-full h-12 bg-blue-600 text-white font-black rounded-xl hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/20 active:scale-95 text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+                                                            >
+                                                                <ArrowUpRight size={14} /> Connect Stripe Account
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-4">
+                                                            <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/10">
+                                                                <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 opacity-60">Connect ID</p>
+                                                                <p className="text-sm font-mono font-black text-blue-700 mt-0.5">{paymentMethods.find(m => m.gateway === 'Stripe')?.gatewayAccountId}</p>
+                                                            </div>
+                                                            <a
+                                                                href="https://dashboard.stripe.com/"
+                                                                target="_blank"
+                                                                className="flex items-center justify-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline"
+                                                            >
+                                                                Manage on Stripe Dashboard <ExternalLink size={10} />
+                                                            </a>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {paymentSubTab === 'accounting' && (
                                         <div className="bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/10 rounded-[2.5rem] p-8 shadow-[var(--shadow-m3-1)] space-y-4">
                                             <div className="flex items-center gap-3">
@@ -1275,6 +1438,7 @@ export default function SettingsPage() {
                                     )}
                                 </section>
                             )}
+
 
                             {/* TAB CONTENT: LEGAL */}
                             {activeTab === 'legal' && (
@@ -2103,6 +2267,6 @@ export default function SettingsPage() {
                     setIsCountryModalOpen(false);
                 }}
             />
-        </div >
+        </div>
     );
 }

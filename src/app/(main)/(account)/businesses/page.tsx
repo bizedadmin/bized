@@ -1,7 +1,8 @@
 "use client";
 
 import React, { } from "react";
-import { Plus, ChevronRight, Loader2, Store } from "lucide-react";
+import { Plus, ChevronRight, Store } from "lucide-react";
+import { CircularProgress } from "@/components/ui/Progress";
 import Link from "next/link";
 import { useBusiness } from "@/contexts/BusinessContext";
 import { useRouter } from "next/navigation";
@@ -18,7 +19,7 @@ export default function BusinessesPage() {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[50vh]">
-                <Loader2 size={32} className="animate-spin text-[var(--color-primary)]" />
+                <CircularProgress size={48} />
             </div>
         );
     }

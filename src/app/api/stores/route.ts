@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import clientPromise from "@/lib/mongodb";
 
@@ -143,8 +144,8 @@ export async function POST(req: NextRequest) {
         }
 
         // Calculate trial period
-        const trialEnds = new Date();
-        trialEnds.setDate(trialEnds.getDate() + (platformSettings.trialPeriodDays || 14));
+        const trialEnd = new Date();
+        trialEnd.setDate(trialEnd.getDate() + (platformSettings.trialPeriodDays || 14));
 
         // Create store document
         const store = {
@@ -154,7 +155,14 @@ export async function POST(req: NextRequest) {
             businessType,
             ownerId: session.user.id,
             currency: platformSettings.defaultCurrency || "USD",
-            trialEnds,
+            subscription: {
+                planId: "free",
+                status: "trialing",
+                trialEnd,
+                gateway: "Manual",
+                cancelAtPeriodEnd: false,
+                updatedAt: new Date()
+            },
             status: "active",
             // Inherit platform financial defaults
             platformCommission: platformSettings.platformCommission || 0,
@@ -177,6 +185,9 @@ export async function POST(req: NextRequest) {
         ].map(acc => ({ ...acc, createdAt: new Date(), updatedAt: new Date() }));
 
         await db.collection("finance_accounts").insertMany(defaultAccounts);
+
+        revalidatePath("/businesses");
+        revalidatePath("/hq/businesses");
 
         return NextResponse.json(
             {

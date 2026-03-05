@@ -71,6 +71,7 @@ export default async function GlobalVariablesPage({
         } else if (type === "financials") {
             update = {
                 trialPeriodDays: Number(formData.get("trialPeriodDays")),
+                subscriptionGracePeriodDays: Number(formData.get("subscriptionGracePeriodDays")),
                 platformCommission: Number(formData.get("platformCommission")),
                 defaultTaxRate: Number(formData.get("defaultTaxRate")),
                 minWithdrawal: Number(formData.get("minWithdrawal")),
@@ -219,6 +220,18 @@ export default async function GlobalVariablesPage({
                                         type="number"
                                         name="platformCommission"
                                         defaultValue={settings.platformCommission || 5}
+                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                                        <Clock className="w-4 h-4 text-orange-400" /> Subscription Grace Period (Days)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="subscriptionGracePeriodDays"
+                                        defaultValue={settings.subscriptionGracePeriodDays || 3}
                                         className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                     />
                                 </div>

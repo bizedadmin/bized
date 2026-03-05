@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
-import { ShieldAlert, Server, Users, Settings, Activity, Globe, CreditCard } from "lucide-react";
+import { ShieldAlert, Server, Users, Settings, Activity, Globe, CreditCard, BarChart3, Bug, Radar } from "lucide-react";
 
 export default function PlatformLayout({ children }: { children: ReactNode }) {
     return (
@@ -21,9 +21,12 @@ export default function PlatformLayout({ children }: { children: ReactNode }) {
 
                 <nav className="px-4 py-4 space-y-1">
                     <NavItem href="/" icon={<Activity className="w-5 h-5" />} label="Overview" />
+                    <NavItem href="/financials" icon={<BarChart3 className="w-5 h-5" />} label="Financials" />
                     <NavItem href="/businesses" icon={<Server className="w-5 h-5" />} label="Businesses" />
                     <NavItem href="/users" icon={<Users className="w-5 h-5" />} label="Platform Staff" />
                     <NavItem href="/transactions" icon={<CreditCard className="w-5 h-5" />} label="Transactions" />
+                    <NavItem href="/errors" icon={<Bug className="w-5 h-5" />} label="Error Logs" badge />
+                    <NavItem href="/sentry" icon={<Radar className="w-5 h-5" />} label="Sentry Issues" />
 
                     <div className="pt-8 pb-2 px-3 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
                         System
@@ -42,7 +45,7 @@ export default function PlatformLayout({ children }: { children: ReactNode }) {
     );
 }
 
-function NavItem({ href, icon, label }: { href: string; icon: ReactNode; label: string }) {
+function NavItem({ href, icon, label, badge }: { href: string; icon: ReactNode; label: string; badge?: boolean }) {
     return (
         <Link
             href={href}
@@ -53,6 +56,7 @@ function NavItem({ href, icon, label }: { href: string; icon: ReactNode; label: 
         >
             {icon}
             {label}
+            {badge && <span className="ml-auto w-2 h-2 rounded-full bg-red-500 animate-pulse" />}
         </Link>
     );
 }

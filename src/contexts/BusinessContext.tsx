@@ -213,6 +213,11 @@ export interface Business {
         instagram?: string;
         facebook?: string;
         google?: string;
+        googleLocationName?: string;
+        googleAccountId?: string;
+        googleMerchantId?: string;
+        googleMerchantSync?: string;
+        googleConnected?: boolean;
     };
     logoUrl?: string;
     coverPhotoUrl?: string;
@@ -235,6 +240,9 @@ export interface Business {
         provider?: "openai" | "google";
         openaiApiKey?: string;
         googleApiKey?: string;
+        googleAccessToken?: string;
+        googleRefreshToken?: string;
+        googleTokenExpiry?: number;
         model?: string;
         systemPrompt?: string;
     };
