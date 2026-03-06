@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { exchangeCodeForToken, getMetaUserProfile } from '@/lib/meta';
 import { encrypt } from '@/lib/encryption';
+import { initAdmin } from '@/lib/firebase-admin';
 
 /**
  * Handle Meta OAuth Callback
@@ -55,8 +56,11 @@ export async function GET(req: NextRequest) {
         const state = JSON.parse(decodeURIComponent(stateStr));
         const { intent, slug } = state;
 
-        // Use the exact origin of the request to ensure consistency with the whitelisted URI
-        const redirectUri = `${req.nextUrl.origin}/api/auth/callback/facebook`;
+        // Use the explicit app URL to ensure consistency with Meta's whitelisted URI
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || `${req.nextUrl.origin}`;
+        const redirectUri = `${appUrl}/api/auth/callback/facebook`;
+
+        console.log('Using redirectUri for exchange:', redirectUri);
 
         // Exchange code for token
         const tokenRes = await exchangeCodeForToken(code, redirectUri);
@@ -69,32 +73,90 @@ export async function GET(req: NextRequest) {
         if (intent === 'signup') {
             // Fetch profile and upsert user
             const profile = await getMetaUserProfile(accessToken);
-            const email = profile.email || `${profile.id}@meta.bized.app`;
 
-            const update = {
-                $set: {
-                    email,
+            if (!profile.email) {
+                console.error('Meta Auth: No email received from Meta. Aborting sign-in.');
+                return new NextResponse(
+                    `<html>
+                        <body>
+                            <script>
+                                window.opener.postMessage({ 
+                                    type: 'META_AUTH_COMPLETE', 
+                                    status: 'error', 
+                                    message: 'Your Meta account did not provide an email address. Please ensure the "Email" permission is granted in the Meta login prompt.' 
+                                }, window.location.origin);
+                                window.close();
+                            </script>
+                        </body>
+                    </html>`,
+                    { headers: { 'Content-Type': 'text/html' } }
+                );
+            }
+
+            const normalizedEmail = profile.email.toLowerCase().trim();
+            console.log('Meta Auth: Starting sync for', normalizedEmail);
+
+            // Find existing user by email (case-insensitive)
+            const existingUser = await users.findOne({
+                $or: [
+                    { email: normalizedEmail },
+                    { email: { $regex: new RegExp(`^${normalizedEmail}$`, 'i') } }
+                ]
+            });
+
+            if (existingUser) {
+                console.log('Meta Auth: Found existing user, updating profile...');
+                await users.updateOne(
+                    { _id: existingUser._id },
+                    {
+                        $set: {
+                            metaId: profile.id,
+                            image: profile.picture?.data?.url || existingUser.image,
+                            name: profile.name || existingUser.name,
+                            dateModified: new Date()
+                        }
+                    }
+                );
+            } else {
+                console.log('Meta Auth: Creating new user...');
+                const newUser = {
+                    email: normalizedEmail,
                     name: profile.name,
                     image: profile.picture?.data?.url || '',
-                    dateModified: new Date(),
-                    metaId: profile.id, // Reference to original Meta user ID
-                },
-                $setOnInsert: {
+                    metaId: profile.id,
+                    authId: `meta:${profile.id}`, // Failsafe for unique index on authId
                     dateCreated: new Date(),
+                    dateModified: new Date(),
                     "@context": "https://schema.org",
                     "@type": "Person",
                     isSuperAdmin: false
-                }
-            };
+                };
+                await users.insertOne(newUser);
+            }
 
-            await users.updateOne({ email }, update, { upsert: true });
+            // Bridge to Firebase session
+            let firebaseToken: string | null = null;
+            try {
+                const admin = initAdmin();
+                // We use the normalized email as the Firebase UID and include it in claims
+                firebaseToken = await admin.auth().createCustomToken(normalizedEmail, { email: normalizedEmail });
+                console.log('Meta Auth: Created Firebase bridge token for', normalizedEmail);
+            } catch (fbErr) {
+                console.error('Meta Auth: Failed to create bridge token:', fbErr);
+            }
 
-            // Since it's a popup, it's better to return a script that handles completion
+            // Since it's a popup, return a script that handles completion
             return new NextResponse(
                 `<html>
                     <body>
                         <script>
-                            window.opener.postMessage({ type: 'META_AUTH_COMPLETE', status: 'success', intent: 'signup', email: '${email}' }, window.location.origin);
+                            window.opener.postMessage({ 
+                                type: 'META_AUTH_COMPLETE', 
+                                status: 'success', 
+                                intent: 'signup', 
+                                email: '${normalizedEmail}',
+                                firebaseToken: ${firebaseToken ? `'${firebaseToken}'` : 'null'}
+                            }, window.location.origin);
                             window.close();
                         </script>
                         Redirecting...

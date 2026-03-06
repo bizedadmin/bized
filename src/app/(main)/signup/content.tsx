@@ -16,6 +16,7 @@ export default function SignUpContentClient() {
     const {
         handleGoogleSignIn,
         handleEmailSignUp,
+        handleMetaSignIn,
         isLoading,
         isRedirecting,
         error
@@ -25,13 +26,17 @@ export default function SignUpContentClient() {
      * Listen for messages from the Meta OAuth popup.
      */
     React.useEffect(() => {
-        const handleMessage = (event: MessageEvent) => {
+        const handleMessage = async (event: MessageEvent) => {
             if (event.origin !== window.location.origin) return;
             const { data } = event;
             if (data.type === 'META_AUTH_COMPLETE') {
                 if (data.status === 'success') {
-                    console.log('Meta Auth Success:', data);
-                    window.location.href = '/businesses';
+                    console.log('Meta Auth Success. Finalizing session...');
+                    if (data.firebaseToken) {
+                        await handleMetaSignIn(data.firebaseToken);
+                    } else {
+                        window.location.href = '/businesses';
+                    }
                 } else if (data.status === 'error') {
                     console.error('Meta Auth Error:', data.message);
                 }

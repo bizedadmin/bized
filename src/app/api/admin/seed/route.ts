@@ -11,7 +11,8 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { email, password } = body;
+        let { email, password } = body;
+        email = email.toLowerCase().trim();
 
         if (!email || !password) return NextResponse.json({ error: 'Email and password required' }, { status: 400 });
 

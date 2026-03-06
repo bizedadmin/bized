@@ -29,8 +29,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     const db = client.db()
                     const users = db.collection("users")
 
-                    const email = decodedToken.email
+                    // Use email claim or fallback to UID if it looks like an email (common for bridge tokens)
+                    const rawEmail = decodedToken.email || (decodedToken.uid?.includes('@') ? decodedToken.uid : null);
+                    const email = rawEmail?.toLowerCase().trim();
+
                     if (!email) {
+                        console.warn("Authorize: No email found in token. DecodedToken:", decodedToken);
                         return null
                     }
 

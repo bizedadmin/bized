@@ -16,6 +16,7 @@ function SignInContent() {
     const {
         handleGoogleSignIn,
         handleEmailSignIn,
+        handleMetaSignIn,
         isLoading,
         isRedirecting,
         error
@@ -25,16 +26,19 @@ function SignInContent() {
      * Listen for messages from the Meta OAuth popup.
      */
     React.useEffect(() => {
-        const handleMessage = (event: MessageEvent) => {
+        const handleMessage = async (event: MessageEvent) => {
             if (event.origin !== window.location.origin) return;
             const data = event.data;
 
             if (data.type === 'META_AUTH_COMPLETE') {
                 if (data.status === 'success') {
-                    console.log('Meta Auth Success:', data);
-                    // Since the user is now in the DB, we can manually trigger a local login 
-                    // or redirect to a dashboard that checks session state.
-                    window.location.href = '/businesses';
+                    console.log('Meta Auth Success. Processing bridging token...');
+                    if (data.firebaseToken) {
+                        await handleMetaSignIn(data.firebaseToken);
+                    } else {
+                        console.error('Meta Auth: No Firebase token returned.');
+                        window.location.href = '/businesses'; // Fallback
+                    }
                 } else if (data.status === 'error') {
                     console.error('Meta Auth Error:', data.message);
                 }

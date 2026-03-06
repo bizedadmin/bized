@@ -31,8 +31,9 @@ export function useMetaBusinessAuth() {
             intent: options.intent,
             slug: options.slug || null,
         }));
-
-        const redirectUri = `${window.location.origin}/api/auth/callback/facebook`;
+        // Use explicit app URL to ensure consistency
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+        const redirectUri = `${appUrl}/api/auth/callback/facebook`;
 
         const oauthUrl = `https://www.facebook.com/v20.0/dialog/oauth?` +
             new URLSearchParams({

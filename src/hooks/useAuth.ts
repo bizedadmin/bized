@@ -12,6 +12,7 @@ import {
     onAuthStateChanged,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
+    signInWithCustomToken,
     updateProfile,
     setPersistence,
     browserLocalPersistence,
@@ -139,6 +140,22 @@ export function useAuth() {
         }
     };
 
+    const handleMetaSignIn = async (token: string) => {
+        setIsLoading(true);
+        setError(null);
+        console.log("useAuth: Transitioning Meta custom token to Firebase session...");
+        try {
+            const result = await signInWithCustomToken(auth, token);
+            console.log("useAuth: Meta-to-Firebase success. User:", result.user.email);
+            const idToken = await result.user.getIdToken(true);
+            await handleAuthCompletion(result.user, idToken);
+        } catch (error: any) {
+            console.error("useAuth: Meta custom token error", error);
+            setError(error.message || "Failed to finalize Meta sign-in.");
+            setIsLoading(false);
+        }
+    };
+
     const handleEmailSignUp = async (email: string, password: string, name: string) => {
         setIsLoading(true);
         setError(null);
@@ -179,6 +196,7 @@ export function useAuth() {
         error,
         handleGoogleSignIn,
         handleFacebookSignIn,
+        handleMetaSignIn,
         handleEmailSignUp,
         handleEmailSignIn
     };
