@@ -6,24 +6,41 @@ import { Button } from "@/components/ui/Button";
 import { CircularProgress } from "@/components/ui/Progress";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { useAuth } from "@/hooks/useAuth";
+import { MetaBusinessButton } from "@/components/auth/MetaBusinessButton";
 
 const GoogleIcon = () => (
     <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .533 5.347.533 12S5.867 24 12.48 24c3.44 0 6.053-1.147 8.213-3.08 2.187-1.933 2.853-4.8 2.853-7.227 0-.693-.067-1.347-.187-2.773h-10.88z" fill="currentColor" /></svg>
 );
 
-const FacebookIcon = () => (
-    <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
-);
-
 export default function SignUpContentClient() {
     const {
         handleGoogleSignIn,
-        handleFacebookSignIn,
         handleEmailSignUp,
         isLoading,
         isRedirecting,
         error
     } = useAuth();
+
+    /**
+     * Listen for messages from the Meta OAuth popup.
+     */
+    React.useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+            if (event.origin !== window.location.origin) return;
+            const { data } = event;
+            if (data.type === 'META_AUTH_COMPLETE') {
+                if (data.status === 'success') {
+                    console.log('Meta Auth Success:', data);
+                    window.location.href = '/businesses';
+                } else if (data.status === 'error') {
+                    console.error('Meta Auth Error:', data.message);
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, []);
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -60,15 +77,7 @@ export default function SignUpContentClient() {
                     <span>Sign up with Google</span>
                 </Button>
 
-                <Button
-                    variant="outline"
-                    className="w-full h-12 border-[var(--color-outline)]/20 hover:bg-[var(--color-surface-container)] hover:border-[var(--color-outline)]/40 text-[var(--color-on-surface)]"
-                    onClick={handleFacebookSignIn}
-                    disabled={isLoading}
-                >
-                    <FacebookIcon />
-                    <span>Sign up with Facebook</span>
-                </Button>
+                <MetaBusinessButton intent="signup" label="Sign up with Meta" />
             </div>
 
             <div className="relative mb-6">

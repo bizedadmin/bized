@@ -11,14 +11,51 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
     const code = searchParams.get('code');
     const stateStr = searchParams.get('state');
+    const oauthError = searchParams.get('error');
+    const oauthErrorMsg = searchParams.get('error_description');
+
+    // If Facebook returned an error directly (e.g. domain mismatch during redirect)
+    if (oauthError) {
+        return new NextResponse(
+            `<html>
+                <body>
+                    <script>
+                        window.opener.postMessage({ 
+                            type: 'META_AUTH_COMPLETE', 
+                            status: 'error', 
+                            message: '${oauthErrorMsg || oauthError}' 
+                        }, window.location.origin);
+                        window.close();
+                    </script>
+                </body>
+            </html>`,
+            { headers: { 'Content-Type': 'text/html' } }
+        );
+    }
 
     if (!code || !stateStr) {
-        return NextResponse.json({ error: 'Missing code or state parameters' }, { status: 400 });
+        return new NextResponse(
+            `<html>
+                <body>
+                    <script>
+                        window.opener.postMessage({ 
+                            type: 'META_AUTH_COMPLETE', 
+                            status: 'error', 
+                            message: 'Missing code or state parameters' 
+                        }, window.location.origin);
+                        window.close();
+                    </script>
+                </body>
+            </html>`,
+            { headers: { 'Content-Type': 'text/html' } }
+        );
     }
 
     try {
         const state = JSON.parse(decodeURIComponent(stateStr));
         const { intent, slug } = state;
+
+        // Use the exact origin of the request to ensure consistency with the whitelisted URI
         const redirectUri = `${req.nextUrl.origin}/api/auth/callback/facebook`;
 
         // Exchange code for token
