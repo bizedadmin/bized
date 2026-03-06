@@ -229,6 +229,26 @@ export interface Business {
         googleAccountId?: string;
         googleMerchantId?: string;
         googleMerchantSync?: string;
+        googleMerchantSettings?: {
+            autoSyncInventory?: boolean;
+            autoPushProducts?: boolean;
+            syncReviews?: boolean;
+            remarketingPixel?: boolean;
+        };
+        googleMerchantPolicies?: {
+            shipping?: {
+                handlingTime?: number;
+                transitTime?: number;
+                flatRate?: number;
+                freeShippingOver?: number;
+                provider?: string;
+            };
+            returns?: {
+                days?: number;
+                policyUrl?: string;
+                restockingFee?: number;
+            };
+        };
         googleConnected?: boolean;
     };
     logoUrl?: string;

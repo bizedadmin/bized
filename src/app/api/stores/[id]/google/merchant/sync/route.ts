@@ -80,29 +80,44 @@ export async function POST(
 
             const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${slug}.bized.app`;
 
+            // Get country code from store or fallback
+            // We'll assume the 'country' field might be a name, so we'll look it up or use a default.
+            // For now, let's try to find it in our logic or just default to KE if it looks like Kenya.
+            let targetCountry = 'KE';
+            const storeCountry = store.country?.toUpperCase();
+            if (storeCountry === 'UNITED STATES' || storeCountry === 'US' || storeCountry === 'USA') targetCountry = 'US';
+            else if (storeCountry === 'UNITED KINGDOM' || storeCountry === 'UK' || storeCountry === 'GB') targetCountry = 'GB';
+            else if (storeCountry === 'NIGERIA' || storeCountry === 'NG') targetCountry = 'NG';
+            else if (storeCountry === 'GHANA' || storeCountry === 'GH') targetCountry = 'GH';
+            else if (storeCountry && storeCountry.length === 2) targetCountry = storeCountry;
+
             // Prepare custombatch entries
             const entries = products.map((product: any, index: number) => {
+                const availability = product.isSoldOut || product.status === 'out of stock' || product.quantity === 0
+                    ? 'out of stock'
+                    : 'in stock';
+
                 return {
                     batchId: index,
                     merchantId: merchantId,
                     method: 'insert',
                     product: {
-                        offerId: `${slug}-${product.id}`,
+                        offerId: product.sku || `${slug}-${product.id}`,
                         title: product.name || 'Product',
                         description: product.description || product.name || 'Product description coming soon.',
                         link: `${baseUrl}/product/${product.id}`,
-                        imageLink: product.image || '',
+                        imageLink: product.image || (product.images && product.images[0]) || '',
                         contentLanguage: 'en',
-                        targetCountry: 'KE',
-                        feedLabel: 'KE',
+                        targetCountry: targetCountry,
+                        feedLabel: targetCountry,
                         channel: 'online',
-                        availability: product.isSoldOut ? 'out of stock' : 'in stock',
+                        availability: availability,
                         price: {
                             value: (product.price || 0).toString(),
                             currency: currency || 'KES'
                         },
-                        brand: storeName || 'Bized Store',
-                        condition: 'new'
+                        brand: product.brand || storeName || 'Bized Store',
+                        condition: (product.condition?.toLowerCase()) || 'new'
                     }
                 };
             });

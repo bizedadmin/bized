@@ -9,7 +9,7 @@ import { google } from "googleapis";
  * GET /api/stores/[id]/google/merchant/status
  * 
  * Fetches real-time product statistics from Google Merchant Center
- * using the Content API for Shopping.
+ * using the latest Merchant API v1.
  */
 export async function GET(
     req: NextRequest,
@@ -70,35 +70,35 @@ export async function GET(
                 expiry_date: aiConfig?.googleTokenExpiry
             });
 
-            const content = google.content({
-                version: 'v2.1',
-                auth: authClient
+            // Use Latest Merchant API (Products V1)
+            const merchantProducts = google.merchantapi("products_v1");
+
+            // Fetch products with their statuses
+            const response = await merchantProducts.accounts.products.list({
+                parent: `accounts/${merchantId}`,
+                auth: authClient,
+                pageSize: 250
             });
 
-            // Get product statuses
-            const response = await content.productstatuses.list({
-                merchantId: merchantId,
-                maxResults: 250
-            });
+            const products = response.data.products || [];
 
-            const productStatuses = response.data.resources || [];
-
-            let total = productStatuses.length;
+            let total = products.length;
             let approved = 0;
             let issues = 0;
 
-            productStatuses.forEach(status => {
-                const destinationStatuses = status.destinationStatuses || [];
-                const shoppingAdStatus = destinationStatuses.find(ds => ds.destination === 'Shopping');
+            products.forEach(product => {
+                const status = (product as any).productStatus;
+                if (!status) return;
 
-                if (shoppingAdStatus?.status === 'approved') {
+                const destinationStatus = (status.destinationStatuses || []).find((ds: any) => ds.destination === 'Shopping');
+
+                if (destinationStatus?.status === 'APPROVED') {
                     approved++;
-                } else if (shoppingAdStatus?.status === 'disapproved') {
+                } else if (destinationStatus?.status === 'DISAPPROVED') {
                     issues++;
                 }
             });
 
-            // If the local database has products, but GMC is empty, total should reflect total potential
             const localProductsCount = store.products?.length || 0;
 
             return NextResponse.json({
@@ -111,9 +111,8 @@ export async function GET(
             });
 
         } catch (googleError: any) {
-            console.error("Google Merchant Status Error:", googleError?.response?.data || googleError.message);
+            console.error("Google Merchant Status Error (v1):", googleError?.response?.data || googleError.message);
 
-            // Fallback to local stats if Google API fails or permissions are missing
             return NextResponse.json({
                 success: false,
                 error: googleError?.response?.data?.error?.message || "Could not retrieve real-time status from Google.",
