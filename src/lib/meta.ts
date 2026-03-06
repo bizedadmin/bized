@@ -51,3 +51,34 @@ export async function getMetaUserProfile(accessToken: string) {
     );
     return await response.json();
 }
+
+/**
+ * Fetch WhatsApp Business Accounts.
+ */
+export async function getWabaAccounts(accessToken: string) {
+    const proof = generateAppSecretProof(accessToken);
+    const response = await fetch(
+        `https://graph.facebook.com/v20.0/me/whatsapp_business_accounts?` +
+        new URLSearchParams({
+            access_token: accessToken,
+            appsecret_proof: proof
+        })
+    );
+    return await response.json();
+}
+
+/**
+ * Fetch Phone Numbers for a specific WABA.
+ */
+export async function getWabaPhoneNumbers(wabaId: string, accessToken: string) {
+    const proof = generateAppSecretProof(accessToken);
+    const response = await fetch(
+        `https://graph.facebook.com/v20.0/${wabaId}/phone_numbers?` +
+        new URLSearchParams({
+            access_token: accessToken,
+            appsecret_proof: proof
+        })
+    );
+    return await response.json();
+}
+

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
-import { exchangeCodeForToken, getMetaUserProfile } from '@/lib/meta';
+import { exchangeCodeForToken, getMetaUserProfile, getWabaAccounts, getWabaPhoneNumbers } from '@/lib/meta';
 import { encrypt } from '@/lib/encryption';
 import { initAdmin } from '@/lib/firebase-admin';
 
@@ -166,18 +166,50 @@ export async function GET(req: NextRequest) {
             );
 
         } else if (intent === 'commerce') {
-            // "slug" should identify the user/business to attach the token to
-            // This could be an ID or store slug depending on multi-tenant logic
-            if (!slug) throw new Error('Store/User identifier (slug) missing for commerce intent.');
+            const { storeId } = state;
+            if (!storeId) throw new Error('Store identifier (storeId) missing for commerce intent.');
 
             const encryptedToken = encrypt(accessToken);
 
-            // Here we assume "slug" refers to the user's ID or unique store identifier
-            // In a real app, you'd likely fetch the current user session first to verify identity
-            await users.updateOne(
-                { email: slug }, // For demo, using email as identifier; adapt if using ID
+            // Fetch WABA accounts
+            const wabaData = await getWabaAccounts(accessToken);
+            console.log('Meta Auth: Fetched WABA data:', JSON.stringify(wabaData));
+
+            let whatsappBusiness = {};
+
+            if (wabaData.data && wabaData.data.length > 0) {
+                const firstWaba = wabaData.data[0];
+                const wabaId = firstWaba.id;
+
+                // Fetch phone numbers for this WABA
+                const phoneData = await getWabaPhoneNumbers(wabaId, accessToken);
+                console.log('Meta Auth: Fetched Phone data:', JSON.stringify(phoneData));
+
+                let phoneNumberId = '';
+                if (phoneData.data && phoneData.data.length > 0) {
+                    phoneNumberId = phoneData.data[0].id;
+                }
+
+                whatsappBusiness = {
+                    wabaId: wabaId,
+                    phoneNumberId: phoneNumberId,
+                    accessToken: encryptedToken,
+                    businessName: firstWaba.name,
+                    status: firstWaba.message_template_namespace ? 'Active' : 'Pending',
+                    verified: true
+                };
+            }
+
+            const stores = db.collection('stores');
+            const { ObjectId } = require('mongodb');
+
+            await stores.updateOne(
+                { _id: new ObjectId(storeId) },
                 {
                     $set: {
+                        'socialLinks.whatsappBusiness': whatsappBusiness,
+                        'socialLinks.whatsappConnected': true,
+                        'socialLinks.whatsappWabaId': (whatsappBusiness as any).wabaId,
                         'metaSettings.systemUserToken': encryptedToken,
                         'metaSettings.tokenUpdatedAt': new Date()
                     }
@@ -191,7 +223,7 @@ export async function GET(req: NextRequest) {
                             window.opener.postMessage({ type: 'META_AUTH_COMPLETE', status: 'success', intent: 'commerce' }, window.location.origin);
                             window.close();
                         </script>
-                        Connection success. This window will now close.
+                        WhatsApp Business Connection success. This window will now close.
                     </body>
                 </html>`,
                 { headers: { 'Content-Type': 'text/html' } }

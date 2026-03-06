@@ -11,6 +11,7 @@ import {
     AlertCircle,
     Copy,
     Sparkles,
+    Megaphone,
     ChevronRight,
     Settings,
     FileText,
@@ -25,7 +26,8 @@ import {
     Bold,
     Italic,
     Strikethrough,
-    CornerDownLeft
+    CornerDownLeft,
+    Zap
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
@@ -87,8 +89,9 @@ const WhatsappBubble = ({ text, time = "09:41" }: { text: string; time?: string 
 };
 
 export default function WhatsappIntegrationPage() {
-    const { currentBusiness, updateBusiness, isLoading: isContextLoading } = useBusiness();
+    const { currentBusiness, updateBusiness, isLoading: isContextLoading, refreshBusinesses } = useBusiness();
     const [activeTab, setActiveTab] = useState("number");
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [whatsappNumber, setWhatsappNumber] = useState("");
     const [templates, setTemplates] = useState({
         home: "",
@@ -116,6 +119,24 @@ export default function WhatsappIntegrationPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+            if (event.origin !== window.location.origin) return;
+            if (event.data?.type === 'META_AUTH_COMPLETE') {
+                if (event.data.status === 'success') {
+                    setSuccessMessage("WhatsApp Business connected successfully!");
+                    refreshBusinesses();
+                    setTimeout(() => setSuccessMessage(null), 3000);
+                } else {
+                    setError(event.data.message || "Connection failed");
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, [refreshBusinesses]);
 
     useEffect(() => {
         if (currentBusiness?.socialLinks) {
@@ -247,6 +268,28 @@ export default function WhatsappIntegrationPage() {
         }
     };
 
+    const handleConnectMeta = () => {
+        if (!currentBusiness) return;
+        const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+        const configId = process.env.NEXT_PUBLIC_META_COMMERCE_CONFIG_ID;
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+        const redirectUri = `${appUrl}/api/auth/callback/facebook`;
+
+        const state = encodeURIComponent(JSON.stringify({
+            intent: 'commerce',
+            storeId: currentBusiness._id
+        }));
+
+        const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}&scope=whatsapp_business_management,whatsapp_business_messaging,business_management&response_type=code${configId ? `&config_id=${configId}` : ''}`;
+
+        const width = 600;
+        const height = 700;
+        const left = window.screenX + (window.outerWidth - width) / 2;
+        const top = window.screenY + (window.outerHeight - height) / 2;
+
+        window.open(url, 'MetaAuth', `width=${width},height=${height},left=${left},top=${top}`);
+    };
+
     if (isContextLoading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
@@ -259,6 +302,7 @@ export default function WhatsappIntegrationPage() {
 
     const tabs = [
         { id: "number", label: "WhatsApp Number", icon: Phone, description: "Connection settings" },
+        { id: "api", label: "Business API", icon: Zap, description: "Official WABA integration" },
         { id: "message", label: "Message Templates", icon: FileText, description: "Page-specific texts & QRs" },
         { id: "button", label: "Floating Button", icon: MessageSquare, description: "Display preferences" },
         { id: "schedule", label: "Availability", icon: Clock, description: "Store hours sync" },
@@ -326,7 +370,131 @@ export default function WhatsappIntegrationPage() {
                         <p className="text-[var(--color-on-surface-variant)] opacity-60">{activePage?.description}</p>
                     </div>
 
+                    {successMessage && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="mb-8 p-4 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center gap-3 text-emerald-600 shadow-sm"
+                        >
+                            <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/20">
+                                <Check size={16} strokeWidth={3} />
+                            </div>
+                            <p className="text-sm font-bold tracking-tight">{successMessage}</p>
+                        </motion.div>
+                    )}
+
                     <AnimatePresence mode="wait">
+                        {activeTab === "api" && (
+                            <motion.div key="api" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8">
+                                <div className="bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/20 rounded-[2.5rem] p-10 shadow-sm space-y-10">
+                                    {(currentBusiness.socialLinks?.whatsappConnected || currentBusiness.socialLinks?.whatsappBusiness) ? (
+                                        <div className="space-y-10">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner border border-emerald-100">
+                                                        <Check size={28} strokeWidth={3} />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-xl font-black italic tracking-tight">API Connected</h4>
+                                                        <p className="text-xs text-[var(--color-on-surface-variant)] opacity-50 font-medium font-mono">
+                                                            WABA ID: {currentBusiness.socialLinks?.whatsappBusiness?.wabaId || 'Connected'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <Button variant="outline" className="text-xs font-bold rounded-xl" onClick={handleConnectMeta}>
+                                                    Change Account
+                                                </Button>
+                                            </div>
+
+                                            <div className="bg-blue-50/50 border border-blue-500/10 rounded-[2rem] p-8 space-y-6">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-xl bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                                        <Zap size={14} />
+                                                    </div>
+                                                    <h5 className="font-black italic tracking-tighter text-blue-900">Official WABA Settings</h5>
+                                                </div>
+
+                                                <div className="space-y-4">
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div className="p-4 rounded-2xl bg-white border border-gray-100 italic">
+                                                            <p className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest mb-1">Business Name</p>
+                                                            <p className="text-sm font-bold text-gray-900">{currentBusiness.socialLinks?.whatsappBusiness?.businessName || currentBusiness.name}</p>
+                                                        </div>
+                                                        <div className="p-4 rounded-2xl bg-white border border-gray-100 italic">
+                                                            <p className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest mb-1">Status</p>
+                                                            <p className="text-sm font-bold text-emerald-600">{currentBusiness.socialLinks?.whatsappBusiness?.status || 'Active'}</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="p-4 rounded-2xl bg-white border border-gray-100 italic">
+                                                        <p className="text-[10px] font-black text-blue-900/40 uppercase tracking-widest mb-1">Phone Number ID</p>
+                                                        <p className="text-sm font-bold text-gray-900 font-mono">{currentBusiness.socialLinks?.whatsappBusiness?.phoneNumberId || '••••••••••••'}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-amber-50/50 border border-amber-500/10 rounded-2xl p-4 flex gap-3">
+                                                <AlertCircle className="text-amber-600 mt-0.5" size={16} />
+                                                <p className="text-[11px] text-amber-800 leading-relaxed font-medium">
+                                                    Webhooks are active. Message delivery and read receipts are being synchronized automatically.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-10">
+                                            <div className="bg-gradient-to-br from-[#128C7E] to-[#075E54] rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-emerald-500/20">
+                                                <div className="absolute top-0 right-0 p-10 opacity-10 rotate-12">
+                                                    <Zap size={150} />
+                                                </div>
+                                                <div className="relative z-10 space-y-8">
+                                                    <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/20">
+                                                        <WhatsAppIcon size={32} fill="white" />
+                                                    </div>
+                                                    <div className="space-y-4">
+                                                        <h4 className="text-4xl font-black italic tracking-tighter leading-none">WhatsApp Business API</h4>
+                                                        <p className="text-emerald-50/70 font-medium leading-relaxed max-w-md">
+                                                            Connect your official WhatsApp Business Account (WABA) to unlock broadcasts, chatbots, and multi-agent support.
+                                                        </p>
+                                                    </div>
+
+                                                    <Button
+                                                        onClick={handleConnectMeta}
+                                                        className="h-16 px-10 rounded-2xl bg-white text-[#075E54] font-black text-sm gap-4 shadow-xl hover:bg-emerald-50 transition-all active:scale-95 flex items-center"
+                                                    >
+                                                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                                                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.248h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                                        </svg>
+                                                        Log in with Facebook
+                                                    </Button>
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
+                                                <div className="flex gap-4">
+                                                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                                                        <Check size={20} />
+                                                    </div>
+                                                    <div>
+                                                        <h5 className="font-bold text-sm">Verified Profile</h5>
+                                                        <p className="text-xs text-[var(--color-on-surface-variant)] opacity-60">Display your business name and verified green badge.</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-4">
+                                                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                                                        <Megaphone size={20} />
+                                                    </div>
+                                                    <div>
+                                                        <h5 className="font-bold text-sm">Broadcasts</h5>
+                                                        <p className="text-xs text-[var(--color-on-surface-variant)] opacity-60">Send promotional messages to thousands of contacts at once.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
+
                         {activeTab === "number" && (
                             <motion.div key="number" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8">
                                 <div className="bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/20 rounded-[2.5rem] p-8 shadow-sm space-y-8">

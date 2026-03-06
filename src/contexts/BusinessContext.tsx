@@ -212,6 +212,16 @@ export interface Business {
             useSchedule?: boolean;
             hideWhenClosed?: boolean;
         };
+        whatsappBusiness?: {
+            phoneNumberId?: string;
+            wabaId?: string;
+            accessToken?: string;
+            businessName?: string;
+            status?: string;
+            verified?: boolean;
+        };
+        whatsappConnected?: boolean;
+        whatsappWabaId?: string;
         instagram?: string;
         facebook?: string;
         google?: string;
