@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
-import { ShieldAlert, Server, Users, Settings, Activity, Globe, CreditCard, BarChart3, Bug, Radar } from "lucide-react";
+import { ShieldAlert, Server, Users, Settings, Activity, Globe, CreditCard, BarChart3, Bug, Radar, MessageSquare } from "lucide-react";
 
 export default function PlatformLayout({ children }: { children: ReactNode }) {
     return (
@@ -27,6 +27,7 @@ export default function PlatformLayout({ children }: { children: ReactNode }) {
                     <NavItem href="/transactions" icon={<CreditCard className="w-5 h-5" />} label="Transactions" />
                     <NavItem href="/errors" icon={<Bug className="w-5 h-5" />} label="Error Logs" badge />
                     <NavItem href="/sentry" icon={<Radar className="w-5 h-5" />} label="Sentry Issues" />
+                    <NavItem href="/whatsapp" icon={<MessageSquare className="w-5 h-5" />} label="WhatsApp API" />
 
                     <div className="pt-8 pb-2 px-3 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
                         System
