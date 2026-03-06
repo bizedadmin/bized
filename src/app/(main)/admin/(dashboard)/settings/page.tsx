@@ -34,6 +34,8 @@ import {
     Layers,
     Landmark,
     Zap,
+    Heart,
+    Lock,
     List
 } from "lucide-react";
 import Link from "next/link";
@@ -47,8 +49,9 @@ import { CountryModal } from "@/components/admin/settings/CountryModal";
 import { COUNTRIES } from "@/lib/countries";
 import { Sheet } from "@/components/ui/Sheet";
 import { HelpIcon } from "@/components/admin/HelpCenter";
+import { MODULE_DEFINITIONS, BusinessModule } from "@/lib/modules";
 
-type SettingsTab = "general" | "contact" | "whatsapp" | "branding" | "regional" | "payments" | "taxes" | "social" | "legal" | "ai" | "billing";
+type SettingsTab = "general" | "contact" | "whatsapp" | "branding" | "regional" | "payments" | "taxes" | "social" | "legal" | "ai" | "billing" | "modules";
 
 const TABS = [
     { id: "general", label: "General", icon: Building2, description: "Store name and industry" },
@@ -62,6 +65,7 @@ const TABS = [
     { id: "legal", label: "Legal", icon: Shield, description: "Policies and terms" },
     { id: "ai", label: "AI Configuration", icon: Globe, description: "BYOK and Agent settings" },
     { id: "billing", label: "Billing & Plans", icon: CreditCard, description: "Manage subscription and limits" },
+    { id: "modules", label: "Industry Modules", icon: Layers, description: "Enable specialized features" },
 ] as const;
 
 import { useAi } from "@/contexts/AiContext";
@@ -1619,6 +1623,96 @@ export default function SettingsPage() {
                                                 <p className="text-[10px] text-[var(--color-on-surface-variant)] ml-1 italic opacity-40">Choose a template above or define how your AI Assistant should behave manually.</p>
                                             </div>
                                         </div>
+                                    </div>
+                                </section>
+                            )}
+
+                            {/* TAB CONTENT: MODULES */}
+                            {activeTab === 'modules' && (
+                                <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <div className="bg-[var(--color-surface)] border border-[var(--color-outline-variant)]/10 rounded-[2.5rem] p-8 shadow-[var(--shadow-m3-1)]">
+                                        <div className="flex items-center gap-4 mb-8">
+                                            <div className="w-12 h-12 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center">
+                                                <Layers size={24} />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-xl font-black text-[var(--color-on-surface)]">Industry Features</h3>
+                                                <p className="text-sm text-[var(--color-on-surface-variant)] opacity-60">Enable or disable specialized tools for your vertical.</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 gap-4">
+                                            {Object.keys(MODULE_DEFINITIONS).map((moduleId) => {
+                                                const module = MODULE_DEFINITIONS[moduleId as BusinessModule];
+                                                const isEnabled = formData.modules?.includes(moduleId);
+                                                const Icon = module.icon;
+
+                                                return (
+                                                    <div
+                                                        key={moduleId}
+                                                        className={cn(
+                                                            "p-6 rounded-[2rem] border transition-all flex items-center gap-6 group",
+                                                            isEnabled
+                                                                ? "bg-[var(--color-primary-container)] border-[var(--color-primary)]/20"
+                                                                : "bg-[var(--color-surface-container-low)] border-transparent opacity-60 grayscale-[0.5]"
+                                                        )}
+                                                    >
+                                                        <div className={cn(
+                                                            "w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-sm",
+                                                            isEnabled ? "bg-[var(--color-primary)] text-white" : "bg-[var(--color-surface-container-high)] text-zinc-400"
+                                                        )}>
+                                                            <Icon size={28} />
+                                                        </div>
+
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-2">
+                                                                <h4 className="font-black text-sm uppercase tracking-tight">{module.name}</h4>
+                                                                {module.locked && (
+                                                                    <div className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest bg-yellow-500/10 text-yellow-600 px-2 py-0.5 rounded-full border border-yellow-500/20">
+                                                                        <Lock size={8} /> Pro Feature
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <p className="text-xs text-[var(--color-on-surface-variant)] opacity-70 mt-1 line-clamp-1">{module.description}</p>
+                                                        </div>
+
+                                                        <button
+                                                            onClick={() => {
+                                                                const currentModules = [...(formData.modules || [])];
+                                                                let updatedModules;
+                                                                if (isEnabled) {
+                                                                    updatedModules = currentModules.filter(m => m !== moduleId);
+                                                                } else {
+                                                                    updatedModules = [...currentModules, moduleId];
+                                                                }
+                                                                setFormData({ ...formData, modules: updatedModules });
+                                                            }}
+                                                            className={cn(
+                                                                "w-12 h-6 rounded-full p-1 transition-all relative shrink-0",
+                                                                isEnabled ? "bg-[var(--color-primary)] shadow-md shadow-[var(--color-primary)]/30" : "bg-zinc-400/30"
+                                                            )}
+                                                        >
+                                                            <div className={cn(
+                                                                "w-4 h-4 rounded-full bg-white shadow-sm transition-transform",
+                                                                isEnabled ? "translate-x-6" : "translate-x-0"
+                                                            )} />
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-zinc-900 rounded-[2.5rem] p-8 border border-zinc-800 flex items-center gap-6 group overflow-hidden relative">
+                                        <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <div className="w-16 h-16 rounded-3xl bg-zinc-800 flex items-center justify-center text-orange-500 shrink-0 relative">
+                                            <Sparkles size={32} />
+                                        </div>
+                                        <div className="relative">
+                                            <h4 className="text-white font-black uppercase tracking-tight">Need a custom module?</h4>
+                                            <p className="text-zinc-500 text-sm mt-1">Our team can build bespoke features for your specific business needs. Contact HQ Support.</p>
+                                        </div>
+                                        <Button variant="outline" className="ml-auto relative border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800">Request Module</Button>
                                     </div>
                                 </section>
                             )}

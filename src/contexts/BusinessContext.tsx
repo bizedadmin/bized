@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import { IndustryVertical } from "@/lib/industries";
 
 export type ProductType = "Physical" | "Digital" | "Booking" | "Subscription" | "Others";
 
@@ -173,8 +174,9 @@ export interface Business {
     _id: string;
     name: string;
     slug: string;
-    industry: string;
+    industry: IndustryVertical;
     businessType: string;
+    modules?: string[];
     ownerId: string;
     status: string;
     title?: string;

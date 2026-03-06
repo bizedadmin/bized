@@ -5,6 +5,7 @@ export interface PlatformSettings {
     _id: string;
     defaultCurrency: string;
     supportedLanguages: string[];
+    supportedIndustries: string[];
     globalTimezones: string[];
     // Financials
     trialPeriodDays: number;
@@ -47,6 +48,7 @@ export const DEFAULT_PLATFORM_SETTINGS: PlatformSettings = {
     _id: PLATFORM_SETTINGS_ID,
     defaultCurrency: "USD",
     supportedLanguages: ["English"],
+    supportedIndustries: ["RETAIL_SHOPPING", "FOOD_BEVERAGE", "BEAUTY_COSMETICS", "PROFESSIONAL_SERVICES", "HEALTH_MEDICAL", "AUTOMOTIVE", "CLOTHING_STORE", "EDUCATION"],
     globalTimezones: ["UTC"],
     trialPeriodDays: 14,
     subscriptionGracePeriodDays: 3,
@@ -62,7 +64,7 @@ export const DEFAULT_PLATFORM_SETTINGS: PlatformSettings = {
     supportEmail: "support@bized.app",
     supportPhone: "+1234567890",
     whatsappNumber: "+1234567890",
-    primaryColor: "#4f46e5",
+    primaryColor: "#2563EB",
     secondaryColor: "#06b6d4",
     metaTitle: "Bized - All-in-one Business Platform",
     metaDescription: "The ultimate platform for managing your business, POS, and storefront.",

@@ -1,0 +1,61 @@
+"use client";
+
+import { useSearchParams } from "next/navigation";
+
+export type MetaAuthIntent = 'signup' | 'commerce';
+
+export interface MetaAuthOptions {
+    intent: MetaAuthIntent;
+    slug?: string; // Multi-tenant context (e.g., store slug)
+}
+
+export function useMetaBusinessAuth() {
+    const searchParams = useSearchParams();
+
+    /**
+     * Triggers the Meta OAuth flow in a popup.
+     */
+    const startMetaBusinessAuth = (options: MetaAuthOptions) => {
+        const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
+        const configId = options.intent === 'signup'
+            ? '1234792008761868' // Sign-up Config
+            : '1403069894456896'; // Commerce Config
+
+        /**
+         * The state object should contain:
+         * 1. intent (signup/commerce)
+         * 2. slug (multi-tenant store id/slug)
+         * 3. current full host (to ensure the callback knows where it belongs)
+         */
+        const state = encodeURIComponent(JSON.stringify({
+            intent: options.intent,
+            slug: options.slug || null,
+        }));
+
+        const redirectUri = `${window.location.origin}/api/auth/callback/facebook`;
+
+        const oauthUrl = `https://www.facebook.com/v20.0/dialog/oauth?` +
+            new URLSearchParams({
+                client_id: appId!,
+                config_id: configId,
+                redirect_uri: redirectUri,
+                state: state,
+                response_type: 'code',
+                scope: 'email,public_profile'
+            }).toString();
+
+        // Standard popup configuration
+        const width = 600;
+        const height = 700;
+        const left = window.screenX + (window.outerWidth - width) / 2;
+        const top = window.screenY + (window.outerHeight - height) / 2;
+
+        window.open(
+            oauthUrl,
+            'Meta Business Login',
+            `width=${width},height=${height},left=${left},top=${top},status=no,resizable=yes,toolbar=no,menubar=no,scrollbars=yes`
+        );
+    };
+
+    return { startMetaBusinessAuth };
+}

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { CircularProgress } from "@/components/ui/Progress";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { useAuth } from "@/hooks/useAuth";
+import { MetaBusinessButton } from "@/components/auth/MetaBusinessButton";
 
 const GoogleIcon = () => (
     <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .533 5.347.533 12S5.867 24 12.48 24c3.44 0 6.053-1.147 8.213-3.08 2.187-1.933 2.853-4.8 2.853-7.227 0-.693-.067-1.347-.187-2.773h-10.88z" fill="currentColor" /></svg>
@@ -19,6 +20,30 @@ function SignInContent() {
         isRedirecting,
         error
     } = useAuth();
+
+    /**
+     * Listen for messages from the Meta OAuth popup.
+     */
+    React.useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+            if (event.origin !== window.location.origin) return;
+            const data = event.data;
+
+            if (data.type === 'META_AUTH_COMPLETE') {
+                if (data.status === 'success') {
+                    console.log('Meta Auth Success:', data);
+                    // Since the user is now in the DB, we can manually trigger a local login 
+                    // or redirect to a dashboard that checks session state.
+                    window.location.href = '/businesses';
+                } else if (data.status === 'error') {
+                    console.error('Meta Auth Error:', data.message);
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, []);
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -52,6 +77,8 @@ function SignInContent() {
                     <GoogleIcon />
                     <span>Continue with Google</span>
                 </Button>
+
+                <MetaBusinessButton intent="signup" />
             </div>
 
             <div className="relative mb-6">

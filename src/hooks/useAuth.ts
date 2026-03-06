@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import {
     GoogleAuthProvider,
+    FacebookAuthProvider,
     signInWithRedirect,
     signInWithPopup,
     getRedirectResult,
@@ -119,6 +120,25 @@ export function useAuth() {
         }
     };
 
+    const handleFacebookSignIn = async () => {
+        setIsLoading(true);
+        setError(null);
+        console.log("useAuth: Starting Facebook Sign In with Popup...");
+        try {
+            const provider = new FacebookAuthProvider();
+            await setPersistence(auth, browserLocalPersistence);
+            const result = await signInWithPopup(auth, provider);
+            console.log("useAuth: Popup success. User:", result.user.email);
+
+            const idToken = await result.user.getIdToken();
+            await handleAuthCompletion(result.user, idToken);
+        } catch (error: any) {
+            console.error("useAuth: Facebook signin error", error);
+            setError(error.message || "Failed to sign in with Facebook.");
+            setIsLoading(false);
+        }
+    };
+
     const handleEmailSignUp = async (email: string, password: string, name: string) => {
         setIsLoading(true);
         setError(null);
@@ -158,6 +178,7 @@ export function useAuth() {
         isRedirecting,
         error,
         handleGoogleSignIn,
+        handleFacebookSignIn,
         handleEmailSignUp,
         handleEmailSignIn
     };

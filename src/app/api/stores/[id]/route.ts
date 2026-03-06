@@ -111,6 +111,8 @@ export async function PATCH(
             "aiConfig",
             // Checkout Settings
             "checkoutSettings",
+            // Industry specific modules
+            "modules",
         ];
 
         const client = await clientPromise;

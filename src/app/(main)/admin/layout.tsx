@@ -18,6 +18,7 @@ import {
     User,
     LogOut,
     History,
+    Heart,
     CheckCircle2,
     Clock,
     UserPlus,
@@ -43,12 +44,22 @@ import {
     TabletSmartphone,
     Languages,
     Coins,
-    Sparkles
+    Sparkles,
+    Activity,
+    ChefHat,
+    Hotel,
+    Handshake,
+    Briefcase,
+    Gem,
+    Wrench,
+    GraduationCap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AiChatSheet } from "@/components/admin/AiChatSheet";
 import { HelpCenterProvider } from "@/components/admin/HelpCenter";
 import { ImpersonationBanner } from "@/components/admin/ImpersonationBanner";
+import { useBusiness } from "@/contexts/BusinessContext";
+import { MODULE_DEFINITIONS, BusinessModule } from "@/lib/modules";
 
 type NavItem = {
     label: string;
@@ -111,6 +122,19 @@ const subNavItems: Record<string, NavItem[]> = {
         { label: "Taxes", href: "/admin/settings?tab=taxes", icon: Coins },
         { label: "AI Config", href: "/admin/settings?tab=ai", icon: Sparkles },
     ],
+    // Industry Specific Modules (Dynamic)
+    "Tables": [
+        { label: "Floor Plan", href: "/admin/dining/tables", icon: LayoutDashboard },
+        { label: "Waitlist", href: "/admin/dining/waitlist", icon: Clock },
+    ],
+    "Medical": [
+        { label: "Patients", href: "/admin/medical/patients", icon: Users },
+        { label: "Prescriptions", href: "/admin/medical/prescriptions", icon: FileText },
+    ],
+    "Service": [
+        { label: "Vehicles", href: "/admin/automotive/vehicles", icon: ShoppingBag },
+        { label: "History", href: "/admin/automotive/history", icon: History },
+    ]
 };
 
 const railItems: NavItem[] = [
@@ -177,6 +201,7 @@ export default function AdminLayout({
     const pathname = usePathname();
     const router = useRouter();
     const { data: session } = useSession();
+    const { currentBusiness } = useBusiness();
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const [hoveredRailItem, setHoveredRailItem] = useState<string | null>(null);
     const [isHoveringFlyout, setIsHoveringFlyout] = useState(false);
@@ -221,7 +246,40 @@ export default function AdminLayout({
         pathname === item.href || (item.href !== "/admin" && pathname?.startsWith(item.href))
     )?.label || (pathname?.startsWith("/admin/storefront") ? "Store" : pathname?.startsWith("/admin/products") ? "Catalog" : "Home");
 
-    const activePersistentSection = (activeRailItemLabel === "Store" || activeRailItemLabel === "Catalog" || activeRailItemLabel === "Users" || activeRailItemLabel === "Finance" || activeRailItemLabel === "Orders" || activeRailItemLabel === "POS") ? activeRailItemLabel : null;
+    // Dynamic Navigation Generation
+    const enabledModules = currentBusiness?.modules || [];
+
+    const dynamicRailItems = [...railItems];
+    const dynamicSubNavItems = { ...subNavItems };
+
+    // Inject industry-specific top-level items dynamically from MODULE_DEFINITIONS
+    enabledModules.forEach((moduleId) => {
+        const module = MODULE_DEFINITIONS[moduleId as BusinessModule];
+        if (!module) return;
+
+        // Map module to subNav (if not already there)
+        if (moduleId === "dining_tables") {
+            dynamicRailItems.splice(3, 0, { label: "Tables", icon: module.icon, href: "/admin/dining/tables" });
+            dynamicSubNavItems["Tables"] = [
+                { label: "Floor Plan", href: "/admin/dining/tables", icon: LayoutDashboard },
+                { label: "Waitlist", href: "/admin/dining/waitlist", icon: Clock },
+            ];
+        } else if (moduleId === "patient_records") {
+            dynamicRailItems.splice(3, 0, { label: "Medical", icon: module.icon, href: "/admin/medical/patients" });
+            dynamicSubNavItems["Medical"] = [
+                { label: "Patients", href: "/admin/medical/patients", icon: Users },
+                { label: "Health Records", href: "/admin/medical/records", icon: FileText },
+            ];
+        } else if (moduleId === "service_history") {
+            dynamicRailItems.splice(3, 0, { label: "Service", icon: module.icon, href: "/admin/automotive/vehicles" });
+            dynamicSubNavItems["Service"] = [
+                { label: "Fleet Registry", href: "/admin/automotive/vehicles", icon: ShoppingBag },
+                { label: "Service Logs", href: "/admin/automotive/history", icon: History },
+            ];
+        }
+    });
+
+    const activePersistentSection = (activeRailItemLabel === "Store" || activeRailItemLabel === "Catalog" || activeRailItemLabel === "Users" || activeRailItemLabel === "Finance" || activeRailItemLabel === "Orders" || activeRailItemLabel === "POS" || activeRailItemLabel === "Tables" || activeRailItemLabel === "Medical" || activeRailItemLabel === "Service") ? activeRailItemLabel : null;
 
     return (
         <HelpCenterProvider>
@@ -243,7 +301,7 @@ export default function AdminLayout({
                         </div>
                     </Link>
 
-                    {railItems.map((item) => (
+                    {dynamicRailItems.map((item) => (
                         <NavigationRailItem
                             key={item.label}
                             item={item}
@@ -327,7 +385,7 @@ export default function AdminLayout({
 
                 {/* Persistent Sub-menu */}
                 <AnimatePresence mode="popLayout">
-                    {activePersistentSection && subNavItems[activePersistentSection] && (
+                    {activePersistentSection && dynamicSubNavItems[activePersistentSection] && (
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -340,7 +398,7 @@ export default function AdminLayout({
                                 </span>
                             </div>
                             <nav className="flex-1 p-3 space-y-1">
-                                {subNavItems[activePersistentSection].map((item) => (
+                                {dynamicSubNavItems[activePersistentSection].map((item) => (
                                     <Link
                                         key={item.label}
                                         href={item.href}
@@ -364,7 +422,7 @@ export default function AdminLayout({
 
                 {/* Flyout Sub-menu */}
                 <AnimatePresence>
-                    {hoveredRailItem && subNavItems[hoveredRailItem] && hoveredRailItem !== activePersistentSection && (
+                    {hoveredRailItem && dynamicSubNavItems[hoveredRailItem] && hoveredRailItem !== activePersistentSection && (
                         <motion.div
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -379,7 +437,7 @@ export default function AdminLayout({
                                 </span>
                             </div>
                             <nav className="flex-1 p-3 space-y-1">
-                                {subNavItems[hoveredRailItem].map((item) => (
+                                {dynamicSubNavItems[hoveredRailItem].map((item) => (
                                     <Link
                                         key={item.label}
                                         href={item.href}

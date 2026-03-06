@@ -50,7 +50,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const settings = await getPlatformSettings();
-  const primaryColor = settings.primaryColor || "#4f46e5";
+  const primaryColor = settings.primaryColor || "#2563EB";
   const secondaryColor = settings.secondaryColor || "#06b6d4";
 
   return (

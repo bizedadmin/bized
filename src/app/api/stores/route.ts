@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import clientPromise from "@/lib/mongodb";
+import { getModulesForIndustry } from "@/lib/modules";
+import { IndustryVertical } from "@/lib/industries";
 
 // GET /api/stores — list all stores for the current user (or the impersonated store for Super Admins)
 export async function GET(req: NextRequest) {
@@ -153,6 +155,7 @@ export async function POST(req: NextRequest) {
             slug: sanitizedSlug,
             industry: industry === "Other" ? (customIndustry || "Other") : industry,
             businessType,
+            modules: getModulesForIndustry(industry as IndustryVertical),
             ownerId: session.user.id,
             currency: platformSettings.defaultCurrency || "USD",
             subscription: {

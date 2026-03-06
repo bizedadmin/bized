@@ -1,8 +1,9 @@
 import clientPromise from "@/lib/mongodb";
 import { revalidatePath } from "next/cache";
 import { encrypt } from "@/lib/encryption";
-import { Globe, Languages, Clock, Coins, Save, Check, Wallet, Percent, Calendar, ToggleLeft, Bot, Lock, Trash2, LayoutGrid, Palette, Mail, Phone, MessageSquare, Search, Ruler, Hash, ShieldAlert, Zap, CreditCard } from "lucide-react";
+import { Globe, Languages, Clock, Coins, Save, Check, Wallet, Percent, Calendar, ToggleLeft, Bot, Lock, Trash2, LayoutGrid, Palette, Mail, Phone, MessageSquare, Search, Ruler, Hash, ShieldAlert, Zap, CreditCard, Briefcase } from "lucide-react";
 import { CURRENCIES } from "@/lib/currencies";
+import { INDUSTRIES } from "@/lib/industries";
 import Link from "next/link";
 import { getPlatformSettings, PLATFORM_SETTINGS_ID } from "@/lib/platform-settings";
 import { VariablesTabs } from "./VariablesTabs";
@@ -107,6 +108,9 @@ export default async function GlobalVariablesPage({
         } else if (type === "gateways") {
             const gateways = formData.getAll("gateways") as string[];
             update = { enabledGateways: gateways };
+        } else if (type === "industries") {
+            const industries = formData.getAll("industries") as string[];
+            update = { supportedIndustries: industries };
         } else if (type === "partner-keys") {
             update = {
                 platformPartnerKeys: {
@@ -738,6 +742,55 @@ export default async function GlobalVariablesPage({
                                 </div>
                                 <button className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg transition-all active:scale-95">
                                     <Save className="w-4 h-4" /> Update Supported Languages
+                                </button>
+                            </form>
+                        </div>
+                    )}
+
+                    {activeTab === "industries" && (
+                        <div className="space-y-6">
+                            <div>
+                                <h2 className="text-xl font-bold text-white mb-2">Supported Industries</h2>
+                                <p className="text-sm text-zinc-400">Enable business industries based on official verticals to tailor the platform experience.</p>
+                            </div>
+
+                            <form action={updateVariables} className="space-y-6">
+                                <input type="hidden" name="type" value="industries" />
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                                    {INDUSTRIES.map(industry => (
+                                        <label
+                                            key={industry.id}
+                                            className={`
+                                                flex items-start gap-4 p-5 rounded-2xl border cursor-pointer transition-all group
+                                                ${(settings.supportedIndustries || []).includes(industry.id)
+                                                    ? "bg-indigo-500/10 border-indigo-500/50"
+                                                    : "bg-zinc-950 border-zinc-800 hover:border-zinc-700"}
+                                            `}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                name="industries"
+                                                value={industry.id}
+                                                defaultChecked={(settings.supportedIndustries || []).includes(industry.id)}
+                                                className="hidden peer"
+                                            />
+                                            <div className="p-3 bg-zinc-900 rounded-xl text-2xl">
+                                                {industry.icon}
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex items-center justify-between">
+                                                    <h3 className="font-bold text-white">{industry.name}</h3>
+                                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${(settings.supportedIndustries || []).includes(industry.id) ? "bg-indigo-500 border-indigo-400" : "bg-zinc-900 border-zinc-700"}`}>
+                                                        {(settings.supportedIndustries || []).includes(industry.id) && <Check className="w-3 h-3 text-white" />}
+                                                    </div>
+                                                </div>
+                                                <p className="text-xs text-zinc-500 mt-1">{industry.description}</p>
+                                            </div>
+                                        </label>
+                                    ))}
+                                </div>
+                                <button className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg transition-all active:scale-95">
+                                    <Briefcase className="w-4 h-4" /> Update Global Industry Access
                                 </button>
                             </form>
                         </div>

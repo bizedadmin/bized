@@ -24,6 +24,30 @@ import {
     Compass,
     Inbox,
     ArrowLeft,
+    Code,
+    Car,
+    GraduationCap,
+    Music,
+    Heart,
+    Banknote,
+    Bed,
+    Building2,
+    Plane,
+    MoreHorizontal,
+    ShoppingBag,
+    Utensils,
+    Scissors,
+    Stethoscope,
+    Briefcase,
+    HelpCircle,
+    FileText,
+    Newspaper,
+    Users,
+    Shirt,
+    PartyPopper,
+    ShoppingCart,
+    Home,
+    Church,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -34,6 +58,8 @@ export function Header() {
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isFeaturesOpen, setIsFeaturesOpen] = useState(false);
+    const [isIndustriesOpen, setIsIndustriesOpen] = useState(false);
+    const [isResourcesOpen, setIsResourcesOpen] = useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -76,6 +102,166 @@ export function Header() {
             href: "/features/whatsapp",
             icon: <MessageCircle className="w-5 h-5 text-green-600" />,
             color: "bg-green-50",
+        },
+    ];
+
+    const industries = [
+        {
+            title: "Shopping & Retail",
+            description: "General stores and boutiques.",
+            href: "#",
+            icon: <ShoppingBag className="w-5 h-5 text-blue-600" />,
+            color: "bg-blue-50",
+        },
+        {
+            title: "Food & Beverage",
+            description: "Restaurants, cafes, and bars.",
+            href: "#",
+            icon: <Utensils className="w-5 h-5 text-orange-600" />,
+            color: "bg-orange-50",
+        },
+        {
+            title: "Automotive",
+            description: "Dealers, repair, and parts.",
+            href: "#",
+            icon: <Car className="w-5 h-5 text-red-600" />,
+            color: "bg-red-50",
+        },
+        {
+            title: "Clothing Store",
+            description: "Fashion and apparel retail.",
+            href: "#",
+            icon: <Shirt className="w-5 h-5 text-indigo-600" />,
+            color: "bg-indigo-50",
+        },
+        {
+            title: "Beauty & Spa",
+            description: "Salons, spas, and cosmetics.",
+            href: "#",
+            icon: <Scissors className="w-5 h-5 text-pink-600" />,
+            color: "bg-pink-50",
+        },
+        {
+            title: "Health & Medical",
+            description: "Doctors, clinics, and hospitals.",
+            href: "#",
+            icon: <Stethoscope className="w-5 h-5 text-emerald-600" />,
+            color: "bg-emerald-50",
+        },
+        {
+            title: "Education",
+            description: "Schools, tutoring, and courses.",
+            href: "#",
+            icon: <GraduationCap className="w-5 h-5 text-indigo-600" />,
+            color: "bg-indigo-50",
+        },
+        {
+            title: "Finance",
+            description: "Banks, insurance, and investing.",
+            href: "#",
+            icon: <Banknote className="w-5 h-5 text-amber-600" />,
+            color: "bg-amber-50",
+        },
+        {
+            title: "Professional",
+            description: "Consulting, legal, and IT.",
+            href: "#",
+            icon: <Briefcase className="w-5 h-5 text-slate-600" />,
+            color: "bg-slate-50",
+        },
+        {
+            title: "Hotel & Lodging",
+            description: "Hotels and vacation rentals.",
+            href: "#",
+            icon: <Bed className="w-5 h-5 text-cyan-600" />,
+            color: "bg-cyan-50",
+        },
+        {
+            title: "Event Planner",
+            description: "Weddings, parties, and events.",
+            href: "#",
+            icon: <PartyPopper className="w-5 h-5 text-purple-600" />,
+            color: "bg-purple-50",
+        },
+        {
+            title: "Grocery Store",
+            description: "Supermarkets and food markets.",
+            href: "#",
+            icon: <ShoppingCart className="w-5 h-5 text-lime-600" />,
+            color: "bg-lime-50",
+        },
+        {
+            title: "Real Estate",
+            description: "Property sales and rentals.",
+            href: "#",
+            icon: <Home className="w-5 h-5 text-sky-600" />,
+            color: "bg-sky-50",
+        },
+        {
+            title: "Non-Profit",
+            description: "Charities and community orgs.",
+            href: "#",
+            icon: <Heart className="w-5 h-5 text-rose-600" />,
+            color: "bg-rose-50",
+        },
+        {
+            title: "Public Services",
+            description: "Govt, utilities, and transport.",
+            href: "#",
+            icon: <Building2 className="w-5 h-5 text-gray-600" />,
+            color: "bg-gray-100",
+        },
+        {
+            title: "Religious Org",
+            description: "Churches and communities.",
+            href: "#",
+            icon: <Church className="w-5 h-5 text-amber-700" />,
+            color: "bg-amber-50",
+        },
+        {
+            title: "Travel",
+            description: "Airlines and tour agencies.",
+            href: "#",
+            icon: <Plane className="w-5 h-5 text-blue-500" />,
+            color: "bg-blue-50",
+        },
+        {
+            title: "Other",
+            description: "Misc business types.",
+            href: "#",
+            icon: <MoreHorizontal className="w-5 h-5 text-zinc-600" />,
+            color: "bg-zinc-100",
+        },
+    ];
+
+    const resources = [
+        {
+            title: "Help Center",
+            description: "Support guides and tutorials.",
+            href: "#",
+            icon: <HelpCircle className="w-5 h-5 text-blue-600" />,
+            color: "bg-blue-50",
+        },
+        {
+            title: "Blog",
+            description: "Tips for growing your business.",
+            href: "#",
+            icon: <Newspaper className="w-5 h-5 text-purple-600" />,
+            color: "bg-purple-50",
+        },
+        {
+            title: "Community",
+            description: "Connect with other business owners.",
+            href: "#",
+            icon: <Users className="w-5 h-5 text-emerald-600" />,
+            color: "bg-emerald-50",
+        },
+        {
+            title: "API Docs",
+            description: "Build on top of Bized.",
+            href: "#",
+            icon: <Code className="w-5 h-5 text-indigo-600" />,
+            color: "bg-indigo-50",
         },
     ];
 
@@ -214,6 +400,90 @@ export function Header() {
                                                     </div>
                                                     <div className="text-xs text-[var(--color-on-surface)]/60">
                                                         {feature.description}
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            </div>
+
+                            {/* Industries Dropdown */}
+                            <div
+                                className="relative group h-16 flex items-center"
+                                onMouseEnter={() => setIsIndustriesOpen(true)}
+                                onMouseLeave={() => setIsIndustriesOpen(false)}
+                            >
+                                <button className="flex items-center gap-1 text-sm font-medium text-[var(--color-on-surface)]/80 hover:text-[var(--color-primary)] transition-colors focus:outline-none">
+                                    Industries
+                                    <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", isIndustriesOpen && "rotate-180")} />
+                                </button>
+
+                                <motion.div
+                                    variants={dropdownVariants}
+                                    initial="hidden"
+                                    animate={isIndustriesOpen ? "visible" : "hidden"}
+                                    className="absolute top-16 left-[-150px] w-[800px] bg-[var(--color-surface-container-low)] rounded-xl border border-[var(--color-outline-variant)]/10 shadow-xl p-2"
+                                >
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {industries.map((industry, index) => (
+                                            <Link
+                                                key={index}
+                                                href={industry.href}
+                                                className="flex items-start gap-4 p-3 rounded-lg hover:bg-[var(--color-surface-container)] transition-colors group/item"
+                                                onClick={() => setIsIndustriesOpen(false)}
+                                            >
+                                                <div className={cn("mt-1 w-10 h-10 rounded-lg flex items-center justify-center shrink-0", industry.color)}>
+                                                    {industry.icon}
+                                                </div>
+                                                <div>
+                                                    <div className="text-sm font-semibold text-[var(--color-on-surface)] group-hover/item:text-[var(--color-primary)] transition-colors">
+                                                        {industry.title}
+                                                    </div>
+                                                    <div className="text-xs text-[var(--color-on-surface)]/60">
+                                                        {industry.description}
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            </div>
+
+                            {/* Resources Dropdown */}
+                            <div
+                                className="relative group h-16 flex items-center"
+                                onMouseEnter={() => setIsResourcesOpen(true)}
+                                onMouseLeave={() => setIsResourcesOpen(false)}
+                            >
+                                <button className="flex items-center gap-1 text-sm font-medium text-[var(--color-on-surface)]/80 hover:text-[var(--color-primary)] transition-colors focus:outline-none">
+                                    Resources
+                                    <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", isResourcesOpen && "rotate-180")} />
+                                </button>
+
+                                <motion.div
+                                    variants={dropdownVariants}
+                                    initial="hidden"
+                                    animate={isResourcesOpen ? "visible" : "hidden"}
+                                    className="absolute top-16 left-0 w-[300px] bg-[var(--color-surface-container-low)] rounded-xl border border-[var(--color-outline-variant)]/10 shadow-xl p-2"
+                                >
+                                    <div className="flex flex-col gap-1">
+                                        {resources.map((resource, index) => (
+                                            <Link
+                                                key={index}
+                                                href={resource.href}
+                                                className="flex items-start gap-4 p-3 rounded-lg hover:bg-[var(--color-surface-container)] transition-colors group/item"
+                                                onClick={() => setIsResourcesOpen(false)}
+                                            >
+                                                <div className={cn("mt-1 w-10 h-10 rounded-lg flex items-center justify-center shrink-0", resource.color)}>
+                                                    {resource.icon}
+                                                </div>
+                                                <div>
+                                                    <div className="text-sm font-semibold text-[var(--color-on-surface)] group-hover/item:text-[var(--color-primary)] transition-colors">
+                                                        {resource.title}
+                                                    </div>
+                                                    <div className="text-xs text-[var(--color-on-surface)]/60">
+                                                        {resource.description}
                                                     </div>
                                                 </div>
                                             </Link>
@@ -362,6 +632,48 @@ export function Header() {
                                             </div>
                                             <div className="text-base font-medium text-[var(--color-on-surface)]">
                                                 {feature.title}
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="py-2 border-b border-[var(--color-outline-variant)]/10">
+                                <div className="text-sm font-semibold text-[var(--color-on-surface)]/50 mb-4 uppercase tracking-wider">Industries</div>
+                                <div className="grid grid-cols-2 gap-4 pl-2">
+                                    {industries.map((industry, index) => (
+                                        <Link
+                                            key={index}
+                                            href={industry.href}
+                                            className="flex items-center gap-3"
+                                            onClick={() => setIsMenuOpen(false)}
+                                        >
+                                            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", industry.color)}>
+                                                {industry.icon}
+                                            </div>
+                                            <div className="text-base font-medium text-[var(--color-on-surface)]">
+                                                {industry.title}
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="py-2 border-b border-[var(--color-outline-variant)]/10">
+                                <div className="text-sm font-semibold text-[var(--color-on-surface)]/50 mb-4 uppercase tracking-wider">Resources</div>
+                                <div className="grid grid-cols-1 gap-4 pl-2">
+                                    {resources.map((resource, index) => (
+                                        <Link
+                                            key={index}
+                                            href={resource.href}
+                                            className="flex items-center gap-3"
+                                            onClick={() => setIsMenuOpen(false)}
+                                        >
+                                            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", resource.color)}>
+                                                {resource.icon}
+                                            </div>
+                                            <div className="text-base font-medium text-[var(--color-on-surface)]">
+                                                {resource.title}
                                             </div>
                                         </Link>
                                     ))}

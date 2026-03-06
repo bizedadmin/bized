@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams, usePathname } from "next/navigation";
-import { Coins, Wallet, LayoutGrid, Palette, Search, Languages, Clock, CreditCard, ShieldAlert, LucideIcon } from "lucide-react";
+import { Coins, Wallet, LayoutGrid, Palette, Search, Languages, Clock, CreditCard, ShieldAlert, LucideIcon, Briefcase } from "lucide-react";
 
 interface TabItem {
     id: string;
@@ -19,6 +19,7 @@ const TABS: TabItem[] = [
     { id: "branding", label: "Branding & Support", icon: Palette },
     { id: "seo", label: "SEO & Localization", icon: Search },
     { id: "languages", label: "Languages", icon: Languages },
+    { id: "industries", label: "Industries", icon: Briefcase },
     { id: "timezones", label: "Timezones", icon: Clock },
     { id: "danger", label: "Danger Zone", icon: ShieldAlert },
 ];

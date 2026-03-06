@@ -2,7 +2,8 @@
 
 @theme {
   /* Material 3 Colors - Primary */
-  --color-primary: oklch(0.488 0.243 264.376);
+  --color-primary: #2563EB;
+  /* Vibrant Blue */
   --color-on-primary: oklch(1 0 0);
   --color-primary-container: oklch(0.9 0.05 264.376);
   --color-on-primary-container: oklch(0.2 0.1 264.376);
@@ -71,8 +72,13 @@ body {
 }
 
 @keyframes m3-circular-rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes m3-circular-dash {
@@ -80,10 +86,12 @@ body {
     stroke-dasharray: 1, 200;
     stroke-dashoffset: 0;
   }
+
   50% {
     stroke-dasharray: 89, 200;
     stroke-dashoffset: -35;
   }
+
   100% {
     stroke-dasharray: 89, 200;
     stroke-dashoffset: -124;
