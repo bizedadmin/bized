@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
         const client = await clientPromise;
         const db = client.db();
 
-        const connectedBusinesses = await db.collection("stores")
+        const connectedBusinesses = await db.collection("businesses")
             .find({
                 $or: [
                     { "socialLinks.whatsappConnected": true },

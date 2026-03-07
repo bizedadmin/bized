@@ -82,3 +82,55 @@ export async function getWabaPhoneNumbers(wabaId: string, accessToken: string) {
     return await response.json();
 }
 
+/**
+ * Fetch a WhatsApp Business Profile for a phone number.
+ */
+export async function getWabaProfile(phoneNumberId: string, accessToken: string) {
+    const proof = generateAppSecretProof(accessToken);
+    const response = await fetch(
+        `https://graph.facebook.com/v20.0/${phoneNumberId}/whatsapp_business_profile?` +
+        new URLSearchParams({
+            fields: 'about,address,description,email,profile_picture_url,websites,vertical',
+            access_token: accessToken,
+            appsecret_proof: proof
+        })
+    );
+    return await response.json();
+}
+
+/**
+ * Update a WhatsApp Business Profile.
+ */
+export async function updateWabaProfile(phoneNumberId: string, accessToken: string, profile: any) {
+    const proof = generateAppSecretProof(accessToken);
+    const response = await fetch(
+        `https://graph.facebook.com/v20.0/${phoneNumberId}/whatsapp_business_profile?` +
+        new URLSearchParams({
+            access_token: accessToken,
+            appsecret_proof: proof
+        }),
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(profile),
+        }
+    );
+    return await response.json();
+}
+/**
+ * Fetch top-level metadata for a WhatsApp Business Account.
+ */
+export async function getWabaAccountDetails(wabaId: string, accessToken: string) {
+    const proof = generateAppSecretProof(accessToken);
+    const response = await fetch(
+        `https://graph.facebook.com/v20.0/${wabaId}?` +
+        new URLSearchParams({
+            fields: 'name,timezone_id,currency,message_template_namespace',
+            access_token: accessToken,
+            appsecret_proof: proof
+        })
+    );
+    return await response.json();
+}

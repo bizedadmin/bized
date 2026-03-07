@@ -60,7 +60,7 @@ export function SubscriptionNotice() {
             </div>
 
             <Link
-                href="/admin/settings?tab=billing"
+                href="/admin/billing"
                 className={cn(
                     "flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95",
                     variant === "info" && "bg-white text-indigo-600 shadow-lg shadow-indigo-900/20",

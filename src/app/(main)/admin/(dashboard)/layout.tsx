@@ -33,7 +33,7 @@ export default function DashboardLayout({
     }
 
     const isRestricted = (currentBusiness.subscription?.status === "canceled" || currentBusiness.subscription?.status === "unpaid") &&
-        !pathname.includes("/settings");
+        !pathname.includes("/settings") && !pathname.includes("/billing");
 
     return (
         <div className="flex flex-col relative w-full h-full min-h-screen">
@@ -55,7 +55,7 @@ export default function DashboardLayout({
                                     Please renew your plan to continue using the platform.
                                 </p>
                             </div>
-                            <Link href="/admin/settings?tab=billing" className="bg-[var(--color-primary)] text-white px-8 py-3 rounded-2xl font-black uppercase tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all">
+                            <Link href="/admin/billing" className="bg-[var(--color-primary)] text-white px-8 py-3 rounded-2xl font-black uppercase tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all">
                                 Go to Billing
                             </Link>
                         </div>

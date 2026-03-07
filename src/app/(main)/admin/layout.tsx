@@ -52,7 +52,11 @@ import {
     Briefcase,
     Gem,
     Wrench,
-    GraduationCap
+    GraduationCap,
+    Building2,
+    Shield,
+    Layers,
+    Brain
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AiChatSheet } from "@/components/admin/AiChatSheet";
@@ -116,11 +120,14 @@ const subNavItems: Record<string, NavItem[]> = {
         { label: "Permissions", href: "/admin/users/permissions", icon: FileText },
     ],
     "Settings": [
-        { label: "General", href: "/admin/settings?tab=general", icon: Settings },
+        { label: "Overview", href: "/admin/settings", icon: LayoutDashboard },
+        { label: "Business Profile", href: "/admin/settings?tab=profile", icon: Building2 },
         { label: "Regional", href: "/admin/settings?tab=regional", icon: Languages },
         { label: "Payment Methods", href: "/admin/settings?tab=payments", icon: CreditCard },
         { label: "Taxes", href: "/admin/settings?tab=taxes", icon: Coins },
-        { label: "AI Config", href: "/admin/settings?tab=ai", icon: Sparkles },
+        { label: "Legal", href: "/admin/settings?tab=legal", icon: Shield },
+        { label: "AI Configuration", href: "/admin/settings?tab=ai", icon: Brain },
+        { label: "Industry Modules", href: "/admin/settings?tab=modules", icon: Layers },
     ],
     // Industry Specific Modules (Dynamic)
     "Tables": [
@@ -242,9 +249,9 @@ export default function AdminLayout({
         setHoveredRailItem(null);
     };
 
-    const activeRailItemLabel = railItems.find(item =>
+    const activeRailItemLabel = pathname?.startsWith("/admin/settings") ? "Settings" : (railItems.find(item =>
         pathname === item.href || (item.href !== "/admin" && pathname?.startsWith(item.href))
-    )?.label || (pathname?.startsWith("/admin/storefront") ? "Store" : pathname?.startsWith("/admin/products") ? "Catalog" : "Home");
+    )?.label || (pathname?.startsWith("/admin/storefront") ? "Store" : pathname?.startsWith("/admin/products") ? "Catalog" : "Home"));
 
     // Dynamic Navigation Generation
     const enabledModules = currentBusiness?.modules || [];
@@ -279,7 +286,7 @@ export default function AdminLayout({
         }
     });
 
-    const activePersistentSection = (activeRailItemLabel === "Store" || activeRailItemLabel === "Catalog" || activeRailItemLabel === "Users" || activeRailItemLabel === "Finance" || activeRailItemLabel === "Orders" || activeRailItemLabel === "POS" || activeRailItemLabel === "Tables" || activeRailItemLabel === "Medical" || activeRailItemLabel === "Service") ? activeRailItemLabel : null;
+    const activePersistentSection = (activeRailItemLabel === "Store" || activeRailItemLabel === "Catalog" || activeRailItemLabel === "Users" || activeRailItemLabel === "Finance" || activeRailItemLabel === "Orders" || activeRailItemLabel === "POS" || activeRailItemLabel === "Tables" || activeRailItemLabel === "Medical" || activeRailItemLabel === "Service" || activeRailItemLabel === "Settings") ? activeRailItemLabel : null;
 
     return (
         <HelpCenterProvider>
@@ -313,8 +320,15 @@ export default function AdminLayout({
 
                     <div className="mt-auto pb-4 flex flex-col items-center gap-2">
                         <NavigationRailItem
+                            item={{ label: "Billing", icon: CreditCard, href: "/admin/billing" }}
+                            isActive={pathname === "/admin/billing"}
+                            onMouseEnter={() => handleRailMouseEnter("Billing")}
+                            onMouseLeave={handleRailMouseLeave}
+                        />
+
+                        <NavigationRailItem
                             item={{ label: "Settings", icon: Settings, href: "/admin/settings" }}
-                            isActive={pathname === "/admin/settings"}
+                            isActive={pathname?.startsWith("/admin/settings")}
                             onMouseEnter={() => handleRailMouseEnter("Settings")}
                             onMouseLeave={handleRailMouseLeave}
                         />

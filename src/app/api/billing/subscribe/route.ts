@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
         const platform = await getPlatformSettings();
         const host = req.headers.get("host") || "localhost:3000";
         const protocol = host.includes("localhost") ? "http" : "https";
-        const returnUrl = `${protocol}://${host}/admin/settings?tab=billing&session_id={CHECKOUT_SESSION_ID}`;
+        const returnUrl = `${protocol}://${host}/admin/billing?session_id={CHECKOUT_SESSION_ID}`;
 
         // 3. Gateway Specific Logic
         if (gateway === "Stripe") {
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
                 line_items: [{ price: priceId, quantity: 1 }],
                 mode: "subscription",
                 success_url: returnUrl,
-                cancel_url: `${protocol}://${host}/admin/settings?tab=billing&status=cancelled`,
+                cancel_url: `${protocol}://${host}/admin/billing?status=cancelled`,
                 metadata: { storeId, planId }
             });
 
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
                     email: store.email || session.user.email || "billing@bized.app",
                     amount: Math.round(plan.price * 100),
                     plan: planCode,
-                    callback_url: `${protocol}://${host}/admin/settings?tab=billing`,
+                    callback_url: `${protocol}://${host}/admin/billing`,
                     metadata: { storeId, planId, type: "subscription" }
                 })
             });
