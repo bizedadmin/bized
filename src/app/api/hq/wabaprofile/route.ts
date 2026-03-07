@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { getWabaProfile, updateWabaProfile, getWabaPhoneNumbers, getWabaAccountDetails } from "@/lib/meta";
+import { getWabaProfile, updateWabaProfile, getWabaPhoneNumbers, getWabaAccountDetails, updateWabaDisplayName } from "@/lib/meta";
 
 // Helper to resolve Phone Number ID from environment ID (which could be WABA or Phone ID)
 async function resolvePhoneNumberId(id: string, accessToken: string) {
@@ -105,6 +105,11 @@ export async function POST(req: NextRequest) {
         };
 
         const result = await updateWabaProfile(phoneNumberId, accessToken, profileUpdates);
+
+        // If display_name is provided and changed, update it too
+        if (body.display_name && !result.error) {
+            await updateWabaDisplayName(phoneNumberId, accessToken, body.display_name);
+        }
 
         if (result.error) {
             return NextResponse.json({ error: result.error.message }, { status: 400 });

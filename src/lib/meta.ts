@@ -134,3 +134,114 @@ export async function getWabaAccountDetails(wabaId: string, accessToken: string)
     );
     return await response.json();
 }
+
+/**
+ * Update the Display Name for a phone number (requires Meta review).
+ */
+export async function updateWabaDisplayName(phoneNumberId: string, accessToken: string, displayName: string) {
+    const proof = generateAppSecretProof(accessToken);
+    const response = await fetch(
+        `https://graph.facebook.com/v20.0/${displayName ? phoneNumberId : ''}/display_name?` +
+        new URLSearchParams({
+            display_name: displayName,
+            access_token: accessToken,
+            appsecret_proof: proof
+        }),
+        { method: 'POST' }
+    );
+    return await response.json();
+}
+/**
+ * Create a Message Template in a WABA.
+ */
+export async function createMessageTemplate(wabaId: string, accessToken: string, template: any) {
+    const proof = generateAppSecretProof(accessToken);
+    const response = await fetch(
+        `https://graph.facebook.com/v20.0/${wabaId}/message_templates?` +
+        new URLSearchParams({
+            access_token: accessToken,
+            appsecret_proof: proof
+        }),
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(template),
+        }
+    );
+    return await response.json();
+}
+
+/**
+ * Fetch Message Templates for a WABA.
+ */
+export async function getMessageTemplates(wabaId: string, accessToken: string) {
+    const proof = generateAppSecretProof(accessToken);
+    const response = await fetch(
+        `https://graph.facebook.com/v20.0/${wabaId}/message_templates?` +
+        new URLSearchParams({
+            access_token: accessToken,
+            appsecret_proof: proof
+        })
+    );
+    return await response.json();
+}
+
+/**
+ * Create a WhatsApp Flow.
+ */
+export async function createWhatsAppFlow(wabaId: string, accessToken: string, name: string, categories: string[]) {
+    const proof = generateAppSecretProof(accessToken);
+    const response = await fetch(
+        `https://graph.facebook.com/v20.0/${wabaId}/flows?` +
+        new URLSearchParams({
+            access_token: accessToken,
+            appsecret_proof: proof
+        }),
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, categories }),
+        }
+    );
+    return await response.json();
+}
+
+/**
+ * Update WhatsApp Flow Assets (the JSON Design).
+ */
+export async function updateFlowAssets(flowId: string, accessToken: string, assetType: string, fileBlob: any) {
+    const proof = generateAppSecretProof(accessToken);
+    const formData = new FormData();
+    formData.append('name', 'flow.json');
+    formData.append('asset_type', assetType);
+    formData.append('file', fileBlob, 'flow.json');
+
+    const response = await fetch(
+        `https://graph.facebook.com/v20.0/${flowId}/assets?` +
+        new URLSearchParams({
+            access_token: accessToken,
+            appsecret_proof: proof
+        }),
+        {
+            method: 'POST',
+            body: formData,
+        }
+    );
+    return await response.json();
+}
+
+/**
+ * Publish a WhatsApp Flow (moves it to Meta Review).
+ */
+export async function publishFlow(flowId: string, accessToken: string) {
+    const proof = generateAppSecretProof(accessToken);
+    const response = await fetch(
+        `https://graph.facebook.com/v20.0/${flowId}/publish?` +
+        new URLSearchParams({
+            access_token: accessToken,
+            appsecret_proof: proof
+        }),
+        { method: 'POST' }
+    );
+    return await response.json();
+}

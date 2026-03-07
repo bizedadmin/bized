@@ -1,0 +1,76 @@
+{
+    "version": "3.1",
+    "screens": [
+        {
+            "id": "COMMERCE",
+            "title": "Configure Storefront",
+            "data": {},
+            "layout": {
+                "type": "Flex",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "commerce_form",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "Operational Setup"
+                            },
+                            {
+                                "type": "Dropdown",
+                                "name": "niche",
+                                "label": "Industry Niche",
+                                "required": true,
+                                "options": [
+                                    {
+                                        "id": "HVAC",
+                                        "title": "HVAC Mechanical"
+                                    },
+                                    {
+                                        "id": "SOLAR",
+                                        "title": "Solar Installation"
+                                    },
+                                    {
+                                        "id": "RETAIL",
+                                        "title": "Consumer Retail"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "RadioButtonsGroup",
+                                "name": "currency",
+                                "label": "Operating Currency",
+                                "required": true,
+                                "options": [
+                                    {
+                                        "id": "KES",
+                                        "title": "Kenya Shilling (KES)"
+                                    },
+                                    {
+                                        "id": "USD",
+                                        "title": "US Dollar (USD)"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "Based on your niche, we'll automatically configure Paystack for Mobile Money (M-Pesa) or Stripe for USD payments."
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Finalize Setup",
+                                "on-click-action": {
+                                    "name": "complete",
+                                    "payload": {
+                                        "niche": "${form.niche}",
+                                        "currency": "${form.currency}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

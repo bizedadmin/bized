@@ -41,7 +41,8 @@ export default function HQWabaProfile() {
         profile_picture_url: "",
         quality_rating: "",
         status: "",
-        business_name: ""
+        business_name: "",
+        display_name: ""
     });
 
     const fetchProfile = async () => {
@@ -65,7 +66,8 @@ export default function HQWabaProfile() {
                     profile_picture_url: data.profile_picture_url || "",
                     quality_rating: data.quality_rating || "UNKNOWN",
                     status: data.status || "UNKNOWN",
-                    business_name: data.business_name || "Platform WABA"
+                    business_name: data.business_name || "Platform WABA",
+                    display_name: data.display_phone_number || ""
                 });
             }
         } catch (error) {
@@ -262,6 +264,23 @@ export default function HQWabaProfile() {
                                     className="w-full h-14 bg-neutral-950 border border-neutral-800 rounded-2xl px-5 text-white focus:border-indigo-500/50 outline-none transition-all placeholder:text-neutral-700 font-medium"
                                     placeholder="support@bized.app"
                                 />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-black uppercase tracking-widest text-neutral-500 ml-1 flex items-center gap-2">
+                                    <MessageSquare size={12} className="text-emerald-500" /> Public Business Name
+                                </label>
+                                <input
+                                    type="text"
+                                    maxLength={30}
+                                    value={profile.display_name}
+                                    onChange={e => setProfile({ ...profile, display_name: e.target.value })}
+                                    className="w-full h-14 bg-neutral-950 border border-emerald-500/30 rounded-2xl px-5 text-white focus:border-emerald-500 outline-none transition-all placeholder:text-neutral-700 font-bold"
+                                    placeholder="e.g. Bized App"
+                                />
+                                <p className="text-[10px] text-neutral-600 font-medium ml-1">
+                                    Note: Changes to this name trigger a Meta review process.
+                                </p>
                             </div>
 
                             <div className="space-y-2">

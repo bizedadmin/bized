@@ -1,0 +1,62 @@
+{
+    "version": "3.1",
+    "screens": [
+        {
+            "id": "IDENTITY",
+            "title": "Build Your Store",
+            "data": {},
+            "layout": {
+                "type": "Flex",
+                "children": [
+                    {
+                        "type": "Form",
+                        "name": "identity_form",
+                        "children": [
+                            {
+                                "type": "TextHeading",
+                                "text": "Tell us about your Business"
+                            },
+                            {
+                                "type": "TextInput",
+                                "name": "business_name",
+                                "label": "Business Name",
+                                "required": true
+                            },
+                            {
+                                "type": "TextBody",
+                                "text": "What is the status of your phone number?"
+                            },
+                            {
+                                "type": "RadioButtonsGroup",
+                                "name": "number_status",
+                                "label": "Number Status",
+                                "required": true,
+                                "options": [
+                                    {
+                                        "id": "NEW",
+                                        "title": "New Phone Number"
+                                    },
+                                    {
+                                        "id": "EXISTING",
+                                        "title": "Existing Business App Number"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "Footer",
+                                "label": "Save Identity",
+                                "on-click-action": {
+                                    "name": "complete",
+                                    "payload": {
+                                        "business_name": "${form.business_name}",
+                                        "number_status": "${form.number_status}"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

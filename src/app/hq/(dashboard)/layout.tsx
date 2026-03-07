@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
-import { ShieldAlert, Server, Users, Settings, Activity, Globe, CreditCard, BarChart3, Bug, Radar, MessageSquare, Zap } from "lucide-react";
+import { ShieldAlert, Server, Users, Settings, Activity, Globe, CreditCard, BarChart3, Bug, Radar, MessageSquare, Zap, Rocket } from "lucide-react";
 import { headers } from "next/headers";
 import { auth } from "@/auth";
 import { UserProfile } from "@/components/hq/UserProfile";
@@ -37,6 +37,7 @@ export default async function PlatformLayout({ children }: { children: ReactNode
 
                 <nav className="flex-1 px-4 py-4 space-y-1">
                     <NavItem href={`${basePath}`} icon={<Activity className="w-5 h-5" />} label="Overview" />
+                    <NavItem href={`${basePath}/onboarding`} icon={<Rocket className="w-5 h-5" />} label="Onboarding" />
                     <NavItem href={`${basePath}/financials`} icon={<BarChart3 className="w-5 h-5" />} label="Financials" />
                     <NavItem href={`${basePath}/businesses`} icon={<Server className="w-5 h-5" />} label="Businesses" />
                     <NavItem href={`${basePath}/users`} icon={<Users className="w-5 h-5" />} label="Platform Staff" />
