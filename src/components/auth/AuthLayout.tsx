@@ -13,6 +13,7 @@ interface AuthLayoutProps {
     subtitle: string;
     showBackLink?: boolean;
     isRedirecting?: boolean;
+    onBack?: () => void;
 }
 
 export function AuthLayout({
@@ -20,7 +21,8 @@ export function AuthLayout({
     title,
     subtitle,
     showBackLink = true,
-    isRedirecting = false
+    isRedirecting = false,
+    onBack
 }: AuthLayoutProps) {
 
     if (isRedirecting) {
@@ -47,12 +49,23 @@ export function AuthLayout({
             >
                 {showBackLink && (
                     <div className="mb-8">
-                        <Link href="/">
-                            <Button variant="text" className="pl-0 hover:pl-2 transition-all text-[var(--color-on-surface)]/60 hover:text-[var(--color-on-surface)]">
+                        {onBack ? (
+                            <Button
+                                variant="text"
+                                className="pl-0 hover:pl-2 transition-all text-[var(--color-on-surface)]/60 hover:text-[var(--color-on-surface)]"
+                                onClick={onBack}
+                            >
                                 <ArrowLeft className="w-4 h-4 mr-2" />
-                                Back to Home
+                                Go Back
                             </Button>
-                        </Link>
+                        ) : (
+                            <Link href="/">
+                                <Button variant="text" className="pl-0 hover:pl-2 transition-all text-[var(--color-on-surface)]/60 hover:text-[var(--color-on-surface)]">
+                                    <ArrowLeft className="w-4 h-4 mr-2" />
+                                    Back to Home
+                                </Button>
+                            </Link>
+                        )}
                     </div>
                 )}
 

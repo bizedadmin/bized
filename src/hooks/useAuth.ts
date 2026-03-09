@@ -30,12 +30,13 @@ export function useAuth() {
     const checkCalled = useRef(false);
 
     // Private helper to complete NextAuth sign-in
-    const handleAuthCompletion = async (user: User, idToken: string) => {
+    const handleAuthCompletion = async (user: User, idToken: string, customCallbackUrl?: string) => {
         try {
+            const finalCallback = customCallbackUrl || callbackUrl;
             const res = await signIn("credentials", {
                 idToken,
                 redirect: false,
-                callbackUrl,
+                callbackUrl: finalCallback,
             });
 
             if (res?.error) {
@@ -44,7 +45,7 @@ export function useAuth() {
                 setIsRedirecting(false);
                 setIsLoading(false);
             } else {
-                router.push(callbackUrl);
+                router.push(finalCallback);
             }
         } catch (e) {
             console.error("useAuth: NextAuth Exception:", e);
@@ -73,28 +74,22 @@ export function useAuth() {
                 }
             } catch (error) {
                 console.error("useAuth: Redirect result error:", error);
-                // Don't set error here yet, try fallback
             }
 
-            // Fallback: Check for session if we expected a redirect
             if (wasRedirecting) {
-                console.log("useAuth: Fallback - Flag exists but no RedirectResult. Checking onAuthStateChanged...");
                 const unsubscribe = onAuthStateChanged(auth, async (user) => {
-                    unsubscribe(); // Run once
+                    unsubscribe();
                     if (user) {
-                        console.log("useAuth: Fallback - User found via onAuthStateChanged:", user.email);
                         sessionStorage.removeItem('auth_redirecting');
                         setIsLoading(true);
                         const idToken = await user.getIdToken();
                         await handleAuthCompletion(user, idToken);
                     } else {
-                        console.log("useAuth: Fallback - No user found despite flag.");
                         setIsRedirecting(false);
                         setIsLoading(false);
                     }
                 });
             } else {
-                console.log("useAuth: No redirect flag. Stopping loader.");
                 setIsRedirecting(false);
             }
         };
@@ -105,13 +100,10 @@ export function useAuth() {
     const handleGoogleSignIn = async () => {
         setIsLoading(true);
         setError(null);
-        console.log("useAuth: Starting Google Sign In with Popup...");
         try {
             const provider = new GoogleAuthProvider();
             await setPersistence(auth, browserLocalPersistence);
             const result = await signInWithPopup(auth, provider);
-            console.log("useAuth: Popup success. User:", result.user.email);
-
             const idToken = await result.user.getIdToken();
             await handleAuthCompletion(result.user, idToken);
         } catch (error: any) {
@@ -124,13 +116,10 @@ export function useAuth() {
     const handleFacebookSignIn = async () => {
         setIsLoading(true);
         setError(null);
-        console.log("useAuth: Starting Facebook Sign In with Popup...");
         try {
             const provider = new FacebookAuthProvider();
             await setPersistence(auth, browserLocalPersistence);
             const result = await signInWithPopup(auth, provider);
-            console.log("useAuth: Popup success. User:", result.user.email);
-
             const idToken = await result.user.getIdToken();
             await handleAuthCompletion(result.user, idToken);
         } catch (error: any) {
@@ -140,15 +129,13 @@ export function useAuth() {
         }
     };
 
-    const handleMetaSignIn = async (token: string) => {
+    const handleMetaSignIn = async (token: string, customCallbackUrl?: string) => {
         setIsLoading(true);
         setError(null);
-        console.log("useAuth: Transitioning Meta custom token to Firebase session...");
         try {
             const result = await signInWithCustomToken(auth, token);
-            console.log("useAuth: Meta-to-Firebase success. User:", result.user.email);
             const idToken = await result.user.getIdToken(true);
-            await handleAuthCompletion(result.user, idToken);
+            await handleAuthCompletion(result.user, idToken, customCallbackUrl);
         } catch (error: any) {
             console.error("useAuth: Meta custom token error", error);
             setError(error.message || "Failed to finalize Meta sign-in.");
@@ -162,12 +149,10 @@ export function useAuth() {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-
             if (name) {
                 await updateProfile(user, { displayName: name });
             }
-
-            const idToken = await user.getIdToken(true); // Force refresh to get updated profile
+            const idToken = await user.getIdToken(true);
             await handleAuthCompletion(user, idToken);
         } catch (error: any) {
             console.error("useAuth: Email signup error", error);

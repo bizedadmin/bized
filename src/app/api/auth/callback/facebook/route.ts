@@ -93,19 +93,43 @@ export async function GET(req: NextRequest) {
                 );
             }
 
+            // Fetch WABA and Phone data if this was a commerce-enabled signup
+            let whatsappBusiness = null;
+            try {
+                const wabaData = await getWabaAccounts(accessToken);
+                if (wabaData?.data?.length > 0) {
+                    const firstWaba = wabaData.data[0];
+                    const phoneData = await getWabaPhoneNumbers(firstWaba.id, accessToken);
+                    const phoneNumberId = phoneData?.data?.length > 0 ? phoneData.data[0].id : '';
+
+                    whatsappBusiness = {
+                        wabaId: firstWaba.id,
+                        phoneNumberId: phoneNumberId,
+                        accessToken: encrypt(accessToken),
+                        businessName: firstWaba.name,
+                        status: 'Active',
+                        verified: true
+                    };
+                }
+            } catch (err) {
+                console.warn('Meta Auth (Signup): Failed to fetch WABA data for pre-fill:', err);
+            }
+
             const normalizedEmail = profile.email.toLowerCase().trim();
             console.log('Meta Auth: Starting sync for', normalizedEmail);
 
             // Find existing user by email (case-insensitive)
-            const existingUser = await users.findOne({
+            let existingUser = await users.findOne({
                 $or: [
                     { email: normalizedEmail },
                     { email: { $regex: new RegExp(`^${normalizedEmail}$`, 'i') } }
                 ]
             });
 
+            let userId: any;
             if (existingUser) {
                 console.log('Meta Auth: Found existing user, updating profile...');
+                userId = existingUser._id;
                 await users.updateOne(
                     { _id: existingUser._id },
                     {
@@ -131,21 +155,21 @@ export async function GET(req: NextRequest) {
                     "@type": "Person",
                     isSuperAdmin: false
                 };
-                await users.insertOne(newUser);
+                const insertResult = await users.insertOne(newUser as any);
+                userId = insertResult.insertedId;
             }
 
             // Bridge to Firebase session
             let firebaseToken: string | null = null;
             try {
                 const admin = initAdmin();
-                // We use the normalized email as the Firebase UID and include it in claims
                 firebaseToken = await admin.auth().createCustomToken(normalizedEmail, { email: normalizedEmail });
-                console.log('Meta Auth: Created Firebase bridge token for', normalizedEmail);
             } catch (fbErr) {
                 console.error('Meta Auth: Failed to create bridge token:', fbErr);
             }
 
             // Since it's a popup, return a script that handles completion
+            // We pass the whatsappBusiness metadata back so the client can allow slug creation
             return new NextResponse(
                 `<html>
                     <body>
@@ -155,6 +179,7 @@ export async function GET(req: NextRequest) {
                                 status: 'success', 
                                 intent: 'signup', 
                                 email: '${normalizedEmail}',
+                                whatsappBusiness: ${whatsappBusiness ? JSON.stringify(whatsappBusiness) : 'null'},
                                 firebaseToken: ${firebaseToken ? `'${firebaseToken}'` : 'null'}
                             }, window.location.origin);
                             window.close();

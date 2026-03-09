@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { ArrowRight, Zap } from "lucide-react";
 
@@ -46,13 +47,15 @@ export function CTASection() {
                     transition={{ delay: 0.2 }}
                     className="flex justify-center"
                 >
-                    <Button
-                        size="lg"
-                        className="h-16 px-12 text-xl font-bold rounded-2xl bg-blue-600 text-white hover:bg-blue-700 shadow-2xl shadow-blue-600/20 transition-all"
-                    >
-                        Build your store
-                        <ArrowRight className="w-6 h-6 ml-2" />
-                    </Button>
+                    <Link href="/onboarding">
+                        <Button
+                            size="lg"
+                            className="h-16 px-12 text-xl font-bold rounded-2xl bg-blue-600 text-white hover:bg-blue-700 shadow-2xl shadow-blue-600/20 transition-all uppercase tracking-tighter italic font-black"
+                        >
+                            Start your free trial
+                            <ArrowRight className="w-6 h-6 ml-2" />
+                        </Button>
+                    </Link>
                 </motion.div>
             </div>
         </section>

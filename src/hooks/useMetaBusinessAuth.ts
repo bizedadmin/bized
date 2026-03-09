@@ -15,11 +15,15 @@ export function useMetaBusinessAuth() {
     /**
      * Triggers the Meta OAuth flow in a popup.
      */
-    const startMetaBusinessAuth = (options: MetaAuthOptions) => {
+    const startMetaBusinessAuth = (options: MetaAuthOptions & { configId?: string }) => {
         const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
-        const configId = options.intent === 'signup'
-            ? '1234792008761868' // Sign-up Config
-            : '1403069894456896'; // Commerce Config
+        let configId = options.configId;
+
+        if (!configId) {
+            configId = (options.intent === 'signup'
+                ? process.env.NEXT_PUBLIC_META_SIGNUP_CONFIG_ID
+                : process.env.NEXT_PUBLIC_META_COMMERCE_CONFIG_ID) || '';
+        }
 
         /**
          * The state object should contain:

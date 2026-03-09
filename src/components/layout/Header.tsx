@@ -537,7 +537,7 @@ export function Header() {
                                     <Link href="/signin">
                                         <Button variant="text" className="px-4">Log in</Button>
                                     </Link>
-                                    <Link href="/signup">
+                                    <Link href="/onboarding">
                                         <Button className="px-4">Start free</Button>
                                     </Link>
                                 </>
@@ -698,7 +698,7 @@ export function Header() {
                                 <Link href="/signin" onClick={() => setIsMenuOpen(false)}>
                                     <Button variant="text" className="w-full justify-center">Log in</Button>
                                 </Link>
-                                <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
+                                <Link href="/onboarding" onClick={() => setIsMenuOpen(false)}>
                                     <Button className="w-full justify-center">Get Started</Button>
                                 </Link>
                             </div>

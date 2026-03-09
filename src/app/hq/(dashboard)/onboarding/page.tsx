@@ -27,6 +27,8 @@ import {
     Layers,
     Activity,
     Target,
+    Link as LinkIcon,
+    Share2,
     X
 } from "lucide-react";
 
@@ -50,6 +52,18 @@ export default function OnboardingBuilderPage() {
             title: "Discovery & Lead Capture",
             subtitle: "Phase 1: WhatsApp Anchor Data",
             steps: [
+                {
+                    id: "p1_s0",
+                    type: "LINK",
+                    sublabel: "Referral Link",
+                    title: "Step 0: Acquisition Link",
+                    phoneNumber: "254112678601",
+                    prefilledMessage: "Hi Bized, I'd like to start onboarding our business!",
+                    imageUrl: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1974&auto=format&fit=crop",
+                    url: "https://wa.me/254112678601?text=Hi%20Bized%2C%20I'd%20like%20to%20start%20onboarding%20our%20business!",
+                    description: "This link initiates the onboarding flow when clicked by a prospect. The pre-filled message helps track the source.",
+                    icon: <LinkIcon className="w-4 h-4" />
+                },
                 { id: "p1_s1", type: "MESSAGE", sublabel: "Initial Contact", title: "Step 1: Welcome Pitch", content: "Welcome to the future of Commerce. Reply with your Business Name to launch your AI-powered WhatsApp storefront instantly.", badge: "Marketing", icon: <MessageSquare className="w-4 h-4" />, buttonText: "Start Selling" },
                 { id: "p1_s2", type: "SCREEN", sublabel: "Identity Form", title: "Step 2: Business Identity", fields: ["Business Name (Text Input)", "Business Category (Dropdown)"], icon: <Smartphone className="w-4 h-4" />, buttonText: "Continue" },
                 { id: "p1_s3", type: "SCREEN", sublabel: "Migration Logic", title: "Step 3: Number Transition", fields: ["Number Status (Radio: New vs. Existing)"], icon: <Smartphone className="w-4 h-4" />, buttonText: "Next Step" },
@@ -206,6 +220,13 @@ export default function OnboardingBuilderPage() {
                 {/* Editor Content Area */}
                 <div className="flex-1 overflow-y-auto p-12 relative z-10 scrollbar-hide">
                     <div className="max-w-4xl mx-auto py-4">
+                        {currentStepData?.type === "LINK" && (
+                            <LinkEditor
+                                data={currentStepData}
+                                onUpdate={(newData: any) => handleUpdate(currentStepData.id, newData)}
+                                onSave={handleSave}
+                            />
+                        )}
                         {currentStepData?.type === "MESSAGE" && (
                             <MessageEditor
                                 data={currentStepData}
@@ -458,6 +479,146 @@ function SystemProcessView({ data }: any) {
                 </p>
                 <div className="flex items-center gap-3 p-4 bg-zinc-900/50 rounded-2xl text-[10px] font-black uppercase tracking-widest text-zinc-500 italic justify-center">
                     <Activity className="w-4 h-4 animate-pulse" /> Final Automated State: No User Input Required
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function LinkEditor({ data, onUpdate, onSave }: any) {
+    const handleUpdateField = (updates: any) => {
+        const phone = updates.phoneNumber !== undefined ? updates.phoneNumber : data.phoneNumber;
+        const msg = updates.prefilledMessage !== undefined ? updates.prefilledMessage : data.prefilledMessage;
+
+        const encodedMsg = encodeURIComponent(msg);
+        const newUrl = `https://wa.me/${phone.replace(/[^0-9]/g, '')}${msg ? `?text=${encodedMsg}` : ''}`;
+
+        onUpdate({ ...updates, url: newUrl });
+    };
+
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(data.url);
+        onSave();
+    };
+
+    const handleShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: data.title,
+                    text: data.prefilledMessage,
+                    url: data.url,
+                });
+            } catch (error) {
+                window.open(data.url, '_blank');
+            }
+        } else {
+            window.open(data.url, '_blank');
+        }
+    };
+
+    return (
+        <div className="space-y-10 animate-in slide-in-from-right-4 duration-500">
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-600/10 border border-indigo-500/30 flex items-center justify-center text-indigo-500 shadow-xl shadow-indigo-600/5">
+                    <LinkIcon className="w-6 h-6" />
+                </div>
+                <div>
+                    <h3 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none">Referral Link</h3>
+                    <p className="text-zinc-600 text-xs font-black uppercase tracking-widest mt-1">Acquisition Endpoint for WhatsApp Onboarding</p>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
+                <div className="lg:col-span-3 space-y-8">
+                    <div className="bg-zinc-950 border border-zinc-900 rounded-[3rem] p-10 space-y-10 shadow-2xl overflow-hidden relative group">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-600 pl-2">WhatsApp Phone Number</label>
+                                <input
+                                    className="w-full bg-zinc-900/50 border border-zinc-900 rounded-2xl px-6 py-4 text-white font-bold italic focus:outline-none focus:border-indigo-500/30 transition-all"
+                                    value={data.phoneNumber}
+                                    placeholder="e.g. 254112678601"
+                                    onChange={(e) => handleUpdateField({ phoneNumber: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-600 pl-2">Asset image URL (Media)</label>
+                                <input
+                                    className="w-full bg-zinc-900/50 border border-zinc-900 rounded-2xl px-6 py-4 text-white font-bold italic focus:outline-none focus:border-indigo-500/30 transition-all"
+                                    value={data.imageUrl}
+                                    placeholder="https://..."
+                                    onChange={(e) => handleUpdateField({ imageUrl: e.target.value })}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-600 pl-2">Pre-filled Response Message (User's Intent)</label>
+                            <textarea
+                                className="w-full bg-zinc-900/50 border border-zinc-900 rounded-[2rem] p-8 text-white italic text-lg focus:outline-none focus:border-indigo-500/30 transition-all min-h-[150px] shadow-inner leading-relaxed"
+                                value={data.prefilledMessage}
+                                placeholder="What should the customer send to you?"
+                                onChange={(e) => handleUpdateField({ prefilledMessage: e.target.value })}
+                            />
+                        </div>
+
+                        <div className="pt-8 border-t border-zinc-900">
+                            <div className="bg-zinc-900/30 p-8 rounded-[2rem] border border-zinc-900 flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                                        <Share2 className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <div className="text-[10px] font-black uppercase text-zinc-500">Sharing Strategy</div>
+                                        <div className="text-white font-bold italic">Source Tracking Enabled</div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={copyToClipboard}
+                                        className="p-3 bg-zinc-900 rounded-xl border border-zinc-800 text-zinc-600 hover:text-white transition"
+                                    >
+                                        <Copy className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={handleShare}
+                                        className="px-6 py-3 bg-white text-black text-[10px] font-black uppercase italic rounded-xl hover:bg-zinc-200 transition flex items-center gap-2"
+                                    >
+                                        Share Asset <ArrowRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="lg:col-span-2">
+                    <div className="sticky top-0 space-y-4">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-zinc-600 pl-2">Referral Card Preview</label>
+                        <div className="bg-zinc-950 border border-zinc-900 rounded-[3rem] p-6 shadow-2xl relative overflow-hidden group">
+                            <div className="bg-zinc-900 rounded-[2.5rem] overflow-hidden border border-zinc-800 transition-transform group-hover:scale-[1.02] duration-500">
+                                {data.imageUrl ? (
+                                    <img src={data.imageUrl} className="w-full h-48 object-cover opacity-80 group-hover:opacity-100 transition-opacity" alt="Preview" />
+                                ) : (
+                                    <div className="w-full h-48 bg-zinc-950 flex items-center justify-center text-zinc-800">
+                                        <Share2 className="w-12 h-12" />
+                                    </div>
+                                )}
+                                <div className="p-8 space-y-3">
+                                    <div className="text-[10px] font-black uppercase text-indigo-500 tracking-[0.2em]">WhatsApp Commercial Asset</div>
+                                    <h4 className="text-white font-black italic text-xl uppercase leading-tight">{data.prefilledMessage || "Start Onboarding"}</h4>
+                                    <div className="flex items-center gap-2 text-zinc-600 text-[10px] font-black uppercase tracking-widest pt-4 border-t border-zinc-800/50">
+                                        <LinkIcon className="w-3 h-3" /> {data.url.substring(0, 30)}...
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="mt-6 flex justify-center">
+                                <div className="px-4 py-2 bg-zinc-900 rounded-full text-[9px] font-black uppercase text-zinc-700 tracking-widest">Mockup: Shared Outcome</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

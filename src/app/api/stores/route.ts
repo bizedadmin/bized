@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { name, slug, industry, customIndustry, businessType } = body;
+        const { name, slug, industry, customIndustry, businessType, whatsappBusiness } = body;
 
         // Validate required fields
         if (!name || !slug || !industry || !businessType) {
@@ -172,6 +172,18 @@ export async function POST(req: NextRequest) {
             taxRate: platformSettings.defaultTaxRate || 0,
             createdAt: new Date(),
             updatedAt: new Date(),
+            // WhatsApp Integration (Optional from Accelerated Onboarding)
+            ...(whatsappBusiness ? {
+                socialLinks: {
+                    whatsappBusiness: whatsappBusiness,
+                    whatsappConnected: true,
+                    whatsappWabaId: whatsappBusiness.wabaId
+                },
+                metaSettings: {
+                    systemUserToken: whatsappBusiness.accessToken,
+                    tokenUpdatedAt: new Date()
+                }
+            } : {})
         };
 
         const result = await stores.insertOne(store);

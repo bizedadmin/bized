@@ -245,3 +245,26 @@ export async function publishFlow(flowId: string, accessToken: string) {
     );
     return await response.json();
 }
+/**
+ * Send a WhatsApp Message (Text or Template).
+ */
+export async function sendWhatsAppMessage(phoneNumberId: string, accessToken: string, to: string, message: any) {
+    const proof = generateAppSecretProof(accessToken);
+    const response = await fetch(
+        `https://graph.facebook.com/v20.0/${phoneNumberId}/messages?` +
+        new URLSearchParams({
+            access_token: accessToken,
+            appsecret_proof: proof
+        }),
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                messaging_product: 'whatsapp',
+                to: to,
+                ...message
+            }),
+        }
+    );
+    return await response.json();
+}

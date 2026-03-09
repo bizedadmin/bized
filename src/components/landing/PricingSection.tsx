@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 const pricingTiers = [
     {
@@ -89,14 +90,16 @@ export function PricingSection() {
                                 </ul>
                             </div>
 
-                            <Button
-                                className={cn(
-                                    "w-full h-14 text-lg rounded-2xl font-bold",
-                                    tier.popular ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-slate-900 hover:bg-slate-800 text-white"
-                                )}
-                            >
-                                {tier.cta}
-                            </Button>
+                            <Link href="/onboarding" className="block w-full">
+                                <Button
+                                    className={cn(
+                                        "w-full h-14 text-lg rounded-2xl font-bold",
+                                        tier.popular ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-slate-900 hover:bg-slate-800 text-white"
+                                    )}
+                                >
+                                    {tier.cta}
+                                </Button>
+                            </Link>
                         </motion.div>
                     ))}
                 </div>

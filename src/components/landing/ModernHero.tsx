@@ -46,7 +46,7 @@ export function ModernHero() {
                         transition={{ duration: 0.6, delay: 0.2 }}
                         className="flex flex-col sm:flex-row items-center justify-center gap-4"
                     >
-                        <Link href="/portfolio/claim">
+                        <Link href="/onboarding">
                             <Button size="lg" className="h-14 px-8 text-lg font-bold rounded-2xl bg-blue-600 hover:bg-blue-700 text-white shadow-xl shadow-blue-600/20">
                                 Build your store
                                 <ArrowRight className="w-5 h-5 ml-2" />
